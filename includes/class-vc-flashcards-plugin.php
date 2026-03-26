@@ -767,7 +767,7 @@ class VC_Flashcards_Plugin {
     $card_limit = isset($_POST['card_limit']) ? absint($_POST['card_limit']) : 10;
     $card_limit = max(1, min(50, $card_limit));
 
-    if (!in_array($mode, ['random', 'category', 'subcategory'], true)) {
+    if (!in_array($mode, ['random', 'global-random', 'category', 'subcategory'], true)) {
       $mode = 'random';
     }
 
@@ -892,12 +892,18 @@ class VC_Flashcards_Plugin {
   }
 
   private function get_flashcards_for_session(string $mode, int $term_id, int $limit): array {
+    $pool_cache_key = $this->get_session_cards_pool_cache_key($mode, $term_id);
+    $cached_pool = get_transient($pool_cache_key);
+    $is_random_mode = in_array($mode, ['random', 'global-random'], true);
+
+    if (is_array($cached_pool)) {
+      return $this->select_cards_from_pool($cached_pool, $limit, $is_random_mode);
+    }
+
     $tax_query = [];
     $include_children = $mode !== 'subcategory';
-    $orderby = $mode === 'random' ? 'rand' : 'ID';
-    $order = $mode === 'random' ? 'DESC' : 'ASC';
 
-    if ($term_id > 0) {
+    if ($mode !== 'global-random' && $term_id > 0) {
       $tax_query[] = [
         'taxonomy' => self::TAXONOMY,
         'field' => 'term_id',
@@ -909,36 +915,55 @@ class VC_Flashcards_Plugin {
     $query = new WP_Query([
       'post_type' => self::POST_TYPE,
       'post_status' => 'publish',
-      'posts_per_page' => $limit,
-      'orderby' => $orderby,
-      'order' => $order,
+      'posts_per_page' => -1,
+      'orderby' => 'ID',
+      'order' => 'ASC',
       'tax_query' => $tax_query,
       'fields' => 'ids',
+      'no_found_rows' => true,
     ]);
 
     if (empty($query->posts)) {
       return [];
     }
 
-    $cards = [];
-    foreach ($query->posts as $post_id) {
+    $selected_ids = $query->posts;
+
+    update_meta_cache('post', $selected_ids);
+    update_object_term_cache($selected_ids, self::POST_TYPE);
+
+    $cards_pool = [];
+    foreach ($selected_ids as $post_id) {
       $card = $this->build_flashcard_payload((int) $post_id);
       if (!empty($card)) {
-        $cards[] = $card;
+        $cards_pool[] = $card;
       }
     }
 
-    return $cards;
+    set_transient($pool_cache_key, $cards_pool, 5 * MINUTE_IN_SECONDS);
+
+    return $this->select_cards_from_pool($cards_pool, $limit, $is_random_mode);
+  }
+
+  /* Selecciona el subset final sin volver a consultar ni reconstruir el pool base de cards. */
+  private function select_cards_from_pool(array $cards_pool, int $limit, bool $is_random_mode): array {
+    if ($is_random_mode) {
+      shuffle($cards_pool);
+    }
+
+    return array_slice($cards_pool, 0, $limit);
   }
 
   private function build_flashcard_payload(int $post_id): array {
-    $question = (string) get_post_meta($post_id, '_vc_flashcard_question', true);
-    $answer_a = (string) get_post_meta($post_id, '_vc_flashcard_answer_a', true);
-    $answer_b = (string) get_post_meta($post_id, '_vc_flashcard_answer_b', true);
-    $answer_c = (string) get_post_meta($post_id, '_vc_flashcard_answer_c', true);
-    $correct_answer = (string) get_post_meta($post_id, '_vc_flashcard_correct_answer', true);
-    $explanation = (string) get_post_meta($post_id, '_vc_flashcard_explanation', true);
-    $references = (string) get_post_meta($post_id, '_vc_flashcard_references', true);
+    /* Lee el meta completo una sola vez para evitar multiples accesos al mismo post. */
+    $meta = get_post_meta($post_id);
+    $question = $this->get_first_meta_value($meta, '_vc_flashcard_question');
+    $answer_a = $this->get_first_meta_value($meta, '_vc_flashcard_answer_a');
+    $answer_b = $this->get_first_meta_value($meta, '_vc_flashcard_answer_b');
+    $answer_c = $this->get_first_meta_value($meta, '_vc_flashcard_answer_c');
+    $correct_answer = $this->get_first_meta_value($meta, '_vc_flashcard_correct_answer');
+    $explanation = $this->get_first_meta_value($meta, '_vc_flashcard_explanation');
+    $references = $this->get_first_meta_value($meta, '_vc_flashcard_references');
 
     if ($question === '' || $answer_a === '' || $answer_b === '' || $answer_c === '' || !in_array($correct_answer, ['a', 'b', 'c'], true)) {
       return [];
@@ -961,6 +986,20 @@ class VC_Flashcards_Plugin {
       'topicLabel' => $term_payload['topic_label'],
       'subtopicLabel' => $term_payload['subtopic_label'],
     ];
+  }
+
+  /* Devuelve el primer valor escalar de una clave de meta ya precargada. */
+  private function get_first_meta_value(array $meta, string $key): string {
+    if (!isset($meta[$key][0])) {
+      return '';
+    }
+
+    return (string) maybe_unserialize($meta[$key][0]);
+  }
+
+  /* Genera la clave del pool base por modo y termino para reutilizarlo entre distintos limits. */
+  private function get_session_cards_pool_cache_key(string $mode, int $term_id): string {
+    return 'vc_flashcards_session_cards_pool_' . md5($mode . '|' . $term_id);
   }
 
   private function parse_references(string $references): array {
