@@ -213,8 +213,10 @@ if (!defined('ABSPATH')) {
   <section class="vc-flashcards-summary" data-vc-flashcards-summary hidden>
     <?php /* Caja principal del resumen con score y siguientes acciones. */ ?>
     <div class="vc-flashcards-summary-box">
-      <?php /* Cierre rapido del overlay sin cambiar el flujo principal del resumen. */ ?>
-      <button type="button" class="vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">&times;</button>
+      <div class="vc-flashcards-summary-header">
+        <?php /* Cierre rapido del overlay sin cambiar el flujo principal del resumen. */ ?>
+        <button type="button" class="vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">&times;</button>
+      </div>
       <?php /* Insignia visual del resumen final con copa centrada sobre un circulo degradado. */ ?>
       <div class="vc-flashcards-summary-badge" aria-hidden="true">
         <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/copa.svg'); ?>" alt="" width="42" height="42">

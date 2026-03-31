@@ -1044,25 +1044,21 @@
 }
 
 /* Boton de cierre del resumen. */
+.vc-flashcards-summary-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .vc-flashcards-summary-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin: 0;
   padding: 6px;
   border: 0;
   background: transparent;
   color: #0F172A;
   font-size: 20px;
-  line-height: 0.9;
   cursor: pointer;
-  box-shadow: none;
 }
+
 
 .vc-flashcards-summary-close:hover,
 .vc-flashcards-summary-close:focus,
