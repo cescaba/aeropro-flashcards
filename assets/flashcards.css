@@ -984,6 +984,7 @@
 /* Oculta elementos marcados como hidden dentro de la interfaz. */
 .vc-flashcards-actions [hidden],
 .vc-flashcards-explanation[hidden],
+.vc-flashcards-summary[hidden],
 .vc-flashcards-modal[hidden] {
   display: none !important;
 }
@@ -1013,21 +1014,272 @@
   outline: none;
 }
 
-/* Caja centrada del resumen final de sesion. */
+/* Overlay del resumen final. */
+.vc-flashcards-summary {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(6px);
+}
+
+/* Caja principal del resumen. */
 .vc-flashcards-summary-box {
+  position: relative;
+  width: min(100%, 460px);
+  margin: 0;
+  padding: 28px 24px 24px;
+  border: 1px solid #dbe4f0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
 }
 
-/* Score principal mostrado en el resumen final. */
+/* Boton de cierre del resumen. */
+.vc-flashcards-summary-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0F172A;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.vc-flashcards-summary-close:hover,
+.vc-flashcards-summary-close:focus,
+.vc-flashcards-summary-close:active {
+  background: transparent;
+  color: #0F172A;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Insignia superior del resumen. */
+.vc-flashcards-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  margin: 10px auto 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #1D235F 0%, #3237B7 52%, #464DFF 100%);
+}
+
+.vc-flashcards-summary-badge img {
+  display: block;
+  width: 42px;
+  height: 42px;
+}
+
+/* Bloque superior del resumen. */
+.vc-flashcards-summary-top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Titulo principal del resumen. */
+.vc-flashcards-summary-kicker {
+  margin: 0 0 18px;
+  color: #111827;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+/* Mensaje final del resumen. */
 .vc-flashcards-summary-box h3 {
-  font-size: 54px;
+  margin-bottom: 28px;
+}
+
+/* Contenedor de resultados. */
+.vc-flashcards-summary-results {
+  display: flex;
+  gap: 10px;
+}
+
+/* Tarjeta base de resultado. */
+.vc-flashcards-summary-result-card {
+  flex: 1 1 0;
+  padding: 17px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 10px;
+}
+
+/* Valor principal de cada resultado. */
+.vc-flashcards-summary-count {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Color de respuestas correctas. */
+.vc-flashcards-summary-count--correct {
+  color: #0d542b;
+}
+
+/* Color de respuestas incorrectas. */
+.vc-flashcards-summary-count--incorrect {
+  color: #82181a;
+}
+
+/* Etiqueta de cada resultado. */
+.vc-flashcards-summary-result-card h3 {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Variante de correctas. */
+.vc-flashcards-summary-result-card--correct h3 {
+  color: #0d542b;
+}
+
+/* Variante de incorrectas. */
+.vc-flashcards-summary-result-card--incorrect h3 {
+  color: #82181a;
+}
+
+/* Tarjeta de correctas. */
+.vc-flashcards-summary-result-card--correct {
+  border-color: #b9f8cf;
+  background: #f0fdf4;
+}
+
+/* Tarjeta de incorrectas. */
+.vc-flashcards-summary-result-card--incorrect {
+  border-color: #ffc9c9;
+  background: #fef2f2;
+}
+
+/* Tarjeta de accuracy. */
+.vc-flashcards-summary-accuracy-card {
+  width: 100%;
+  border: 1px solid #bedbff;
+  padding: 17px;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+/* Titulo de accuracy. */
+.vc-flashcards-summary-accuracy-title {
+  display: block;
+  margin: 0 0 6px;
+  color: #1447E6;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Valor principal de accuracy. */
+.vc-flashcards-summary-accuracy-card strong {
+  display: block;
+  margin: 0 0 10px;
+  color: #1447E6;
+  font-size: 30px;
   line-height: 1;
 }
 
-/* Botonera del resumen final. */
+/* Barra de progreso de accuracy. */
+.vc-flashcards-summary-accuracy-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #1E293B33;
+}
+
+.vc-flashcards-summary-accuracy-bar > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #1447E6;
+}
+
+/* Botonera del resumen. */
 .vc-flashcards-summary-actions {
+  flex-direction: column;
+  align-items: stretch;
   justify-content: center;
+  gap: 8px;
   margin-top: 18px;
+}
+
+/* Centrado del contenido de acciones. */
+.vc-flashcards-summary-actions .vc-flashcards-back,
+.vc-flashcards-summary-actions .vc-flashcards-start {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Base de acciones del resumen. */
+.vc-flashcards-summary-action {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+}
+
+/* Accion principal. */
+.vc-flashcards-summary-action--back,
+.vc-flashcards-summary-action--back:hover,
+.vc-flashcards-summary-action--back:focus,
+.vc-flashcards-summary-action--back:active {
+  background: #1E3C80;
+  color: #ffffff;
+  border: 1px solid #1E3C80;
+  text-decoration: none;
+}
+
+/* Accion secundaria con icono. */
+.vc-flashcards-summary-action--restart,
+.vc-flashcards-summary-action--restart:hover,
+.vc-flashcards-summary-action--restart:focus,
+.vc-flashcards-summary-action--restart:active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #1E3C80;
+  border: 1px solid #1E3C80;
+  text-decoration: none;
+}
+
+/* Icono del boton de reinicio. */
+.vc-flashcards-summary-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.vc-flashcards-summary-action-icon img {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 /* Garantiza que el modal oculto no ocupe espacio. */
@@ -1306,5 +1558,15 @@ body.vc-flashcards-modal-open {
     width: calc(100% - 24px);
     margin-top: 24px;
     padding: 22px 18px;
+  }
+
+  /* Mejora: ajusta el modal de resumen en móvil para conservar aire lateral y legibilidad. */
+  .vc-flashcards-summary {
+    padding: 16px;
+  }
+
+  .vc-flashcards-summary-box {
+    width: min(100%, 420px);
+    padding: 24px 18px 18px;
   }
 }

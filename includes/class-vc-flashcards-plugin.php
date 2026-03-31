@@ -830,6 +830,7 @@ class VC_Flashcards_Plugin {
 
     $wpdb->delete($attempts_table, ['session_id' => $session_id], ['%d']);
 
+    /* Inicializa los contadores finales de la sesión antes de recorrer los intentos enviados por JS. */
     $correct_answers = 0;
     $total_cards = 0;
 
@@ -845,7 +846,9 @@ class VC_Flashcards_Plugin {
         continue;
       }
 
+      /* Cada intento válido suma una tarjeta respondida al total de la sesión. */
       $total_cards++;
+      /* is_correct vale 1 si acertó y 0 si falló, por eso puede acumularse directamente. */
       $correct_answers += $is_correct;
 
       $wpdb->insert(
@@ -865,6 +868,10 @@ class VC_Flashcards_Plugin {
       );
     }
 
+    /* Calcula el porcentaje final de la sesión usando: respuestas correctas / total de tarjetas válidas * 100. */
+    /* Si no hubo tarjetas válidas respondidas, devuelve 0 para evitar división entre cero. */
+    $incorrect_answers = max(0, $total_cards - $correct_answers);
+    $precision_percent = $total_cards > 0 ? round(($correct_answers / $total_cards) * 100, 2) : 0;
     $score_percent = $total_cards > 0 ? round(($correct_answers / $total_cards) * 100, 2) : 0;
 
     $wpdb->update(
@@ -883,10 +890,13 @@ class VC_Flashcards_Plugin {
       ['%d', '%d']
     );
 
+    /* Devuelve al frontend las métricas finales para pintar el resumen de la sesión. */
     wp_send_json_success([
       'stats' => $this->get_user_stats($user_id),
+      'precisionPercent' => $precision_percent,
       'scorePercent' => $score_percent,
       'correctAnswers' => $correct_answers,
+      'incorrectAnswers' => $incorrect_answers,
       'totalCards' => $total_cards,
     ]);
   }

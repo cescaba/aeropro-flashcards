@@ -1,5 +1,5 @@
-(function () {
-  /* Inicializa una instancia completa del modulo sobre un contenedor dado. */
+﻿(function () {
+  
   function initFlashcardsApp(root) {
     const categories = parseCategories(root.dataset.categories);
     const labels = (window.vcFlashcardsData && window.vcFlashcardsData.labels) || {};
@@ -20,14 +20,19 @@
     const explanationToggleLabel = root.querySelector('.vc-flashcards-explanation-toggle-label');
     const restartButton = root.querySelector('[data-vc-flashcards-restart]');
     const summaryBackButton = root.querySelector('[data-vc-flashcards-summary-back]');
+    const summaryCloseButton = root.querySelector('[data-vc-flashcards-summary-close]');
     const answersWrap = root.querySelector('[data-vc-flashcards-answers]');
     const questionEl = root.querySelector('[data-vc-flashcards-question]');
     const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
     const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
     const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
     const kicker = root.querySelector('[data-vc-flashcards-kicker]');
+    const summaryPrecision = root.querySelector('[data-vc-flashcards-summary-precision]');
+    const summaryPrecisionBar = root.querySelector('[data-vc-flashcards-summary-precision-bar]');
     const summaryScore = root.querySelector('[data-vc-flashcards-summary-score]');
-    const summaryCopy = root.querySelector('[data-vc-flashcards-summary-copy]');
+    
+    const summaryCorrectCount = root.querySelector('[data-vc-flashcards-correct-count]');
+    const summaryIncorrectCount = root.querySelector('[data-vc-flashcards-incorrect-count]');
     const modalTitle = root.querySelector('[data-vc-flashcards-modal-title]');
     const modalCopy = root.querySelector('[data-vc-flashcards-modal-copy]');
     const countDisplay = root.querySelector('[data-vc-flashcards-count-display]');
@@ -46,13 +51,13 @@
     let cards = [];
     let cardIndex = 0;
     let attempts = [];
+    let summaryMetrics = null;
     let isStartingSession = false;
     let answerStartedAt = 0;
     let answeredCurrentCard = false;
     let currentExplanationHtml = '';
     const storageKey = 'vcFlashcardsState:' + window.location.pathname;
 
-    /* Convierte el JSON embebido en una lista segura de categorias para la app. */
     function parseCategories(serialized) {
       if (!serialized) {
         return [];
@@ -66,11 +71,12 @@
       }
     }
 
-    /* Guarda el estado minimo de la interfaz para poder restaurarlo al refrescar. */
     function persistState() {
       try {
         window.sessionStorage.setItem(storageKey, JSON.stringify({
           activeView: root.dataset.activeView || 'home',
+          summaryOpen: summaryPanel ? !summaryPanel.hidden : false,
+          summaryMetrics: summaryMetrics,
           currentCategoryId: currentCategory ? Number(currentCategory.id) : 0,
           pendingConfig: pendingConfig,
           lastConfig: lastConfig,
@@ -85,7 +91,37 @@
       } catch (error) {}
     }
 
-    /* Restaura la vista activa desde sessionStorage para conservar el contexto al refrescar. */
+    function setSummaryOpen(isOpen) {
+      if (!summaryPanel) {
+        return;
+      }
+
+      summaryPanel.hidden = !isOpen;
+      persistState();
+    }
+
+    function renderSummaryMetrics(metrics) {
+      if (!metrics) {
+        return;
+      }
+
+      if (summaryCorrectCount) {
+        summaryCorrectCount.textContent = String(metrics.correctAnswers);
+      }
+      if (summaryIncorrectCount) {
+        summaryIncorrectCount.textContent = String(metrics.incorrectAnswers);
+      }
+      if (summaryPrecision) {
+        summaryPrecision.textContent = String(Math.round(metrics.precisionPercent)) + '%';
+      }
+      if (summaryPrecisionBar) {
+        summaryPrecisionBar.style.width = String(Math.max(0, Math.min(100, Number(metrics.precisionPercent) || 0))) + '%';
+      }
+      if (summaryScore) {
+        summaryScore.textContent = String(Math.round(metrics.scorePercent)) + '%';
+      }
+    }
+
     function restoreState() {
       try {
         const rawState = window.sessionStorage.getItem(storageKey);
@@ -103,6 +139,7 @@
         currentCategory = state.currentCategoryId ? getCategoryById(state.currentCategoryId) : null;
         pendingConfig = state.pendingConfig || null;
         lastConfig = state.lastConfig || null;
+        summaryMetrics = state.summaryMetrics || null;
         sessionId = Number(state.sessionId || 0);
         cards = Array.isArray(state.cards) ? state.cards : [];
         cardIndex = Math.max(0, Math.min(Number(state.cardIndex || 0), Math.max(cards.length - 1, 0)));
@@ -117,6 +154,8 @@
 
         if (state.activeView === 'session' && currentCategory && cards.length) {
           renderCard();
+          renderSummaryMetrics(summaryMetrics);
+          setSummaryOpen(Boolean(state.summaryOpen));
 
           return true;
         }
@@ -137,7 +176,6 @@
       return false;
     }
 
-    /* Renderiza el contexto de la pregunta como chips independientes para topic y subtopic. */
     function renderSessionKicker(topicLabel, subtopicLabel) {
       if (!kicker) {
         return;
@@ -160,7 +198,6 @@
       }
     }
 
-    /* Muestra u oculta mensajes transitorios de error o informacion dentro del modulo. */
     function setFeedback(message, type) {
       if (!feedback) {
         return;
@@ -178,7 +215,6 @@
       feedback.dataset.state = type || 'info';
     }
 
-    /* Alterna entre vistas principales del modulo y persiste la vista activa. */
     function showView(viewName) {
       root.dataset.activeView = viewName;
       homeView.hidden = viewName !== 'home';
@@ -188,7 +224,6 @@
       persistState();
     }
 
-    /* Restablece el contexto actual y vuelve a la vista inicial del modulo. */
     function openHome() {
       currentCategory = null;
       showView('home');
@@ -196,14 +231,12 @@
       persistState();
     }
 
-    /* Busca una categoria por id dentro del dataset ya cargado en memoria. */
     function getCategoryById(categoryId) {
       return categories.find(function (item) {
         return Number(item.id) === Number(categoryId);
       }) || null;
     }
 
-    /* Carga los datos de una categoria y abre su vista de detalle. */
     function openCategory(categoryId) {
       currentCategory = getCategoryById(categoryId);
 
@@ -219,7 +252,6 @@
       persistState();
     }
 
-    /* Renderiza la lista de subtemas disponibles para la categoria seleccionada. */
     function renderSubtopics(subtopics) {
       subtopicsWrap.innerHTML = '';
 
@@ -258,14 +290,12 @@
       });
     }
 
-    /* Ajusta la cantidad pedida al rango valido soportado por el modal. */
     function normalizeCount(value, maxCards) {
       const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const safeValue = Math.max(1, Math.min(safeMax, Number(value || safeMax)));
       return safeValue;
     }
 
-    /* Genera las opciones rapidas de cantidad respetando el maximo disponible. */
     function getOptionValues(maxCards) {
       const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const filtered = cardOptions
@@ -285,7 +315,6 @@
       });
     }
 
-    /* Sincroniza el valor elegido en slider, contador y botones rapidos del modal. */
     function updateModalSelection(value) {
       if (!pendingConfig) {
         return;
@@ -302,7 +331,6 @@
       updateRangeFill();
     }
 
-    /* Sincroniza el relleno visual del slider con el valor actual mediante una variable CSS. */
     function updateRangeFill() {
       const min = Number(rangeInput.min || 0);
       const max = Number(rangeInput.max || 100);
@@ -312,7 +340,6 @@
       rangeInput.style.setProperty('--vc-range-progress', percent + '%');
     }
 
-    /* Renderiza las acciones rapidas de cantidad dentro del modal de inicio. */
     function renderModalOptions(maxCards) {
       const values = getOptionValues(maxCards);
       optionsWrap.innerHTML = '';
@@ -330,7 +357,6 @@
       });
     }
 
-    /* Prepara y abre el modal de configuracion para iniciar una sesion. */
     function openConfigModal(config) {
       const maxCards = Number(config.maxCards || 0);
       if (maxCards < 1) {
@@ -362,14 +388,12 @@
       persistState();
     }
 
-    /* Cierra el modal de configuracion y restablece su estado visual base. */
     function closeConfigModal() {
       modal.hidden = true;
       document.body.classList.remove('vc-flashcards-modal-open');
       persistState();
     }
 
-    /* Bloquea temporalmente el CTA del modal mientras se crea una nueva sesion. */
     function setSessionStartLoading(isLoading) {
       isStartingSession = isLoading;
 
@@ -381,7 +405,6 @@
       }
     }
 
-    /* Actualiza la etiqueta del boton de explicacion sin reemplazar su icono. */
     function setExplanationToggleLabel(label) {
       if (!explanationToggleLabel) {
         return;
@@ -390,7 +413,6 @@
       explanationToggleLabel.textContent = label;
     }
 
-    /* Restablece la interfaz de sesion antes de pintar una nueva pregunta. */
     function resetSessionUi() {
       answersWrap.innerHTML = '';
       explanationEl.hidden = true;
@@ -408,7 +430,6 @@
       setFeedback('', '');
     }
 
-    /* Crea un boton de respuesta reutilizable con su clave y manejador asociado. */
     function buildAnswerButton(key, text) {
       const button = document.createElement('button');
       button.type = 'button';
@@ -421,7 +442,6 @@
       return button;
     }
 
-    /* Construye el bloque de explicacion y lo deja listo para mostrarse bajo demanda. */
     function renderExplanation(card, isCorrect) {
       const refs = Array.isArray(card.references) && card.references.length
         ? '<ul>' + card.references.map(function (ref) { return '<li>' + ref + '</li>'; }).join('') + '</ul>'
@@ -441,7 +461,6 @@
       }
     }
 
-    /* Renderiza la pregunta actual, su progreso y todas sus respuestas disponibles. */
     function renderCard() {
       const card = cards[cardIndex];
 
@@ -469,7 +488,6 @@
       persistState();
     }
 
-    /* Procesa una respuesta elegida, bloquea la card y guarda el intento. */
     function handleAnswer(button) {
       if (answeredCurrentCard) {
         return;
@@ -508,7 +526,6 @@
       persistState();
     }
 
-    /* Revela la respuesta correcta sin seleccion del usuario y registra el intento. */
     function revealAnswer() {
       if (answeredCurrentCard) {
         return;
@@ -547,7 +564,6 @@
       persistState();
     }
 
-    /* Refresca las metricas visibles del dashboard con los datos devueltos por el backend. */
     function updateStats(stats) {
       if (!stats) {
         return;
@@ -564,7 +580,6 @@
       }
     }
 
-    /* Cierra la sesion en backend y muestra el resumen final del intento. */
     function finishSession() {
       const body = new window.URLSearchParams();
       body.append('action', 'vc_flashcards_complete_session');
@@ -586,10 +601,15 @@
           }
 
           const data = payload.data;
+          summaryMetrics = {
+            correctAnswers: Number(data.correctAnswers || 0),
+            incorrectAnswers: Number(data.incorrectAnswers || 0),
+            precisionPercent: Number(data.precisionPercent || 0),
+            scorePercent: Number(data.scorePercent || 0)
+          };
           updateStats(data.stats);
-          showView('summary');
-          summaryScore.textContent = String(Math.round(data.scorePercent)) + '%';
-          summaryCopy.textContent = data.correctAnswers + ' / ' + data.totalCards + ' correct answers';
+          setSummaryOpen(true);
+          renderSummaryMetrics(summaryMetrics);
           persistState();
         })
         .catch(function (error) {
@@ -602,7 +622,6 @@
         });
     }
 
-    /* Solicita una nueva sesion al backend y prepara la primera pregunta. */
     function startSession(config) {
       if (!config || isStartingSession) {
         return;
@@ -637,6 +656,7 @@
           cards = payload.data.cards || [];
           cardIndex = 0;
           attempts = [];
+          summaryMetrics = null;
           lastConfig = Object.assign({}, config);
           setFeedback('', '');
           renderCard();
@@ -746,7 +766,13 @@
       openHome();
     });
 
-    /* Soporte de teclado para seleccionar respuestas con letras. */
+    if (summaryCloseButton) {
+      summaryCloseButton.addEventListener('click', function () {
+        setSummaryOpen(false);
+        openHome();
+      });
+    }
+
     document.addEventListener('keydown', function (event) {
       if (root.dataset.activeView !== 'session') {
         return;
@@ -765,8 +791,8 @@
     }
   }
 
-  /* Inicializa todas las instancias del modulo una vez cargado el DOM. */
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.vc-flashcards-app').forEach(initFlashcardsApp);
   });
 }());
+

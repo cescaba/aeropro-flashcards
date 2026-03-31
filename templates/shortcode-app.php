@@ -217,12 +217,48 @@ if (!defined('ABSPATH')) {
   <section class="vc-flashcards-summary" data-vc-flashcards-summary hidden>
     <?php /* Caja principal del resumen con score y siguientes acciones. */ ?>
     <div class="vc-flashcards-summary-box">
-      <p class="vc-flashcards-summary-kicker"><?php esc_html_e('Session complete', 'vc-flashcards'); ?></p>
-      <h3 data-vc-flashcards-summary-score>0%</h3>
-      <p data-vc-flashcards-summary-copy></p>
+      <?php /* Cierre rapido del overlay sin cambiar el flujo principal del resumen. */ ?>
+      <button type="button" class="vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">&times;</button>
+      <?php /* Insignia visual del resumen final con copa centrada sobre un circulo degradado. */ ?>
+      <div class="vc-flashcards-summary-badge" aria-hidden="true">
+        <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/copa.svg'); ?>" alt="" width="42" height="42">
+      </div>
+      <p class="vc-flashcards-summary-kicker"><?php esc_html_e('Session completed!', 'vc-flashcards'); ?></p>
+      <?php /* Franja superior preparada para futuras metricas o elementos visuales del resumen. */ ?>
+      <div class="vc-flashcards-summary-top">
+        <div class="vc-flashcards-summary-results">
+          <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--correct">
+            <?php /* Contador dinámico de respuestas correctas renderizado al cerrar la sesión. */ ?>
+            <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--correct" data-vc-flashcards-correct-count>0</strong>
+            <h3><?php esc_html_e('Correct', 'vc-flashcards'); ?></h3>
+          </div>
+          <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--incorrect">
+            <?php /* Contador dinámico de respuestas incorrectas calculado a partir del total de la sesión. */ ?>
+            <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--incorrect" data-vc-flashcards-incorrect-count>0</strong>
+            <h3><?php esc_html_e('Incorrect', 'vc-flashcards'); ?></h3>
+          </div>
+        </div>
+        <div class="vc-flashcards-summary-accuracy-card">
+          <?php /* Titulo de la tarjeta de precision encima del porcentaje principal. */ ?>
+          <span class="vc-flashcards-summary-accuracy-title"><?php esc_html_e('Accuracy', 'vc-flashcards'); ?></span>
+          <strong data-vc-flashcards-summary-precision>0%</strong>
+          <?php /* Barra visual que representa el porcentaje de precision de la sesion. */ ?>
+          <span class="vc-flashcards-summary-accuracy-bar">
+            <span data-vc-flashcards-summary-precision-bar></span>
+          </span>
+        </div>
+      </div>
+      <h3><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></h3>
       <div class="vc-flashcards-summary-actions">
-        <button type="button" class="vc-flashcards-start" data-vc-flashcards-restart><?php esc_html_e('Study again', 'vc-flashcards'); ?></button>
-        <button type="button" class="vc-flashcards-back" data-vc-flashcards-summary-back><?php esc_html_e('Back to category', 'vc-flashcards'); ?></button>
+        <?php /* Variante visual exclusiva del summary para el retorno al menú. */ ?>
+        <button type="button" class="vc-flashcards-back vc-flashcards-summary-action vc-flashcards-summary-action--back" data-vc-flashcards-summary-back><?php esc_html_e('Back to menu', 'vc-flashcards'); ?></button>
+        <?php /* CTA secundario del summary con icono izquierdo para reiniciar la sesión actual. */ ?>
+        <button type="button" class="vc-flashcards-start vc-flashcards-summary-action vc-flashcards-summary-action--restart" data-vc-flashcards-restart>
+          <span class="vc-flashcards-summary-action-icon" aria-hidden="true">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/repeat-session.svg'); ?>" alt="" width="16" height="16">
+          </span>
+          <span><?php esc_html_e('Repeat session', 'vc-flashcards'); ?></span>
+        </button>
       </div>
     </div>
   </section>
