@@ -3,7 +3,7 @@
   display: grid;
   gap: 24px;
   color: #212121;
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
 }
 
 
@@ -153,6 +153,10 @@
   color: #666666;
 }
 
+.vc-flashcards-category-total {
+  margin: 0;
+}
+
 /* Layout del encabezado de la vista de detalle de categoria. */
 .vc-flashcards-detail-header {
   display: flex;
@@ -205,20 +209,22 @@
   color: #666666;
 }
 
-/* Ancho fijo para el boton secondary en global random. */
-.vc-flashcards-start--secondary {
-  width: 111px;
-  min-width: 111px;
-  box-sizing: border-box;
-  align-self: stretch;
-  height: auto;
-  padding: 0 16px;
+/* Boton exclusivo del bloque global random. */
+.vc-flashcards-start.vc-flashcards-global-random-start {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 56px;
+  align-items: center;
+  justify-content: center;
   background: #ffffff;
   color: #1447E6;
   border: 2px solid #1447E6;
+  padding: 8px 13px;
+  box-sizing: border-box;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
+  white-space: nowrap; 
 }
 
 /* Reset visual y transicion comun para elementos interactivos. */
@@ -247,7 +253,6 @@
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  font-family: Inter, sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
@@ -263,8 +268,8 @@
 .vc-flashcards-back:focus,
 .vc-flashcards-back:active {
   background: transparent;
-  color: #0f172a;
-  border: 1px solid #0f172a;
+  color: #212121;
+  border: 1px solid #212121;
   transform: none;
   box-shadow: none;
   transition: none;
@@ -286,7 +291,7 @@
 /* Color base de los CTA principales. */
 .vc-flashcards-start,
 .vc-flashcards-next {
-  background: #1e3c80;
+  background: #3237B7;
   color: #ffffff;
 }
 
@@ -323,11 +328,12 @@
   align-self: stretch;
 }
 
-/* Replica el comportamiento dimensional del icono de stats solo en el CTA lateral del config grid. */
+/* Mantiene este CTA lateral cuadrado aunque el ancho disponible cambie. */
 .vc-flashcards-config-card > .vc-flashcards-start--icon {
   flex: 0 0 auto;
   width: 55px;
-  min-height: 44px;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
   background: #155dfc;
 }
 
@@ -365,21 +371,21 @@
 
 /* Variante lateral para la accion de practica aleatoria. */
 .vc-flashcards-start--secondary {
+
   display: inline-flex;
   flex: 0 0 auto;
-  width: 111px;
-  min-width: 111px;
   min-height: 56px;
   align-items: center;
+  justify-content: center;
   background: #ffffff;
   color: #1447E6;
   border: 2px solid #1447E6;
-  justify-content: center;
   padding: 0 16px;
   box-sizing: border-box;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
+  white-space: nowrap; /* evita salto de línea */
 }
 
 /* Escala el icono de la accion secundaria sin tocar otros SVG del modulo. */
@@ -532,10 +538,7 @@
   align-items: center;
   flex-wrap: nowrap;
   margin-left: auto;
-  padding: 6px 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background: #f8fafc;
+
   white-space: nowrap;
 }
 
@@ -555,7 +558,7 @@
   height: 10px;
   margin: 0 0 24px;
   border-radius: 999px;
-  background: #d7dce7;
+  background: #E2E8F0;
   overflow: hidden;
 }
 
@@ -564,7 +567,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #2b50da 0%, #2a6cf6 100%);
+  background: #1E3C80;
 }
 
 /* Separa la barra del header para que el cambio de bloque se sienta mas limpio. */
@@ -717,7 +720,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
+  padding: 8px 23px;
   border: 1px solid transparent;
   border-radius: 4px;
   font-size: 14px;
@@ -752,7 +755,7 @@
   padding: 16px 18px;
   border-radius: 16px;
   background: #f7f9fc;
-  color: #1f2430;
+  color: #666666;
   cursor: pointer;
   text-align: left;
 }
@@ -961,6 +964,7 @@
   gap: 8px;
   width: 100%;
   margin-top: 16px;
+  background: #1E3C80;
 }
 
 /* Alinea el texto y el simbolo del CTA siguiente en el mismo eje vertical. */
@@ -1047,14 +1051,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 6px;
   border: 0;
   background: transparent;
   color: #0F172A;
-  font-size: 16px;
-  line-height: 1;
+  font-size: 20px;
+  line-height: 0.9;
   cursor: pointer;
   box-shadow: none;
 }
@@ -1312,15 +1317,27 @@
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
 }
 
+/* Encabezado del modal para alinear titulo y cierre. */
+.vc-flashcards-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
 /* Boton para cerrar el modal. */
 .vc-flashcards-modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 6px;
   border: 0;
   background: transparent;
   color: #666666;
-  font-size: 30px;
+  font-size: 20px;
+  line-height: 0.9;
   cursor: pointer;
 }
 
@@ -1338,7 +1355,8 @@
 
 /* Texto descriptivo bajo el titulo del modal. */
 .vc-flashcards-modal-copy {
-  max-width: 320px;
+  width: 100%;
+  max-width: none;
   margin: 0 0 24px;
 }
 
@@ -1383,7 +1401,7 @@
   height: 15px;
   appearance: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, #3f3dc7 0 var(--vc-range-progress, 0%), #d7dce7 var(--vc-range-progress, 0%) 100%);
+  background: linear-gradient(90deg, #3237B7 0 var(--vc-range-progress, 0%), #d7dce7 var(--vc-range-progress, 0%) 100%);
 }
 
 /* Mantiene transparente la pista nativa para que el relleno dinamico lo controle el propio input. */
@@ -1399,7 +1417,7 @@
   height: 26px;
   margin-top: -5.5px;
   appearance: none;
-  border: 2px solid #3f3dc7;
+  border: 2px solid #3237B7;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: none;
@@ -1417,14 +1435,14 @@
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-progress {
   height: 15px;
   border-radius: 999px;
-  background: #3f3dc7;
+  background: #3237B7;
 }
 
 /* Replica la bola blanca del slider para Firefox. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
   width: 26px;
   height: 26px;
-  border: 2px solid #3f3dc7;
+  border: 2px solid #3237B7;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: none;
@@ -1452,8 +1470,8 @@
 
 /* Estado activo de la cantidad elegida. */
 .vc-flashcards-count-option.is-active {
-  border-color: #3f3dc7;
-  background: #3f3dc7;
+  border-color: #3237B7;
+  background: #3237B7;
   color: #ffffff;
 }
 

@@ -13,6 +13,7 @@
     const modal = root.querySelector('[data-vc-flashcards-modal]');
     const categoryTitle = root.querySelector('[data-vc-flashcards-category-title]');
     const categoryMeta = root.querySelector('[data-vc-flashcards-category-meta]');
+    const categoryTotal = root.querySelector('[data-vc-flashcards-category-total]');
     const subtopicsWrap = root.querySelector('[data-vc-flashcards-subtopics]');
     const nextButton = root.querySelector('[data-vc-flashcards-next]');
     const revealButton = root.querySelector('[data-vc-flashcards-reveal]');
@@ -27,6 +28,7 @@
     const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
     const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
     const kicker = root.querySelector('[data-vc-flashcards-kicker]');
+    const nextButtonLabel = root.querySelector('.vc-flashcards-next-label');
     const summaryPrecision = root.querySelector('[data-vc-flashcards-summary-precision]');
     const summaryPrecisionBar = root.querySelector('[data-vc-flashcards-summary-precision-bar]');
     const summaryScore = root.querySelector('[data-vc-flashcards-summary-score]');
@@ -122,6 +124,23 @@
       }
     }
 
+    function renderCategoryHeader(category) {
+      if (!category) {
+        return;
+      }
+
+      categoryTitle.textContent = category.name;
+
+      if (categoryMeta) {
+        categoryMeta.textContent = '';
+        categoryMeta.hidden = true;
+      }
+
+      if (categoryTotal) {
+        categoryTotal.textContent = String(Number(category.totalCards || 0)) + ' total flashcards';
+      }
+    }
+
     function restoreState() {
       try {
         const rawState = window.sessionStorage.getItem(storageKey);
@@ -147,8 +166,7 @@
         currentExplanationHtml = state.currentExplanationHtml || '';
 
         if (currentCategory) {
-          categoryTitle.textContent = currentCategory.name;
-          categoryMeta.textContent = currentCategory.description;
+          renderCategoryHeader(currentCategory);
           renderSubtopics(currentCategory.children || []);
         }
 
@@ -244,8 +262,7 @@
         return;
       }
 
-      categoryTitle.textContent = currentCategory.name;
-      categoryMeta.textContent = currentCategory.description;
+      renderCategoryHeader(currentCategory);
       renderSubtopics(currentCategory.children || []);
       showView('detail');
       setFeedback('', '');
@@ -279,7 +296,7 @@
           openConfigModal({
             mode: 'subcategory',
             termId: Number(subtopic.id),
-            title: subtopic.name,
+            title: 'Card study: ' + subtopic.name,
             description: 'Focus on one specific subtopic.',
             maxCards: Number(subtopic.totalCards || 0),
             kicker: currentCategory ? currentCategory.name + ' / ' + subtopic.name : subtopic.name
@@ -477,6 +494,9 @@
       progressCount.textContent = 'Question ' + String(cardIndex + 1) + ' de ' + String(cards.length);
       if (sessionBarFill) {
         sessionBarFill.style.width = String(Math.round(((cardIndex + 1) / cards.length) * 100)) + '%';
+      }
+      if (nextButtonLabel) {
+        nextButtonLabel.textContent = cardIndex === cards.length - 1 ? 'Finish' : 'Next question';
       }
       questionEl.textContent = card.question;
       renderSessionKicker(card.topicLabel, card.subtopicLabel);
@@ -694,12 +714,12 @@
         openConfigModal({
           mode: isGlobalRandom ? 'global-random' : (isRandom ? 'random' : 'category'),
           termId: isGlobalRandom ? 0 : Number(currentCategory.id),
-          title: isGlobalRandom ? 'Global Random Practice' : (isRandom ? 'Random practice' : 'Study full category'),
+          title: isGlobalRandom ? 'Global Random Practice' : (isRandom ? 'Study in random mode' : 'Study the full category'),
           description: isGlobalRandom
             ? 'Mix cards from all categories for a comprehensive review.'
             : (isRandom
-              ? 'Choose how many cards you want to mix from this category.'
-              : 'Choose how many cards you want to study in sequential order.'),
+              ? 'Cards will be shuffled randomly within this category'
+              : 'Select how many cards you want to study in sequential order'),
           maxCards: isGlobalRandom ? Number(categories.reduce(function (sum, item) { return sum + Number(item.totalCards || 0); }, 0)) : Number(currentCategory.totalCards || 0),
           kicker: isGlobalRandom ? 'Global Random' : currentCategory.name
         });
@@ -795,4 +815,3 @@
     document.querySelectorAll('.vc-flashcards-app').forEach(initFlashcardsApp);
   });
 }());
-
