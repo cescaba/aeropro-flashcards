@@ -726,6 +726,35 @@
       });
     });
 
+    root.querySelectorAll('[data-vc-flashcards-launch-card]').forEach(function (card) {
+      const launchButton = card.querySelector('[data-vc-flashcards-launch]');
+
+      if (!launchButton) {
+        return;
+      }
+
+      card.addEventListener('click', function (event) {
+        if (event.target.closest('[data-vc-flashcards-launch]')) {
+          return;
+        }
+
+        launchButton.click();
+      });
+
+      card.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+          return;
+        }
+
+        if (event.target.closest('[data-vc-flashcards-launch]')) {
+          return;
+        }
+
+        event.preventDefault();
+        launchButton.click();
+      });
+    });
+
     root.querySelectorAll('[data-vc-flashcards-back]').forEach(function (button) {
       button.addEventListener('click', openHome);
     });

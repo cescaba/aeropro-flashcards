@@ -84,18 +84,20 @@ if (!defined('ABSPATH')) {
       <?php /* Acceso global a practica aleatoria dentro de la vista inicial. */ ?>
       <section class="vc-flashcards-global-section">
         <article class="vc-flashcards-global-random">
-          <div class="vc-flashcards-global-random-content">
+          <div class="vc-flashcards-global-random-main">
             <span class="vc-flashcards-global-random-icon" aria-hidden="true">
               <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/mundo.svg'); ?>" alt="" width="24" height="24">
             </span>
-            <div>
-              <h3><?php esc_html_e('Global Random Practice', 'vc-flashcards'); ?></h3>
-              <p><?php esc_html_e('Mix cards from all categories for a comprehensive review.', 'vc-flashcards'); ?></p>
+            <div class="vc-flashcards-global-random-content">
+              <div class="vc-flashcards-global-random-copy">
+                <h3><?php esc_html_e('Global Random Practice', 'vc-flashcards'); ?></h3>
+                <p><?php esc_html_e('Mix cards from all categories for a comprehensive review.', 'vc-flashcards'); ?></p>
+              </div>
+              <button type="button" class="vc-flashcards-start vc-flashcards-global-random-start" data-vc-flashcards-launch="global-random">
+                <span><?php esc_html_e('Start study', 'vc-flashcards'); ?></span>
+              </button>
             </div>
           </div>
-          <button type="button" class="vc-flashcards-start vc-flashcards-global-random-start" data-vc-flashcards-launch="global-random">
-            <span><?php esc_html_e('Start study', 'vc-flashcards'); ?></span>
-          </button>
         </article>
       </section>
     <?php endif; ?>
@@ -115,7 +117,6 @@ if (!defined('ABSPATH')) {
       </button>
       <div>
         <h2 data-vc-flashcards-category-title></h2>
-        <p data-vc-flashcards-category-meta></p>
         <p class="vc-flashcards-category-total" data-vc-flashcards-category-total></p>
       </div>
     </header>
@@ -123,26 +124,26 @@ if (!defined('ABSPATH')) {
     <?php /* Rejilla de modos de estudio disponibles para la categoria activa. */ ?>
     <div class="vc-flashcards-config-grid">
       <?php /* Opcion para estudiar toda la categoria en orden secuencial. */ ?>
-      <article class="vc-flashcards-config-card">
+      <article class="vc-flashcards-config-card vc-flashcards-config-card--aligned" data-vc-flashcards-launch-card tabindex="0" role="button" aria-label="<?php esc_attr_e('Study full category', 'vc-flashcards'); ?>">
         <div class="vc-flashcards-config-copy">
-          <h3><?php esc_html_e('Study the full category ', 'vc-flashcards'); ?></h3>
-          <p><?php esc_html_e('Study all General cards in order', 'vc-flashcards'); ?></p>
+          <h3 class="vc-flashcards-card-cardtitle"><?php esc_html_e('Study Full Category', 'vc-flashcards'); ?></h3>
+          <p class="vc-flashcards-card-cardsubtitle"><?php esc_html_e('Study all General cards in order', 'vc-flashcards'); ?></p>
         </div>
-        <button type="button" class="vc-flashcards-start vc-flashcards-start--icon" data-vc-flashcards-launch="category" aria-label="<?php esc_attr_e('Study full category', 'vc-flashcards'); ?>">
-          <span class="vc-flashcards-start-list-icon" aria-hidden="true">
+        <button type="button" class="vc-flashcards-start vc-flashcards-start--icon vc-flashcards-config-card-action" data-vc-flashcards-launch="category" aria-label="<?php esc_attr_e('Study full category', 'vc-flashcards'); ?>">
+          <span class="vc-flashcards-start-list-icon vc-flashcards-config-card-action-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Icon.svg'); ?>" alt="" width="24" height="24">
           </span>
         </button>
       </article>
 
       <?php /* Opcion para lanzar una practica aleatoria dentro de la categoria. */ ?>
-      <article class="vc-flashcards-config-card">
+      <article class="vc-flashcards-config-card vc-flashcards-config-card--aligned" data-vc-flashcards-launch-card tabindex="0" role="button" aria-label="<?php esc_attr_e('Study random', 'vc-flashcards'); ?>">
         <div class="vc-flashcards-config-copy">
-          <h3><?php esc_html_e('Random practice', 'vc-flashcards'); ?></h3>
-          <p><?php esc_html_e('Mix cards from all General subtopics', 'vc-flashcards'); ?></p>
+          <h3 class="vc-flashcards-card-cardtitle"><?php esc_html_e('Random practice', 'vc-flashcards'); ?></h3>
+          <p class="vc-flashcards-card-cardsubtitle"><?php esc_html_e('Mix cards from all General subtopics', 'vc-flashcards'); ?></p>
         </div>
-        <button type="button" class="vc-flashcards-start vc-flashcards-start--secondary" data-vc-flashcards-launch="random" aria-label="<?php esc_attr_e('Study random', 'vc-flashcards'); ?>">
-          <span class="vc-flashcards-start-random-icon" aria-hidden="true">
+        <button type="button" class="vc-flashcards-start vc-flashcards-start--secondary vc-flashcards-config-card-action" data-vc-flashcards-launch="random" aria-label="<?php esc_attr_e('Study random', 'vc-flashcards'); ?>">
+          <span class="vc-flashcards-start-random-icon vc-flashcards-config-card-action-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
           </span>
         </button>
@@ -186,13 +187,16 @@ if (!defined('ABSPATH')) {
 
     <?php /* Tarjeta principal con pregunta, respuestas y acciones de apoyo. */ ?>
     <article class="vc-flashcards-card">
-      <p class="vc-flashcards-session-kicker" data-vc-flashcards-kicker></p>
+      <div class="vc-flashcards-session-context">
+        <p class="vc-flashcards-session-topic">General</p>
+        <p class="vc-flashcards-session-subtopic">Hand tools</p>
+      </div>
       <h4 data-vc-flashcards-question></h4>
       <div class="vc-flashcards-answers" data-vc-flashcards-answers></div>
       <?php /* Fila de acciones auxiliares antes de avanzar a la siguiente pregunta. */ ?>
       <div class="vc-flashcards-actions">
         <button type="button" class="vc-flashcards-reveal" data-vc-flashcards-reveal><?php esc_html_e("Don't know the answer? Reveal answer", 'vc-flashcards'); ?></button>
-        <button type="button" class="vc-flashcards-back" data-vc-flashcards-explanation-toggle hidden>
+        <button type="button" class="vc-flashcards-session-action vc-flashcards-explanation-toggle" data-vc-flashcards-explanation-toggle hidden>
           <span class="vc-flashcards-explanation-toggle-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/libro.svg'); ?>" alt="" width="16" height="16">
           </span>
@@ -202,7 +206,7 @@ if (!defined('ABSPATH')) {
       <?php /* Panel expandible donde se inyecta la explicacion de la respuesta. */ ?>
       <div class="vc-flashcards-explanation" data-vc-flashcards-explanation hidden></div>
       <?php /* CTA final para avanzar despues de resolver o revelar la respuesta. */ ?>
-      <button type="button" class="vc-flashcards-next" data-vc-flashcards-next hidden disabled>
+      <button type="button" class="vc-flashcards-session-action vc-flashcards-session-next" data-vc-flashcards-next hidden disabled>
         <span class="vc-flashcards-next-label"><?php esc_html_e('Next question', 'vc-flashcards'); ?></span>
         <span class="vc-flashcards-next-icon" aria-hidden="true">&gt;</span>
       </button>
@@ -215,7 +219,9 @@ if (!defined('ABSPATH')) {
     <div class="vc-flashcards-summary-box">
       <div class="vc-flashcards-summary-header">
         <?php /* Cierre rapido del overlay sin cambiar el flujo principal del resumen. */ ?>
-        <button type="button" class="vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">&times;</button>
+        <button type="button" class="vc-flashcards-close-button vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">
+          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/cerrar.svg'); ?>" alt="" width="20" height="20">
+        </button>
       </div>
       <?php /* Insignia visual del resumen final con copa centrada sobre un circulo degradado. */ ?>
       <div class="vc-flashcards-summary-badge" aria-hidden="true">
@@ -246,7 +252,7 @@ if (!defined('ABSPATH')) {
           </span>
         </div>
       </div>
-      <h3><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></h3>
+      <h3 class="vc-flashcards-summary-message"><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></h3>
       <div class="vc-flashcards-summary-actions">
         <?php /* Variante visual exclusiva del summary para el retorno al menú. */ ?>
         <button type="button" class="vc-flashcards-back vc-flashcards-summary-action vc-flashcards-summary-action--back" data-vc-flashcards-summary-back><?php esc_html_e('Back to menu', 'vc-flashcards'); ?></button>
@@ -268,11 +274,15 @@ if (!defined('ABSPATH')) {
     <?php /* Dialogo principal con titulo, selector de cantidad y acciones finales. */ ?>
     <div class="vc-flashcards-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="vc-flashcards-modal-title">
       <div class="vc-flashcards-modal-header">
-        <h3 id="vc-flashcards-modal-title" data-vc-flashcards-modal-title></h3>
-        <button type="button" class="vc-flashcards-modal-close" data-vc-flashcards-close aria-label="<?php esc_attr_e('Close', 'vc-flashcards'); ?>">&times;</button>
+        <div class="vc-flashcards-modal-heading">
+          <h3 id="vc-flashcards-modal-title" data-vc-flashcards-modal-title></h3>
+          <p class="vc-flashcards-modal-copy" data-vc-flashcards-modal-copy></p>
+        </div>
+        <button type="button" class="vc-flashcards-close-button vc-flashcards-modal-close" data-vc-flashcards-close aria-label="<?php esc_attr_e('Close', 'vc-flashcards'); ?>">
+          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/cerrar.svg'); ?>" alt="" width="20" height="20">
+        </button>
       </div>
-      <p class="vc-flashcards-modal-copy" data-vc-flashcards-modal-copy></p>
-
+  
       <?php /* Resumen numerico de la cantidad de tarjetas seleccionada. */ ?>
       <div class="vc-flashcards-modal-count">
         <strong data-vc-flashcards-count-display>20</strong>
@@ -293,11 +303,9 @@ if (!defined('ABSPATH')) {
 
       <?php /* Acciones finales del modal para cancelar o confirmar el inicio. */ ?>
       <div class="vc-flashcards-modal-actions">
-        <button type="button" class="vc-flashcards-back" data-vc-flashcards-close><?php esc_html_e('Cancel', 'vc-flashcards'); ?></button>
-        <button type="button" class="vc-flashcards-start" data-vc-flashcards-confirm><?php esc_html_e('Start', 'vc-flashcards'); ?></button>
+        <button type="button" class="vc-flashcards-modal-cancel" data-vc-flashcards-close><?php esc_html_e('Cancel', 'vc-flashcards'); ?></button>
+        <button type="button" class="vc-flashcards-modal-confirm" data-vc-flashcards-confirm><?php esc_html_e('Start', 'vc-flashcards'); ?></button>
       </div>
     </div>
   </div>
 </div>
-
-
