@@ -1657,6 +1657,26 @@
   border: 0;
 }
 
+.vc-flashcards-modal-cancel:hover,
+.vc-flashcards-modal-cancel:focus,
+.vc-flashcards-modal-cancel:focus-visible,
+.vc-flashcards-modal-cancel:active {
+  background: transparent;
+  color: #3f3dc7;
+  border-color: #3f3dc7;
+  box-shadow: none;
+}
+
+.vc-flashcards-modal-confirm:hover,
+.vc-flashcards-modal-confirm:focus,
+.vc-flashcards-modal-confirm:focus-visible,
+.vc-flashcards-modal-confirm:active {
+  background: #3237B7;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
+}
+
 
 /* Hace visible el bloqueo temporal del CTA de inicio mientras la sesion se prepara. */
 .vc-flashcards-modal-confirm:disabled {
@@ -1673,6 +1693,26 @@
 /* Centra icono y texto del toggle de explicacion dentro del mismo eje visual. */
 .vc-flashcards-explanation-toggle {
   background: #1447E6;
+}
+
+.vc-flashcards-explanation-toggle:hover,
+.vc-flashcards-explanation-toggle:focus,
+.vc-flashcards-explanation-toggle:focus-visible,
+.vc-flashcards-explanation-toggle:active {
+  background: #1447E6;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
+}
+
+.vc-flashcards-session-next:hover,
+.vc-flashcards-session-next:focus,
+.vc-flashcards-session-next:focus-visible,
+.vc-flashcards-session-next:active {
+  background: #1E3C80;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
 }
 
 /* Alinea cada pieza interna para que el icono no quede mas alto ni mas bajo que la etiqueta. */
