@@ -1634,6 +1634,16 @@
   margin-top: 22px;
 }
 
+/* Evita cambios visuales al pasar el cursor por el footer del modal. */
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:hover,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:focus,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:focus-within {
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
 .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-confirm {
   flex: 1 1 0;
@@ -1675,6 +1685,67 @@
   color: #ffffff;
   border: 0;
   box-shadow: none;
+}
+
+.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:hover,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus-visible,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:active {
+  background: transparent;
+  color: #3f3dc7;
+  border-color: #3f3dc7;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  filter: none;
+  transform: none;
+  transition: none;
+}
+
+.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:hover,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus-visible,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:active {
+  background: #3237B7;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  filter: none;
+  transform: none;
+  transition: none;
+}
+
+/* Mantiene estable el boton opuesto aunque el otro este en hover, foco o clic. */
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:hover) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus-visible) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:active) .vc-flashcards-modal-confirm {
+  background: #3237B7;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  filter: none;
+  transform: none;
+}
+
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:hover) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus-visible) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:active) .vc-flashcards-modal-cancel {
+  background: transparent;
+  color: #3f3dc7;
+  border-color: #3f3dc7;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  filter: none;
+  transform: none;
 }
 
 
