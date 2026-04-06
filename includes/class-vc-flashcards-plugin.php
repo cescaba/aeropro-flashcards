@@ -46,6 +46,8 @@ class VC_Flashcards_Plugin {
     add_shortcode('vc_flashcards', [$this, 'render_flashcards_shortcode']);
     add_action('wp_ajax_vc_flashcards_start_session', [$this, 'ajax_start_session']);
     add_action('wp_ajax_vc_flashcards_complete_session', [$this, 'ajax_complete_session']);
+    add_shortcode('vc_exam_simulator', [$this, 'render_exam_shortcode']);
+    add_action('wp_ajax_vc_flashcards_start_exam', [$this, 'ajax_start_exam']);
   }
 
   public static function register_content_types(): void {
@@ -1308,5 +1310,257 @@ class VC_Flashcards_Plugin {
     });
 
     return $terms;
+  }
+
+  /* ─── Exam Simulator ─────────────────────────────────────────────────── */
+
+  public function render_exam_shortcode($atts = []): string {
+    if (!is_user_logged_in()) {
+      return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the exam simulator.', 'vc-flashcards') . '</div>';
+    }
+
+    wp_enqueue_style(
+      'vc-flashcards-style',
+      VC_FLASHCARDS_URL . 'assets/flashcards.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
+    );
+
+    wp_enqueue_style(
+      'vc-exam-style',
+      VC_FLASHCARDS_URL . 'assets/exam.css',
+      ['vc-flashcards-style'],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/exam.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/exam.css') : '1.0.0'
+    );
+
+    wp_enqueue_script(
+      'vc-exam-script',
+      VC_FLASHCARDS_URL . 'assets/exam.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/exam.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/exam.js') : '1.0.0',
+      true
+    );
+
+    wp_localize_script('vc-exam-script', 'vcExamData', [
+      'ajaxUrl' => admin_url('admin-ajax.php'),
+      'nonce'   => wp_create_nonce(self::NONCE_ACTION),
+      'examConfig' => [
+        'totalQuestions'   => 100,
+        'timeLimitSeconds' => 900,
+        'passingScore'     => self::PASSING_SCORE,
+      ],
+      'labels' => [
+        'loading'      => __('Preparing your exam…', 'vc-flashcards'),
+        'noCards'      => __('No questions were found for this category.', 'vc-flashcards'),
+        'question'     => __('Question', 'vc-flashcards'),
+        'of'           => __('of', 'vc-flashcards'),
+        'next'         => __('Next question', 'vc-flashcards'),
+        'finish'       => __('Finish exam', 'vc-flashcards'),
+        'passed'       => __('Passed!', 'vc-flashcards'),
+        'failed'       => __('Failed', 'vc-flashcards'),
+        'timeExpired'  => __('Time expired', 'vc-flashcards'),
+        'tryAgain'     => __('Try again', 'vc-flashcards'),
+        'backToMenu'   => __('Back to menu', 'vc-flashcards'),
+        'examComplete' => __('Exam complete!', 'vc-flashcards'),
+        'correct'      => __('Correct', 'vc-flashcards'),
+        'incorrect'    => __('Incorrect', 'vc-flashcards'),
+        'passingScore' => __('Passing score', 'vc-flashcards'),
+        'timeUsed'     => __('Time used', 'vc-flashcards'),
+        'congratulations' => __('Congratulations! You passed the exam.', 'vc-flashcards'),
+        'keepStudying'    => __('Keep studying. You need 70% to pass.', 'vc-flashcards'),
+        'confirmAbandon'  => __('Are you sure you want to abandon the exam? Your progress will be lost.', 'vc-flashcards'),
+      ],
+    ]);
+
+    $exam_categories = $this->get_exam_categories();
+
+    ob_start();
+    include VC_FLASHCARDS_DIR . 'templates/shortcode-exam.php';
+    return (string) ob_get_clean();
+  }
+
+  public function ajax_start_exam(): void {
+    check_ajax_referer(self::NONCE_ACTION, 'nonce');
+
+    if (!is_user_logged_in()) {
+      wp_send_json_error(['message' => __('You must be logged in.', 'vc-flashcards')], 403);
+    }
+
+    $topic_term_id = isset($_POST['topic_term_id']) ? absint($_POST['topic_term_id']) : 0;
+
+    if ($topic_term_id < 1) {
+      wp_send_json_error(['message' => __('Please select a topic.', 'vc-flashcards')], 400);
+    }
+
+    $cards = $this->get_exam_cards_for_topic($topic_term_id);
+
+    if (empty($cards)) {
+      wp_send_json_error(['message' => __('No flashcards were found for this topic.', 'vc-flashcards')], 404);
+    }
+
+    global $wpdb;
+
+    $wpdb->insert(
+      $wpdb->prefix . self::SESSION_TABLE,
+      [
+        'user_id'         => get_current_user_id(),
+        'mode'            => 'exam',
+        'topic_term_id'   => $topic_term_id,
+        'total_cards'     => count($cards),
+        'correct_answers' => 0,
+        'score_percent'   => 0,
+        'started_at'      => current_time('mysql'),
+      ],
+      ['%d', '%s', '%d', '%d', '%d', '%f', '%s']
+    );
+
+    wp_send_json_success([
+      'sessionId'      => (int) $wpdb->insert_id,
+      'cards'          => $cards,
+      'totalQuestions' => count($cards),
+    ]);
+  }
+
+  /* Builds a pool of up to 100 questions distributed proportionally across subtopics. */
+  private function get_exam_cards_for_topic(int $topic_term_id, int $total = 100): array {
+    $subtopics = get_terms([
+      'taxonomy'   => self::TAXONOMY,
+      'hide_empty' => false,
+      'parent'     => $topic_term_id,
+      'orderby'    => 'name',
+      'order'      => 'ASC',
+    ]);
+
+    /* No subtopics: fall back to pulling cards directly from the parent topic. */
+    if (is_wp_error($subtopics) || empty($subtopics)) {
+      $query = new WP_Query([
+        'post_type'      => self::POST_TYPE,
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'tax_query'      => [[
+          'taxonomy'         => self::TAXONOMY,
+          'field'            => 'term_id',
+          'terms'            => [$topic_term_id],
+          'include_children' => true,
+        ]],
+      ]);
+
+      $ids = $query->posts ?: [];
+      shuffle($ids);
+      $selected = array_slice($ids, 0, $total);
+
+      if (empty($selected)) {
+        return [];
+      }
+
+      update_meta_cache('post', $selected);
+      update_object_term_cache($selected, self::POST_TYPE);
+
+      $cards = [];
+      foreach ($selected as $post_id) {
+        $card = $this->build_flashcard_payload((int) $post_id);
+        if (!empty($card)) {
+          $cards[] = $card;
+        }
+      }
+
+      shuffle($cards);
+      return $cards;
+    }
+
+    /* Distribute $total questions across subtopics.
+     * e.g. 2 subtopics → 50 / 50
+     *      3 subtopics → 33 / 33 / 34
+     *      4 subtopics → 25 / 25 / 25 / 25  */
+    $subtopics_arr = array_values($subtopics);
+    $n             = count($subtopics_arr);
+    $base          = intdiv($total, $n);
+    $remainder     = $total % $n;
+
+    $quotas           = array_fill(0, $n, $base);
+    $quotas[$n - 1]  += $remainder;
+
+    $all_cards = [];
+
+    foreach ($subtopics_arr as $index => $subtopic) {
+      $quota = $quotas[$index];
+
+      $query = new WP_Query([
+        'post_type'      => self::POST_TYPE,
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'tax_query'      => [[
+          'taxonomy'         => self::TAXONOMY,
+          'field'            => 'term_id',
+          'terms'            => [(int) $subtopic->term_id],
+          'include_children' => false,
+        ]],
+      ]);
+
+      $ids = $query->posts ?: [];
+      if (empty($ids)) {
+        continue;
+      }
+
+      shuffle($ids);
+      $selected = array_slice($ids, 0, $quota);
+
+      update_meta_cache('post', $selected);
+      update_object_term_cache($selected, self::POST_TYPE);
+
+      foreach ($selected as $post_id) {
+        $card = $this->build_flashcard_payload((int) $post_id);
+        if (!empty($card)) {
+          $all_cards[] = $card;
+        }
+      }
+    }
+
+    shuffle($all_cards);
+    return $all_cards;
+  }
+
+  /* Returns parent topics enriched with subtopic count and total card count for the exam selector. */
+  private function get_exam_categories(): array {
+    $parents = get_terms([
+      'taxonomy'   => self::TAXONOMY,
+      'hide_empty' => false,
+      'parent'     => 0,
+      'orderby'    => 'name',
+      'order'      => 'ASC',
+    ]);
+
+    if (is_wp_error($parents) || empty($parents)) {
+      return [];
+    }
+
+    $parents    = $this->sort_parent_topics($parents);
+    $categories = [];
+
+    foreach ($parents as $parent) {
+      $children = get_terms([
+        'taxonomy'   => self::TAXONOMY,
+        'hide_empty' => false,
+        'parent'     => $parent->term_id,
+        'orderby'    => 'name',
+        'order'      => 'ASC',
+      ]);
+
+      $subtopic_count = is_wp_error($children) ? 0 : count($children);
+      $total_cards    = count($this->get_flashcard_ids_for_term((int) $parent->term_id));
+
+      $categories[] = [
+        'id'           => (int) $parent->term_id,
+        'name'         => $parent->name,
+        'totalCards'   => $total_cards,
+        'subtopicCount' => $subtopic_count,
+      ];
+    }
+
+    return $categories;
   }
 }

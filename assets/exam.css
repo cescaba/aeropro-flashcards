@@ -1,0 +1,321 @@
+/* ─── Exam Simulator ─────────────────────────────────────────────────────── */
+
+/* Root container mirrors .vc-flashcards-app layout. */
+.vc-exam-app {
+  display: grid;
+  gap: 24px;
+  color: #212121;
+  font-family: Poppins, sans-serif;
+}
+
+/* Each view is hidden by default; JS toggles the hidden attribute. */
+.vc-exam-view {
+  display: block;
+}
+
+.vc-exam-view[hidden] {
+  display: none !important;
+}
+
+/* ── Intro header ─────────────────────────────────────────────────────────── */
+
+.vc-exam-intro {
+  display: grid;
+  gap: 8px;
+}
+
+.vc-exam-intro h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #212121;
+}
+
+.vc-exam-intro > p {
+  margin: 0;
+  font-size: 15px;
+  color: #666666;
+}
+
+.vc-exam-intro-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.vc-exam-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.vc-exam-badge svg {
+  flex: 0 0 auto;
+}
+
+/* ── Category card (exam variant) ────────────────────────────────────────── */
+
+/* Removes the progress bar from category cards used in the exam home. */
+.vc-exam-category-card .vc-flashcards-topic-bar,
+.vc-exam-category-card .vc-flashcards-category-progress {
+  display: none;
+}
+
+.vc-exam-category-meta {
+  margin: 10px 0 6px;
+  font-size: 14px;
+  color: #666666;
+}
+
+.vc-exam-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #0ea44b;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 14px;
+}
+
+.vc-exam-category-pill svg {
+  flex: 0 0 auto;
+}
+
+/* Exam "Start" button uses its own green accent. */
+.vc-exam-start-btn {
+  background: #1447e6 !important;
+}
+
+/* ── Session header ───────────────────────────────────────────────────────── */
+
+.vc-exam-session-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.vc-exam-abandon-btn {
+  flex: 0 0 auto;
+}
+
+.vc-exam-session-progress {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+}
+
+.vc-exam-session-progress strong {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Countdown timer ─────────────────────────────────────────────────────── */
+
+.vc-exam-timer {
+  flex: 0 0 auto;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: #212121;
+  white-space: nowrap;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Under 5 minutes: amber warning. */
+.vc-exam-timer--warning {
+  background: #fef3c7;
+  color: #92400e;
+  animation: vc-exam-pulse 1.2s ease-in-out infinite;
+}
+
+/* Time up: red. */
+.vc-exam-timer--expired {
+  background: #fee2e2;
+  color: #dc2626;
+  animation: none;
+}
+
+@keyframes vc-exam-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+/* ── Exam question card ───────────────────────────────────────────────────── */
+
+.vc-exam-card {
+  /* inherits .vc-flashcards-card base styles */
+}
+
+/* Next button inside exam card. */
+.vc-exam-card .vc-flashcards-session-next {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+}
+
+/* ── Summary Modal ────────────────────────────────────────────────────────── */
+
+/* Full-screen overlay */
+.vc-exam-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.vc-exam-modal[hidden] {
+  display: none !important;
+}
+
+/* Semi-transparent backdrop */
+.vc-exam-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+/* Scrollable dialog container */
+.vc-exam-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Close button in top-right corner */
+.vc-exam-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.vc-exam-modal-close:hover {
+  background: #f1f5f9;
+}
+
+/* Prevent page scroll when modal is open */
+body.vc-exam-modal-open {
+  overflow: hidden;
+}
+
+/* Center summary content inside the modal */
+.vc-exam-modal-dialog .vc-flashcards-summary-top {
+  justify-content: center;
+}
+
+.vc-exam-modal-dialog .vc-flashcards-summary-actions {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.vc-exam-modal-dialog .vc-flashcards-summary-message {
+  text-align: center;
+}
+
+/* ── Summary / Results ────────────────────────────────────────────────────── */
+
+/* Result badge: circle with checkmark or X. */
+.vc-exam-result-badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #e2e8f0; /* default neutral */
+  transition: background 0.3s ease;
+}
+
+.vc-exam-result-badge--passed {
+  background: linear-gradient(135deg, #00a63e 0%, #0ea44b 100%);
+}
+
+.vc-exam-result-badge--failed {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+}
+
+/* Accuracy bar: green when passed, red when failed – toggled by JS. */
+.vc-exam-summary-box .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1447e6;
+  transition: width 0.6s ease;
+}
+
+.vc-exam-summary-box.is-passed .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
+  background: #00a63e;
+}
+
+.vc-exam-summary-box.is-failed .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
+  background: #dc2626;
+}
+
+/* Result meta row (required score + time used). */
+.vc-exam-result-meta {
+  margin: 12px 0 4px;
+  font-size: 14px;
+  color: #666666;
+  text-align: center;
+}
+
+.vc-exam-result-meta strong {
+  color: #212121;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 680px) {
+  .vc-exam-session-header {
+    flex-wrap: wrap;
+  }
+
+  .vc-exam-timer {
+    font-size: 16px;
+    padding: 4px 10px;
+  }
+}
