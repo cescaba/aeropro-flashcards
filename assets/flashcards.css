@@ -927,6 +927,36 @@
   color: #3f3dc7;
 }
 
+/* Una vez respondida la tarjeta, las opciones restantes no deben reaccionar al cursor. */
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):hover,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus-visible,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):hover,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus-visible,
+.vc-flashcards-card .vc-flashcards-answer:disabled:hover,
+.vc-flashcards-card .vc-flashcards-answer:disabled:focus,
+.vc-flashcards-card .vc-flashcards-answer:disabled:focus-visible {
+  background: #ffffff;
+  color: #1f2430;
+  border-color: #e2e8f0;
+  box-shadow: none;
+  transform: none;
+}
+
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):hover span,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus span,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus-visible span,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):hover span,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus span,
+.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus-visible span,
+.vc-flashcards-card .vc-flashcards-answer:disabled:hover span,
+.vc-flashcards-card .vc-flashcards-answer:disabled:focus span,
+.vc-flashcards-card .vc-flashcards-answer:disabled:focus-visible span {
+  background: #e2e8f0;
+  color: #4A5565;
+}
+
 /* Neutraliza el efecto del enlace de ayuda solo dentro de la tarjeta principal. */
 .vc-flashcards-card .vc-flashcards-reveal:hover {
   transform: none;
