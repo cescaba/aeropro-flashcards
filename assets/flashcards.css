@@ -937,10 +937,12 @@
 .vc-flashcards-card .vc-flashcards-answer:disabled:hover,
 .vc-flashcards-card .vc-flashcards-answer:disabled:focus,
 .vc-flashcards-card .vc-flashcards-answer:disabled:focus-visible {
-  background: #ffffff;
-  color: #1f2430;
-  border-color: #e2e8f0;
+  background: inherit;
+  color: inherit;
+  border-color: inherit;
   box-shadow: none;
+  outline: none;
+  filter: none;
   transform: none;
 }
 
@@ -953,8 +955,8 @@
 .vc-flashcards-card .vc-flashcards-answer:disabled:hover span,
 .vc-flashcards-card .vc-flashcards-answer:disabled:focus span,
 .vc-flashcards-card .vc-flashcards-answer:disabled:focus-visible span {
-  background: #e2e8f0;
-  color: #4A5565;
+  background: inherit;
+  color: inherit;
 }
 
 /* Neutraliza el efecto del enlace de ayuda solo dentro de la tarjeta principal. */
