@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
         </span>
         <div class="vc-flashcards-stat-card-copy">
           <small><?php esc_html_e('Best score', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="correct-streak"><?php echo esc_html($stats['correctStreak']); ?></strong>
+          <strong data-vc-flashcards-stat="best-score"><?php echo esc_html((string) ($stats['bestScore'] ?? 0)); ?>%</strong>
         </div>
       </div>
     </article>
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
         </span>
         <div class="vc-flashcards-stat-card-copy">
           <small><?php esc_html_e('Average', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="study-streak"><?php echo esc_html($stats['studyStreak']); ?>d</strong>
+          <strong data-vc-flashcards-stat="average-score"><?php echo esc_html((string) ($stats['averageScore'] ?? 0)); ?>%</strong>
         </div>
       </div>
     </article>
@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
         </span>
         <div class="vc-flashcards-stat-card-copy">
           <small><?php esc_html_e('Passed attempts', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="coverage"><?php echo esc_html($stats['reviewedCoverage']); ?>%</strong>
+          <strong data-vc-flashcards-stat="passed-attempts"><?php echo esc_html((string) ($stats['passedAttempts'] ?? '0/5')); ?></strong>
         </div>
       </div>
     </article>

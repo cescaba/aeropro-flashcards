@@ -11,6 +11,7 @@ class VC_Flashcards_Plugin {
   const ATTEMPT_TABLE = 'vc_flashcard_attempts';
   const NONCE_ACTION = 'vc_flashcards_nonce';
   const PASSING_SCORE = 70;
+  const EXAM_HISTORY_LIMIT = 5;
   const DEFAULT_TOPIC_ORDER = ['General', 'Airframe', 'Powerplant'];
 
   private static $instance = null;
@@ -48,6 +49,7 @@ class VC_Flashcards_Plugin {
     add_action('wp_ajax_vc_flashcards_complete_session', [$this, 'ajax_complete_session']);
     add_shortcode('vc_exam_simulator', [$this, 'render_exam_shortcode']);
     add_action('wp_ajax_vc_flashcards_start_exam', [$this, 'ajax_start_exam']);
+    add_action('wp_ajax_vc_flashcards_get_exam_history', [$this, 'ajax_get_exam_history']);
   }
 
   public static function register_content_types(): void {
@@ -1171,8 +1173,9 @@ class VC_Flashcards_Plugin {
   private function get_user_stats(int $user_id): array {
     global $wpdb;
 
-    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    // Tabla de sesiones: desde aqui salen los porcentajes finales de cada practica completada.
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
 
     $attempt_summary = $wpdb->get_row($wpdb->prepare(
       "SELECT
@@ -1187,12 +1190,54 @@ class VC_Flashcards_Plugin {
     $total_flashcards = $published_flashcards instanceof stdClass ? (int) $published_flashcards->publish : 0;
     $reviewed_coverage = $total_flashcards > 0 ? (int) round(($unique_cards_reviewed / $total_flashcards) * 100) : 0;
 
+    // Resume solo sesiones normales de flashcards.
+    // Aqui se calcula el mejor porcentaje historico y el promedio, excluyendo modo exam.
+    $flashcards_summary = $wpdb->get_row($wpdb->prepare(
+      "SELECT
+        MAX(score_percent) AS best_score,
+        AVG(score_percent) AS average_score
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND completed_at IS NOT NULL
+        AND mode <> %s",
+      $user_id,
+      'exam'
+    ), ARRAY_A);
+    $best_score = isset($flashcards_summary['best_score']) ? (int) round((float) $flashcards_summary['best_score']) : 0;
+    $average_score = isset($flashcards_summary['average_score']) ? (int) round((float) $flashcards_summary['average_score']) : 0;
+
+    // Toma los ultimos intentos de flashcards para contar cuantos pasaron el umbral minimo.
+    // El formato final se devuelve como x/5 para las cards resumen de la home.
+    $recent_flashcards_scores = $wpdb->get_col($wpdb->prepare(
+      "SELECT score_percent
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND completed_at IS NOT NULL
+        AND mode <> %s
+      ORDER BY completed_at DESC, id DESC
+      LIMIT %d",
+      $user_id,
+      'exam',
+      self::EXAM_HISTORY_LIMIT
+    ));
+    $passed_attempts = 0;
+    foreach ($recent_flashcards_scores as $score_value) {
+      if ((float) $score_value >= self::PASSING_SCORE) {
+        $passed_attempts++;
+      }
+    }
+
+    // Devuelve todas las metricas que usa la home de flashcards:
+    // racha, cobertura revisada, mejor score, promedio y aprobados recientes.
     return [
       'correctStreak' => $this->get_current_correct_streak($user_id),
       'studyStreak' => $this->get_study_streak($user_id),
       'reviewedCoverage' => $reviewed_coverage,
       'reviewedCards' => $unique_cards_reviewed,
       'totalFlashcards' => $total_flashcards,
+      'bestScore' => $best_score,
+      'averageScore' => $average_score,
+      'passedAttempts' => $passed_attempts . '/' . self::EXAM_HISTORY_LIMIT,
     ];
   }
 
@@ -1319,6 +1364,11 @@ class VC_Flashcards_Plugin {
       return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the exam simulator.', 'vc-flashcards') . '</div>';
     }
 
+    $user_id = get_current_user_id();
+    // Separamos stats normales de flashcards y stats propias del home del examen.
+    $stats = $this->get_user_stats($user_id);
+    $exam_home_stats = $this->get_exam_home_stats($user_id);
+
     wp_enqueue_style(
       'vc-flashcards-style',
       VC_FLASHCARDS_URL . 'assets/flashcards.css',
@@ -1373,10 +1423,59 @@ class VC_Flashcards_Plugin {
     ]);
 
     $exam_categories = $this->get_exam_categories();
+    $exam_history = $this->get_exam_history($user_id, self::EXAM_HISTORY_LIMIT);
+    $exam_history_subtitle = $this->get_exam_history_subtitle(count($exam_history));
 
     ob_start();
     include VC_FLASHCARDS_DIR . 'templates/shortcode-exam.php';
     return (string) ob_get_clean();
+  }
+
+  private function get_exam_home_stats(int $user_id): array {
+    global $wpdb;
+
+    // Tabla de sesiones: aqui filtramos solo las sesiones completadas del simulador de examen.
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
+    // Resume el rendimiento historico del usuario solo en modo exam.
+    // Calcula mejor score y promedio para los badges superiores del home del examen.
+    $exam_scores = $wpdb->get_row($wpdb->prepare(
+      "SELECT
+        MAX(score_percent) AS best_score,
+        AVG(score_percent) AS average_score
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND mode = %s
+        AND completed_at IS NOT NULL",
+      $user_id,
+      'exam'
+    ), ARRAY_A);
+    // Recupera los ultimos intentos de examen para contar cuantos aprobaron.
+    // El resultado se presenta como x/5 en el badge "Passed attempts".
+    $recent_exam_scores = $wpdb->get_col($wpdb->prepare(
+      "SELECT score_percent
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND mode = %s
+        AND completed_at IS NOT NULL
+      ORDER BY completed_at DESC, id DESC
+      LIMIT %d",
+      $user_id,
+      'exam',
+      self::EXAM_HISTORY_LIMIT
+    ));
+    $passed_attempts = 0;
+    foreach ($recent_exam_scores as $score_value) {
+      if ((float) $score_value >= self::PASSING_SCORE) {
+        $passed_attempts++;
+      }
+    }
+
+    // Devuelve un set pequeno de metricas pensado solo para la home del mock test.
+    return [
+      'bestScore' => isset($exam_scores['best_score']) ? (int) round((float) $exam_scores['best_score']) : 0,
+      'averageScore' => isset($exam_scores['average_score']) ? (int) round((float) $exam_scores['average_score']) : 0,
+      'passedAttempts' => $passed_attempts . '/' . self::EXAM_HISTORY_LIMIT,
+    ];
   }
 
   public function ajax_start_exam(): void {
@@ -1418,6 +1517,22 @@ class VC_Flashcards_Plugin {
       'sessionId'      => (int) $wpdb->insert_id,
       'cards'          => $cards,
       'totalQuestions' => count($cards),
+    ]);
+  }
+
+  public function ajax_get_exam_history(): void {
+    check_ajax_referer(self::NONCE_ACTION, 'nonce');
+
+    if (!is_user_logged_in()) {
+      wp_send_json_error(['message' => __('You must be logged in.', 'vc-flashcards')], 403);
+    }
+
+    $user_id = get_current_user_id();
+
+    // Devuelve solo el HTML del historial del examen para refrescar el bloque por AJAX.
+    // Esto evita recargar toda la pagina despues de completar un mock test.
+    wp_send_json_success([
+      'html' => $this->render_exam_history_content($user_id),
     ]);
   }
 
@@ -1562,5 +1677,92 @@ class VC_Flashcards_Plugin {
     }
 
     return $categories;
+  }
+
+  /* Devuelve los intentos completados del examen ya formateados para pintar el historial. */
+  private function get_exam_history(int $user_id, int $limit = self::EXAM_HISTORY_LIMIT): array {
+    global $wpdb;
+
+    // Tabla de sesiones: desde aqui salen fecha, duracion y score de cada intento de examen.
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
+    $limit = max(1, $limit);
+    // Recupera solo examenes completados del usuario, ordenados del mas reciente al mas antiguo.
+    $rows = $wpdb->get_results($wpdb->prepare(
+      "SELECT started_at, completed_at, score_percent
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND mode = %s
+        AND completed_at IS NOT NULL
+      ORDER BY completed_at DESC, id DESC
+      LIMIT %d",
+      $user_id,
+      'exam',
+      $limit
+    ), ARRAY_A);
+
+    if (empty($rows)) {
+      return [];
+    }
+
+    $history = [];
+    foreach ($rows as $row) {
+      $started_at = isset($row['started_at']) ? strtotime((string) $row['started_at']) : false;
+      $completed_at = isset($row['completed_at']) ? strtotime((string) $row['completed_at']) : false;
+      if (!$completed_at) {
+        continue;
+      }
+
+      // Calcula una duracion legible para el historial a partir de started_at y completed_at.
+      $duration_label = '0 min';
+      if ($started_at && $completed_at >= $started_at) {
+        $elapsed_seconds = max(0, $completed_at - $started_at);
+        $elapsed_minutes = max(1, (int) round($elapsed_seconds / 60));
+        $hours = intdiv($elapsed_minutes, 60);
+        $minutes = $elapsed_minutes % 60;
+
+        if ($hours > 0 && $minutes > 0) {
+          $duration_label = sprintf('%dh %02d min', $hours, $minutes);
+        } elseif ($hours > 0) {
+          $duration_label = sprintf('%dh', $hours);
+        } else {
+          $duration_label = sprintf('%d min', $minutes);
+        }
+      }
+
+      $score_value = isset($row['score_percent']) ? (float) $row['score_percent'] : 0.0;
+      $score_percent = (int) round($score_value);
+
+      // Normaliza cada intento en un array listo para la vista:
+      // fecha, duracion, score, estado visual e icono correspondiente.
+      $history[] = [
+        'date' => date_i18n('d M Y', $completed_at),
+        'duration' => $duration_label,
+        'score' => $score_percent . '%',
+        'passed' => $score_percent >= self::PASSING_SCORE,
+        'status_label' => $score_percent >= self::PASSING_SCORE ? __('Passed', 'vc-flashcards') : __('Failed', 'vc-flashcards'),
+        'icon_url' => VC_FLASHCARDS_URL . 'assets/icons/' . ($score_percent >= self::PASSING_SCORE ? 'correctoHist.svg' : 'incorrectoHist.svg'),
+      ];
+    }
+
+    return $history;
+  }
+
+  /* Renderiza el historial del examen para reutilizar el mismo markup en carga inicial y en AJAX. */
+  private function render_exam_history_content(int $user_id): string {
+    $exam_history = $this->get_exam_history($user_id, self::EXAM_HISTORY_LIMIT);
+    $exam_history_subtitle = $this->get_exam_history_subtitle(count($exam_history));
+
+    ob_start();
+    include VC_FLASHCARDS_DIR . 'templates/partials/exam-history-content.php';
+    return (string) ob_get_clean();
+  }
+
+  /* Construye el subtitulo del historial en funcion de cuantos intentos se muestran. */
+  private function get_exam_history_subtitle(int $attempt_count): string {
+    return sprintf(
+      /* translators: %d: number of exam attempts shown in history */
+      __('Your last %d attempts', 'vc-flashcards'),
+      $attempt_count
+    );
   }
 }
