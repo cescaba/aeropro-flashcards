@@ -159,25 +159,37 @@
     // Construye el resumen global del examen a partir del payload final.
     // Devuelve aciertos, errores, no respondidas, porcentaje final, tiempo consumido y el desglose por categoria.
     function buildSummaryResults(attemptPayload, elapsed, expired) {
-      var correct = 0;
-
-      attemptPayload.forEach(function (attempt) {
-        if (attempt.selectedAnswer && attempt.selectedAnswer === attempt.correctAnswer) {
-          correct += 1;
+      var total = attemptPayload.length;
+      // Separa cada intento en tres estados excluyentes:
+      // correcta, incorrecta o no respondida.
+      // Asi evitamos que una pregunta vacia se sume tambien como incorrecta.
+      var counts = attemptPayload.reduce(function (result, attempt) {
+        if (!attempt.selectedAnswer) {
+          result.unanswered += 1;
+          return result;
         }
+
+        if (attempt.selectedAnswer === attempt.correctAnswer) {
+          result.correct += 1;
+          return result;
+        }
+
+        result.incorrect += 1;
+        return result;
+      }, {
+        correct: 0,
+        incorrect: 0,
+        unanswered: 0,
       });
 
-      var total = attemptPayload.length;
-      var unanswered = attemptPayload.reduce(function (count, attempt) {
-        return !attempt.selectedAnswer ? count + 1 : count;
-      }, 0);
-
       return {
-        correct: correct,
-        incorrect: total - correct,
-        unanswered: unanswered,
+        correct: counts.correct,
+        incorrect: counts.incorrect,
+        unanswered: counts.unanswered,
         breakdown: buildTopicBreakdown(attemptPayload),
-        score: total > 0 ? Math.round((correct / total) * 100) : 0,
+        // El porcentaje final del examen se calcula con respuestas correctas
+        // sobre el total de preguntas del mock test.
+        score: total > 0 ? Math.round((counts.correct / total) * 100) : 0,
         elapsed: elapsed,
         expired: expired,
       };
@@ -269,6 +281,44 @@
 
     function clearState() {
       try { sessionStorage.removeItem(storageKey); } catch (e) {}
+    }
+
+    // Vigila la navegacion lateral del dashboard para detectar cuando el usuario
+    // abandona el mock test y entra a otra vista como Flashcards, Profile o Logout.
+    // En ese momento limpiamos el estado persistido del examen para que el summary
+    // no quede "pegado" al volver mas tarde.
+    function bindDashboardExitCleanup() {
+      var navLinks = document.querySelectorAll('.vc-dashboard-nav-link, .vc-dashboard-logout');
+
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          // Leemos el destino real del enlace para comparar la vista actual del dashboard
+          // contra la vista a la que el usuario va a navegar.
+          var href = link.getAttribute('href');
+          if (!href) { return; }
+
+          var targetUrl;
+          try {
+            targetUrl = new URL(href, window.location.href);
+          } catch (e) {
+            return;
+          }
+
+          // "view" identifica el panel activo del dashboard. Si cambia de mock-test
+          // a cualquier otro panel, debemos descartar el estado del examen anterior.
+          var currentView = new URL(window.location.href).searchParams.get('view') || 'flashcards';
+          var targetView = targetUrl.searchParams.get('view') || 'flashcards';
+          var samePath = targetUrl.pathname === window.location.pathname;
+          var leavingMockTestView = !samePath || targetView !== currentView;
+
+          if (leavingMockTestView) {
+            // Borra sessionStorage del examen y tambien la memoria viva del script.
+            // Asi evitamos restaurar por accidente un summary viejo al volver al mock test.
+            clearState();
+            resetExamState();
+          }
+        });
+      });
     }
 
     function restoreState() {
@@ -627,6 +677,8 @@
 
     /* ── Start exam ─────────────────────────────────────────────────────── */
 
+    // Inicia una nueva sesion de examen para la categoria elegida.
+    // Este mismo flujo se reutiliza tanto desde la home como desde "Try again".
     function startExam(topicTermId) {
       lastTopicTermId = topicTermId;
       setFeedback(labels.loading || 'Preparing your exam…', 'info');
@@ -728,8 +780,8 @@
       btn.addEventListener('click', function () {
         clearState();
         if (lastTopicTermId) {
-          showView('home');
-          setFeedback('', '');
+          // Reinicia directamente la misma categoria sin pasar primero por la home.
+          // Asi evitamos el salto visual mientras el servidor prepara la nueva sesion.
           startExam(lastTopicTermId);
         } else {
           showView('home');
@@ -753,6 +805,10 @@
     if (!restoreState()) {
       showView('home');
     }
+
+    // Se registra al final del boot para que el cleanup viva durante toda la pagina
+    // y cubra cualquier salida desde el mock test hacia otra vista del dashboard.
+    bindDashboardExitCleanup();
 
     root.classList.remove('is-booting');
   }
