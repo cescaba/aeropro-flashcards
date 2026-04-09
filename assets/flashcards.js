@@ -42,9 +42,9 @@
     const rangeInput = root.querySelector('[data-vc-flashcards-range]');
     const optionsWrap = root.querySelector('[data-vc-flashcards-options]');
     const confirmButton = root.querySelector('[data-vc-flashcards-confirm]');
-    const statCorrectStreak = root.querySelector('[data-vc-flashcards-stat="correct-streak"]');
-    const statStudyStreak = root.querySelector('[data-vc-flashcards-stat="study-streak"]');
-    const statCoverage = root.querySelector('[data-vc-flashcards-stat="coverage"]');
+    const statBestScore = root.querySelector('[data-vc-flashcards-stat="best-score"]');
+    const statAverageScore = root.querySelector('[data-vc-flashcards-stat="average-score"]');
+    const statPassedAttempts = root.querySelector('[data-vc-flashcards-stat="passed-attempts"]');
 
     let currentCategory = null;
     let pendingConfig = null;
@@ -589,14 +589,14 @@
         return;
       }
 
-      if (statCorrectStreak) {
-        statCorrectStreak.textContent = String(stats.correctStreak);
+      if (statBestScore) {
+        statBestScore.textContent = String(stats.bestScore || 0) + '%';
       }
-      if (statStudyStreak) {
-        statStudyStreak.textContent = String(stats.studyStreak) + 'd';
+      if (statAverageScore) {
+        statAverageScore.textContent = String(stats.averageScore || 0) + '%';
       }
-      if (statCoverage) {
-        statCoverage.textContent = String(stats.reviewedCoverage) + '%';
+      if (statPassedAttempts) {
+        statPassedAttempts.textContent = String(stats.passedAttempts || '0/5');
       }
     }
 

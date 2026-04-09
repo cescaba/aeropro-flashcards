@@ -49,6 +49,7 @@
 /* Distribuye las tarjetas de configuracion en dos columnas. */
 .vc-flashcards-config-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 32px;
 }
 
 /* Separa la grilla principal de categorias del bloque global que vive debajo en home. */
@@ -71,27 +72,28 @@
 
 /* Tarjeta de estadistica con fondo suave para metricas destacadas. */
 .vc-flashcards-stat-card {
-  padding: 18px 20px;
+  padding: 12px 20px;
   background: #e2e8f0;
 }
 
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
 .vc-flashcards-stat-card-content {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 12px;
 }
 
 /* Mantiene el icono a la izquierda con una caja estable y centrada verticalmente. */
 .vc-flashcards-stat-card-icon {
   flex: 0 0 auto;
-  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  border-radius: 5px;
+  opacity: 1;
+  padding: 11px;
+  border-radius: 8px;
   background: #00a63e;
+  box-sizing: border-box;
 }
 
 /* Evita que la imagen del icono se desplace por su comportamiento inline. */
@@ -104,10 +106,8 @@
 /* Bloque tipografico de cada metrica alineado con el icono lateral. */
 .vc-flashcards-stat-card-copy {
   flex: 1 1 auto;
-  min-height: 44px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 /* Color secundario para textos descriptivos y ayudas visuales. */
@@ -131,13 +131,28 @@
   font-size: 14px;
 }
 
+.vc-flashcards-summary-accuracy-title {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.vc-flashcards-stats .vc-flashcards-stat-card-copy small {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+}
+
 /* Valor principal destacado dentro de cada tarjeta de estadistica. */
-.vc-flashcards-stat-card strong {
+[data-vc-flashcards-stat] {
   display: block;
   margin-top: 0;
   color: #0ea44b;
+  font-weight: 400;
   font-size: 30px;
-  line-height: 1.1;
+  line-height: 42px;
+  letter-spacing: 0.4px;
 }
 
 /* Estilo base de los encabezados principales del modulo. */
@@ -151,9 +166,12 @@
   color: #212121;
 }
 
-.vc-flashcards-detail-header h2 {
+.vc-flashcards-detail-header [data-vc-flashcards-category-title] {
+  font-weight: 400;
   font-size: 16px;
-  line-height: 1.1;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+  color: #212121;
 }
 
 /* Unifica el tamano de los encabezados secundarios usados en cards y subtopics. */
@@ -162,38 +180,67 @@
   font-size: 16px;
 }
 
-.vc-flashcards-config-copy .vc-flashcards-card-cardtitle {
+.vc-flashcards-subtopics-header h3 {
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
   margin: 0 0 4px;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
 }
 
 
-.vc-flashcards-config-copy .vc-flashcards-card-cardsubtitle {
+.vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
   margin: 0;
+  font-weight: 400;
   font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #666666;
 }
 
 
-/* Titulo principal de la pregunta con tamano propio dentro de la card. */
-.vc-flashcards-card h4[data-vc-flashcards-question] {
-  font-size: 22px;
+/* Titulo principal compartido de la pregunta dentro de la card. */
+.vc-flashcards-card [data-vc-flashcards-question],
+.vc-flashcards-card [data-vc-exam-question] {
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 130%;
+  color: #212121;
 }
 
 /* Titulo principal del modal con tipografia aislada del theme. */
 #vc-flashcards-modal-title {
-  margin: 0 0 12px;
+  margin: 0;
+  font-weight: 400;
   font-size: 30px;
+  line-height: 120%;
   color: #000000;
 }
 
 /* Texto descriptivo del modal con color propio y sin herencia global. */
 .vc-flashcards-modal-copy {
   color: #666666;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 /* Texto secundario que muestra el total de flashcards bajo el titulo de la categoria. */
 .vc-flashcards-category-total {
   margin: 0;
+  font-weight: 400;
   font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #666666;
 }
 
 /* Layout del encabezado de la vista de detalle de categoria. */
@@ -202,6 +249,22 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.vc-flashcards-detail-header .vc-flashcards-back {
+  gap: 8px;
+  opacity: 0.8;
+  padding: 7px 11px;
+  border-radius: 6px;
+  border: 1px solid #314158;
+}
+
+.vc-flashcards-detail-header .vc-flashcards-back span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #0F172A;
 }
 
 /* Tarjeta global de practica aleatoria en el home de flashcards. */
@@ -241,7 +304,10 @@
   align-items: center;
   justify-content: center;
   width: 55px;
-  border-radius: 5px;
+  padding: 14px;
+  box-sizing: border-box;
+  opacity: 1;
+  border-radius: 12px;
   background: #1447E6;
 }
 
@@ -252,12 +318,26 @@
   height: 28px;
 }
 
-.vc-flashcards-global-random h3 {
-  margin: 0px;
+.vc-flashcards-global-random-copy {
+  display: grid;
+  gap: 6px;
 }
-.vc-flashcards-global-random p {
-  font-size: 14px;
+
+.vc-flashcards-global-random-copy h3 {
   margin: 0;
+  color: #212121;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -0.3px;
+}
+
+.vc-flashcards-global-random-copy p {
+  margin: 0;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -0.15px;
   color: #666666;
 }
 
@@ -267,19 +347,25 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  opacity: 1;
   background: #ffffff;
   color: #1447E6;
-  border: 2px solid #1447E6;
+  border: 1px solid #1447E6;
   padding: 8px 13px;
+  border-radius: 6px;
   box-sizing: border-box;
   font-size: 16px;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 .vc-flashcards-start.vc-flashcards-global-random-start > span {
   display: block;
-  font-size: inherit;
-  line-height: 1;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -0.3px;
+  color: #1447E6;
 }
 
 
@@ -480,10 +566,13 @@
 .vc-flashcards-category-card,
 .vc-flashcards-config-card,
 .vc-flashcards-subtopics-card,
-.vc-flashcards-card,
 .vc-flashcards-summary-box,
 .vc-flashcards-empty {
-  padding: 24px;
+  padding: 24px 24px 29px;
+}
+
+.vc-flashcards-card {
+  padding: 32px;
 }
 
 /* Contenedor neutro para el listado de subtemas sin apariencia de tarjeta. */
@@ -513,7 +602,7 @@
 
 /* Encabezado de la seccion de subtemas con espaciado superior propio. */
 .vc-flashcards-subtopics-header {
-  margin-top: 32px;
+  margin-top: 0;
   margin-bottom: 16px;
 }
 
@@ -625,9 +714,10 @@
   display: inline-flex;
   align-items: center;
   color: #666666;
+  font-weight: 400;
   font-size: 14px;
-  line-height: 1;
-  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 /* Barra visual del avance de preguntas dentro de la sesion. */
@@ -696,7 +786,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
-  padding: 18px 44px 18px 20px;
+  padding: 16px 44px 23px 16px;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   background: #f8fbff;
@@ -749,7 +839,7 @@
 /* Bloque de texto interno de cada subtema. */
 .vc-flashcards-subtopic-copy {
   display: grid;
-  gap: 4px;
+  gap: 8px;
 }
 
 /* Alinea el titulo del subtema y su badge de estado en una misma fila. */
@@ -850,16 +940,29 @@
 }
 
 .vc-flashcards-session-topic {
-  padding: 9px 24px;
+  gap: 4px;
+  opacity: 1;
+  padding: 8px 16px;
+  border: 0.56px solid #e5e7eb;
   background: #e5e7eb;
   color: #364153;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 .vc-flashcards-session-subtopic {
+  gap: 4px;
+  opacity: 1;
   padding: 8px 16px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #4a5565;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 /* Separacion superior del listado de respuestas. */
@@ -890,13 +993,20 @@
   justify-content: center;
   border-radius: 5px;
   background: #dfe7f7;
-  color: #2b50da;
-  font-weight: 700;
+  color: #666666;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
 }
 
 /* Texto principal de la opcion de respuesta. */
 .vc-flashcards-answer strong {
-  font-weight: 500;
+  color: #666666;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
 }
 
 /* Limita estos ajustes visuales solo a las respuestas renderizadas dentro de la tarjeta principal. */
@@ -1160,8 +1270,10 @@
   background: transparent;
   color: #666666;
   cursor: pointer;
+  font-weight: 400;
   font-size: 14px;
   line-height: 20px;
+  letter-spacing: -0.15px;
   text-decoration: underline;
   text-underline-offset: 3px;
   appearance: none;
@@ -1193,11 +1305,13 @@
 /* Caja principal del resumen. */
 .vc-flashcards-summary-box {
   position: relative;
-  width: min(100%, 460px);
+  display: grid;
+  width: min(100%, 425px);
   margin: 0;
-  padding: 28px 24px 24px;
-  border: 1px solid #dbe4f0;
-  border-radius: 18px;
+  opacity: 1;
+  padding: 30px;
+  border: 0.56px solid #dbe4f0;
+  border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
@@ -1303,9 +1417,20 @@
 .vc-flashcards-summary-count {
   display: block;
   margin-bottom: 6px;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
   font-size: 30px;
-  line-height: 1;
+  line-height: 36px;
+  letter-spacing: 0.4px;
   text-align: center;
+}
+
+[data-vc-flashcards-summary-precision] {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: 0.4px;
 }
 
 /* Color de respuestas correctas. */
@@ -1321,8 +1446,11 @@
 /* Etiqueta de cada resultado. */
 .vc-flashcards-summary-result-card h3 {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.2;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
   text-align: center;
 }
 
@@ -1398,7 +1526,6 @@
   align-items: stretch;
   justify-content: center;
   gap: 8px;
-  margin-top: 18px;
 }
 
 /* Centrado del contenido de acciones. */
@@ -1423,6 +1550,11 @@
   background: #1E3C80;
   color: #ffffff;
   border: 1px solid #1E3C80;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
   text-decoration: none;
 }
 
@@ -1438,6 +1570,11 @@
   background: #ffffff;
   color: #1E3C80;
   border: 1px solid #1E3C80;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
   text-decoration: none;
 }
 
@@ -1467,6 +1604,10 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
 /* Fondo oscurecido del modal. */
@@ -1479,9 +1620,9 @@
 /* Caja principal del modal de configuracion. */
 .vc-flashcards-modal-dialog {
   position: relative;
-  width: min(100%, 560px);
-  margin: 64px auto 24px;
-  padding: 28px;
+  width: min(100%, 445px);
+  margin: 0;
+  padding: 24px;
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
@@ -1564,9 +1705,18 @@
 /* Tipografia auxiliar de los textos del rango. */
 .vc-flashcards-modal-range-meta span,
 .vc-flashcards-modal-range-meta strong {
-  font-size: 14px;        
+  font-size: 14px;
   font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.15px;
   color: #666666;
+}
+
+[data-vc-flashcards-range-label] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 /* Slider de cantidad con ancho completo. */
@@ -1625,8 +1775,8 @@
 /* Grid de cantidades rapidas dentro del modal. */
 .vc-flashcards-modal-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
   margin-top: 16px;
 }
 

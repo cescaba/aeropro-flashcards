@@ -1,79 +1,205 @@
-/* ─── Exam Simulator ─────────────────────────────────────────────────────── */
+/* ===== Simulador de examen ===== */
 
-/* Root container mirrors .vc-flashcards-app layout. */
+/* ===== Simulador de examen: estructura general ===== */
+/* Contenedor raiz del examen; replica el layout base de flashcards. */
 .vc-exam-app {
   display: grid;
   gap: 24px;
   color: #212121;
   font-family: Poppins, sans-serif;
+  position: relative;
+  min-height: 100%;
 }
 
-/* Each view is hidden by default; JS toggles the hidden attribute. */
-.vc-exam-view {
-  display: block;
+/* Estado oculto temporal mientras JS inicializa la UI del examen. */
+.vc-exam-app.is-booting {
+  visibility: hidden;
 }
 
-.vc-exam-view[hidden] {
+/* Cada vista del examen cuelga directo del root; JS alterna el atributo hidden. */
+.vc-exam-app > [data-vc-exam-view] {
+  display: grid;
+}
+
+.vc-exam-app > [data-vc-exam-view][hidden] {
   display: none !important;
 }
 
-/* ── Intro header ─────────────────────────────────────────────────────────── */
+/* ===== Home del examen: bloque superior ===== */
 
+/* ===== Home del examen: encabezado, badges y cards ===== */
+/* Bloque superior de la home del examen, encima de badges y cards. */
 .vc-exam-intro {
   display: grid;
-  gap: 8px;
+  margin-bottom: 24px;
 }
 
-.vc-exam-intro h2 {
+/* Grilla que organiza los 4 badges de resumen en la home del examen. */
+.vc-exam-intro-badges {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
   margin: 0;
-  font-size: 22px;
-  color: #212121;
+  padding: 0;
+  list-style: none;
 }
 
-.vc-exam-intro > p {
-  margin: 0;
-  font-size: 15px;
+/* Espacio debajo de la grilla de categorias antes de historial y detalles. */
+.vc-exam-app .vc-flashcards-category-grid {
+  margin-bottom: 24px;
+}
+
+/* Tipografia compartida para textos secundarios pequenos del examen. */
+.vc-exam-badge-copy small,
+.vc-exam-history-header p,
+.vc-exam-history-item-copy-text span,
+.vc-exam-history-item-score-copy small,
+.vc-exam-progress-label,
+.vc-exam-session-header [data-vc-exam-progress],
+.vc-exam-summary-dialog .vc-exam-result-requirement,
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3,
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Color compartido para textos secundarios neutrales del examen. */
+.vc-exam-badge-copy small,
+.vc-exam-history-header p,
+.vc-exam-history-item-copy-text span,
+.vc-exam-history-item-score-copy small,
+.vc-exam-session-header [data-vc-exam-progress],
+.vc-exam-summary-dialog .vc-exam-result-requirement,
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
   color: #666666;
 }
 
-.vc-exam-intro-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+/* Tipografia compartida para textos base de contenido del examen. */
+.vc-exam-history-item-copy-text strong,
+.vc-exam-summary-dialog .vc-exam-summary-description,
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy strong {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
 }
 
-.vc-exam-badge {
+/* Tipografia compartida para titulos de seccion del examen. */
+.vc-exam-history-header h2,
+.vc-exam-summary-dialog .vc-exam-summary-eyebrow,
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-title {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/* Wrappers centrados que usan inline-flex para alinear contenido en ambos ejes. */
+.vc-exam-badge-icon,
+.vc-exam-history-item-icon,
+.vc-exam-timer-icon {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
-  background: #f0f9ff;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  justify-content: center;
 }
 
-.vc-exam-badge svg {
+/* Wrappers base apilados con grid. */
+.vc-exam-history-item-copy,
+.vc-exam-history-item-score-copy,
+.vc-exam-history-item-copy-text,
+.vc-exam-history-test-details-list,
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-list,
+.vc-exam-summary-dialog .vc-exam-summary-intro {
+  display: grid;
+}
+
+/* Caja externa de cada badge superior del examen. */
+.vc-exam-badge {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  opacity: 1;
+  padding: 12px 20px;
+  background: #F1F5F9;
+}
+
+/* Layout horizontal que alinea icono + texto dentro de cada badge. */
+.vc-exam-badge-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Caja verde del icono usada en cada badge superior. */
+.vc-exam-badge-icon {
   flex: 0 0 auto;
+  padding: 11px;
+  border-radius: 5px;
+  background: #00a63e;
+  color: #ffffff;
+  box-sizing: border-box;
 }
 
-/* ── Category card (exam variant) ────────────────────────────────────────── */
+/* Tamano del SVG cuando el badge usa icono inline. */
+.vc-exam-badge-icon svg {
+  flex: 0 0 auto;
+  display: block;
+  width: 28px;
+  height: 28px;
+}
 
-/* Removes the progress bar from category cards used in the exam home. */
+/* Tamano del icono cuando el badge usa imagen. */
+.vc-exam-badge-icon img {
+  flex: 0 0 auto;
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+/* Columna de texto dentro de cada badge superior. */
+.vc-exam-badge-copy {
+  flex: 1 1 auto;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Texto secundario del badge, como "Best score" o "Average". */
+.vc-exam-badge-copy small {
+  display: block;
+}
+
+/* Valor principal del badge, como "81%" o "0/5". */
+.vc-exam-badge-copy strong {
+  font-weight: 400;
+  display: block;
+  margin-top: 0;
+  color: #0ea44b;
+  font-size: 30px;
+  line-height: 42px;
+}
+
+/* ===== Home del examen: cards de categoria ===== */
+
+/* ===== Home del examen: variante visual de las categorias ===== */
+/* Oculta la barra de progreso normal en las cards de categoria del examen. */
 .vc-exam-category-card .vc-flashcards-topic-bar,
 .vc-exam-category-card .vc-flashcards-category-progress {
   display: none;
 }
 
+/* Fila de metadata que muestra subtopics/cards por categoria. */
 .vc-exam-category-meta {
   margin: 10px 0 6px;
   font-size: 14px;
   color: #666666;
 }
 
+/* Resetea margenes del parrafo dentro de la metadata de categoria. */
+.vc-exam-category-meta p {
+  margin: 0;
+}
+
+/* Pill verde que aparece debajo de cada card de categoria. */
 .vc-exam-category-pill {
   display: inline-flex;
   align-items: center;
@@ -87,48 +213,242 @@
   margin-bottom: 14px;
 }
 
+/* Evita que el icono del pill se estire. */
 .vc-exam-category-pill svg {
   flex: 0 0 auto;
 }
 
-/* Exam "Start" button uses its own green accent. */
+/* Variante del boton Start propia del examen. */
 .vc-exam-start-btn {
   background: #1447e6 !important;
 }
 
-/* ── Session header ───────────────────────────────────────────────────────── */
+/* Bloque de historial del examen debajo de la grilla de categorias. */
+/* Layout de dos columnas: historial a la izquierda y detalles a la derecha. */
+.vc-exam-history {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  align-items: start;
+  gap: 24px;
+}
 
+/* Card blanca que envuelve la lista del historial de examenes. */
+.vc-exam-history-content {
+  padding: 25px;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+/* Espaciado compartido entre historial y test details. */
+.vc-exam-history-content,
+.vc-exam-history-test-details {
+  display: grid;
+  gap: 16px;
+}
+
+/* Card lateral derecha con los detalles del test. */
+.vc-exam-history-test-details {
+  gap: 14px;
+  padding: 12px 24px 17px;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  background: #F1F5F9;
+}
+
+/* Estilo del titulo del bloque de historial. */
+.vc-exam-history-header h2 {
+  margin: 0;
+  letter-spacing: -0.31px;
+  color: #212121;
+}
+
+/* Estilo del subtitulo del historial. */
+.vc-exam-history-header p {
+  margin: 0;
+}
+
+/* Lista apilada de intentos del historial. */
+.vc-exam-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+/* Fila individual de un intento en el historial. */
+.vc-exam-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  opacity: 1;
+  padding: 11px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+/* Lado izquierdo de la fila: icono de estado + fecha/duracion. */
+.vc-exam-history-item-copy {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Caja del icono de aprobado/reprobado en el historial. */
+.vc-exam-history-item-icon {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 0;
+}
+
+/* Fija el tamano del icono de aprobado/reprobado. */
+.vc-exam-history-item-icon img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* Texto principal, como la fecha del intento. */
+.vc-exam-history-item-copy-text strong {
+  color: #212121;
+  letter-spacing: -0.15px;
+}
+
+/* Porcentaje grande mostrado a la derecha de cada fila. */
+.vc-exam-history-item-score-copy strong {
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 42px;
+  letter-spacing: 0.4px;
+}
+
+/* Layout del lado derecho que alinea porcentaje e icono de tendencia. */
+.vc-exam-history-item-score {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+/* Alineacion del texto a la derecha dentro de la columna de score. */
+.vc-exam-history-item-score-copy {
+  justify-items: end;
+}
+
+/* Icono pequeno del extremo derecho de cada fila del historial. */
+.vc-exam-history-item-score-icon {
+  flex: 0 0 auto;
+  display: block;
+  align-self: flex-start;
+  padding: 20px 0;
+}
+
+/* Tamano explicito para la imagen del icono de tendencia. */
+.vc-exam-history-item-score-icon img {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+/* Colores del porcentaje cuando el intento fue aprobado. */
+.vc-exam-history-item.is-passed .vc-exam-history-item-score-copy strong {
+  color: #0ea44b;
+}
+
+/* Fondo de la caja izquierda cuando el intento fue aprobado. */
+.vc-exam-history-item.is-passed .vc-exam-history-item-icon {
+  background: #00A63E1A;
+}
+
+/* Colores del porcentaje cuando el intento fue reprobado. */
+.vc-exam-history-item.is-failed .vc-exam-history-item-score-copy strong {
+  color: #dc2626;
+}
+
+/* Fondo de la caja izquierda cuando el intento fue reprobado. */
+.vc-exam-history-item.is-failed .vc-exam-history-item-icon {
+  background: #E2101B1A;
+}
+
+/* Titulo del bloque lateral de test details. */
+.vc-exam-history-test-details h3 {
+  margin: 0;
+  font-weight: 500;
+  color: #1E3C80;
+  font-size: 20px;
+  line-height: 33.6px;
+  letter-spacing: 0.07px;
+}
+
+/* Lista que contiene los bullets de detalles del examen. */
+.vc-exam-history-test-details-list {
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Item individual dentro de la lista de detalles. */
+.vc-exam-history-test-details-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  font-weight: 400;
+  gap: 8px;
+  color: #1E3C80;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Icono pequeno que acompana cada item de test details. */
+.vc-exam-history-test-details-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+/* ===== Sesion en curso: cabecera ===== */
+
+/* ===== Sesion en curso: header y cronometro ===== */
+/* Barra superior de la sesion en vivo: progreso a un lado y acciones al otro. */
 .vc-exam-session-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 0;
+  margin-bottom: 6px;
 }
 
-.vc-exam-abandon-btn {
+/* Tipografia compartida para el label de progreso y el contador respondido. */
+.vc-exam-progress-label,
+.vc-exam-session-header [data-vc-exam-progress] {
+  margin: 0;
+}
+
+/* Ajuste fino solo para el contador de respuestas del header. */
+.vc-exam-session-header [data-vc-exam-progress] {
   flex: 0 0 auto;
+  margin-left: 0;
 }
 
-.vc-exam-session-progress {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-}
+/* ===== Sesion en curso: cronometro ===== */
 
-.vc-exam-session-progress strong {
-  color: #666666;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* ── Countdown timer ─────────────────────────────────────────────────────── */
-
+/* ===== Sesion en curso: comportamiento del cronometro ===== */
+/* Pill del cronometro mostrado en el header de la sesion. */
 .vc-exam-timer {
   flex: 0 0 auto;
-  font-size: 18px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.5px;
   padding: 5px 14px;
   border-radius: 8px;
   background: #e2e8f0;
@@ -137,18 +457,59 @@
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Under 5 minutes: amber warning. */
+/* Wrapper del icono del cronometro. */
+.vc-exam-timer-icon {
+  flex: 0 0 auto;
+}
+
+/* Evita comportamientos inline no deseados en el SVG del cronometro. */
+.vc-exam-timer-icon svg {
+  display: block;
+}
+
+/* Cuando faltan menos de 5 minutos: estado de advertencia. */
 .vc-exam-timer--warning {
   background: #fef3c7;
   color: #92400e;
   animation: vc-exam-pulse 1.2s ease-in-out infinite;
 }
 
-/* Time up: red. */
+/* Cuando el tiempo termina: estado expirado en rojo. */
 .vc-exam-timer--expired {
   background: #fee2e2;
   color: #dc2626;
   animation: none;
+}
+
+/* Boton Finish exam que aparece junto al cronometro. */
+.vc-exam-finish-btn {
+  opacity: 1;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border-width: 1.67px;
+  border-color: #1E3C80;
+  box-sizing: border-box;
+}
+
+/* Estilo del texto dentro del boton Finish exam. */
+.vc-exam-finish-btn span {
+  color: #1E3C80;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+/* Espacio extra debajo de los pills de topic/subtopic en la card del examen. */
+.vc-exam-card .vc-flashcards-session-context {
+  margin: 0 0 30px;
+}
+
+/* Espaciado del wrapper de la barra de progreso dentro de la card del examen. */
+.vc-exam-app .vc-flashcards-session-bar {
+  margin-top: 0;
+  margin-bottom: 35px;
 }
 
 @keyframes vc-exam-pulse {
@@ -156,164 +517,462 @@
   50%       { opacity: 0.65; }
 }
 
-/* ── Exam question card ───────────────────────────────────────────────────── */
+/* ===== Sesion en curso: pregunta y acciones ===== */
 
-.vc-exam-card {
-  /* inherits .vc-flashcards-card base styles */
-}
 
-/* Next button inside exam card. */
-.vc-exam-card .vc-flashcards-session-next {
+
+/* ===== Sesion en curso: card de pregunta y respuestas ===== */
+/* Fila de botones de navegacion dentro de la card del examen. */
+.vc-exam-card .vc-exam-session-actions {
+  display: flex;
+  gap: 12px;
   margin-top: 16px;
-  width: 100%;
+}
+
+/* Estilo base compartido por Next y Previous en el footer de la card. */
+.vc-exam-card .vc-flashcards-session-next {
+  flex: 1 1 0;
+  height: 44px;
+  opacity: 1;
+  margin-top: 0;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 6px;
+  padding: 0;
+  border-radius: 6px;
+  background: #1E3C80;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
 }
 
-/* ── Summary Modal ────────────────────────────────────────────────────────── */
-
-/* Full-screen overlay */
-.vc-exam-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.vc-exam-modal[hidden] {
-  display: none !important;
-}
-
-/* Semi-transparent backdrop */
-.vc-exam-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-}
-
-/* Scrollable dialog container */
-.vc-exam-modal-dialog {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 520px;
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
+/* Variante visual del boton Previous: fondo blanco y borde azul. */
+.vc-exam-card .vc-exam-session-prev {
+  flex: 1 1 0;
   background: #ffffff;
-  border-radius: 20px;
-  padding: 32px 28px 28px;
+  color: #1E3C80;
+  border: 1.67px solid #1E3C80;
+}
+
+/* Fuerza flecha y texto azules en el boton Previous. */
+.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon,
+.vc-exam-card .vc-exam-session-prev span {
+  color: #1E3C80;
+}
+
+/* Estado disabled de Previous para la primera pregunta. */
+.vc-exam-card .vc-exam-session-prev:disabled,
+.vc-exam-card .vc-exam-session-prev:disabled:hover,
+.vc-exam-card .vc-exam-session-prev:disabled:focus,
+.vc-exam-card .vc-exam-session-prev:disabled:focus-visible,
+.vc-exam-card .vc-exam-session-prev:disabled:active {
+  background: #ffffff;
+  color: #1E3C80;
+  border: 1.67px solid #1E3C80;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* Mantiene texto e icono de Previous disabled en el mismo azul. */
+.vc-exam-card .vc-exam-session-prev:disabled .vc-flashcards-next-icon,
+.vc-exam-card .vc-exam-session-prev:disabled span {
+  color: #1E3C80;
+}
+
+/* Tipografia compartida de los dos botones del footer de la card. */
+.vc-exam-card .vc-flashcards-session-next span,
+.vc-exam-card .vc-exam-session-prev span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+/* Resetea el helper del next-icon cuando se reutiliza como flecha izquierda. */
+.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon {
+  position: static;
+  width: auto;
+  height: auto;
+  font-size: inherit;
+}
+
+/* Elimina pseudo-elementos decorativos del icon helper reutilizado. */
+.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon::before,
+.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon::after {
+  content: none;
+}
+
+/* Mantiene Next estable, sin hover visual extra. */
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):hover,
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus,
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus-visible,
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):active {
+  background: #1E3C80;
+  color: #ffffff;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Estilo de una respuesta seleccionada dentro de la pregunta del examen. */
+.vc-exam-card .vc-flashcards-answer[data-state="selected"] {
+  border-color: #1E3C80;
+  background: #FFFFFF;
+  box-shadow: none;
+}
+
+/* Bloquea el look de la respuesta seleccionada en hover/focus/disabled. */
+.vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active),
+.vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) {
+  border-color: #1E3C80 !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Estilo del chip de letra/indice cuando la respuesta esta seleccionada. */
+.vc-exam-card .vc-flashcards-answer[data-state="selected"] span {
+  background: #1E3C80;
+  color: #FFFFFF;
+}
+
+/* Mantiene los colores del chip seleccionado en todos los estados. */
+.vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active) span,
+.vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) span {
+  background: #1E3C80 !important;
+  color: #FFFFFF !important;
+}
+
+/* Elimina el marcador decorativo por defecto de la respuesta seleccionada. */
+.vc-exam-card .vc-flashcards-answer[data-state="selected"]::after {
+  display: none;
+}
+
+/* Las respuestas no seleccionadas conservan el estilo neutro en todos los estados. */
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]),
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):is(:hover, :focus, :focus-visible, :active, :disabled),
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):disabled:is(:hover, :focus, :focus-visible) {
+  background: #ffffff !important;
+  color: inherit !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Estilo neutro del chip para respuestas no seleccionadas. */
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]) span,
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):is(:hover, :focus, :focus-visible, :active, :disabled) span,
+.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):disabled:is(:hover, :focus, :focus-visible) span {
+  background: #e2e8f0 !important;
+  color: #4A5565 !important;
+}
+
+/* ===== Resumen final del examen ===== */
+
+/* La vista summary funciona como una vista normal del examen, no como overlay. */
+.vc-exam-app > [data-vc-exam-view="summary"] {
+  min-height: 100%;
+}
+
+/* Wrapper principal con ancho maximo para la pantalla de resumen. */
+.vc-exam-summary-dialog {
+  position: relative;
+  width: min(100%, 896px);
+  margin: 0 auto;
+  opacity: 1;
+  overflow-y: auto;
+  padding: 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Franja superior del resumen; queda transparente a proposito. */
+.vc-exam-summary-dialog .vc-exam-summary-section--intro {
+  background: transparent;
+}
+
+/* Card blanca del resumen que envuelve resultados, desglose y acciones. */
+.vc-exam-summary-dialog .vc-exam-summary-section--content {
+  display: grid;
+  gap: 0;
+  background: #ffffff;
+  padding: 20px 24px 26px;
+  border-radius: 12px;
+  border-width: 1.67px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  text-align: center;
 }
 
-/* Close button in top-right corner */
-.vc-exam-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 0;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+/* Espaciado inferior del bloque superior del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-top {
+  margin-bottom: 26px;
 }
 
-.vc-exam-modal-close:hover {
-  background: #f1f5f9;
+/* Separacion entre las cards superiores del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-results {
+  gap: 12px;
 }
 
-/* Prevent page scroll when modal is open */
-body.vc-exam-modal-open {
-  overflow: hidden;
+/* Texto auxiliar debajo del titulo de aprobado/reprobado. */
+.vc-exam-summary-dialog .vc-exam-result-requirement {
+  margin: 0;
+  letter-spacing: 0;
 }
 
-/* Center summary content inside the modal */
-.vc-exam-modal-dialog .vc-flashcards-summary-top {
-  justify-content: center;
+/* Header del resultado: centra badge, titulo y requirement. */
+.vc-exam-summary-dialog .vc-exam-result-header {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 24px;
 }
 
-.vc-exam-modal-dialog .vc-flashcards-summary-actions {
-  justify-content: center;
+/* Mini-card usada para Correct / Incorrect / Unanswered. */
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0;
+  padding: 12px;
+}
+
+/* Color neutro del valor de Unanswered. */
+.vc-exam-summary-dialog .vc-flashcards-summary-count--unanswered {
+  color: #666666;
+}
+
+/* Numero grande dentro de cada mini-card del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-count {
+  margin: 0;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 53.33px;
+  letter-spacing: 0.37px;
+}
+
+/* Label debajo del numero de cada mini-card del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+/* Variante visual especifica para la card de Unanswered. */
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card--unanswered {
+  border-color: #E2E8F0;
+  background: #F8FAFC;
+}
+
+/* Color del label de la card Unanswered. */
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card--unanswered h3 {
+  color: #666666;
+}
+
+/* Seccion de desglose por categoria dentro del resumen. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown {
   margin-top: 20px;
+  text-align: left;
 }
 
-.vc-exam-modal-dialog .vc-flashcards-summary-message {
+/* Titulo del bloque de desglose por categoria. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-title {
+  margin: 0 0 12px;
+  color: #212121;
+  letter-spacing: -0.31px;
+}
+
+/* Lista apilada de filas del desglose por categoria. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-list {
+  gap: 7px;
+}
+
+/* Fila individual del desglose para General / Airframe / Powerplant. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 10px;
+  border-radius: 10px;
+  background: #F8FAFC;
+}
+
+/* Columna izquierda de texto dentro de cada fila del desglose. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy {
+  display: grid;
+  gap: 2px;
+}
+
+/* Nombre de la categoria dentro de cada fila del desglose. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy strong {
+  color: #212121;
+  letter-spacing: -0.15px;
+}
+
+/* Texto auxiliar como "0 of 78 correct". */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
+  letter-spacing: 0;
+}
+
+/* Porcentaje mostrado a la derecha de cada fila del desglose. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-score {
+  color: #ef4444;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 42px;
+  letter-spacing: 0.4px;
+}
+
+/* Variante de color para porcentajes aprobados. */
+.vc-exam-summary-dialog .vc-exam-summary-breakdown-score.is-passing {
+  color: #00A63E;
+}
+
+/* Fila horizontal de botones al final del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 0;
+}
+
+
+/* Bloque introductorio arriba de la card blanca del resumen. */
+.vc-exam-summary-dialog .vc-exam-summary-intro {
+  margin-bottom: 24px;
+  text-align: center;
+  justify-items: center;
+}
+
+/* Titulo superior pequeno del resumen. */
+.vc-exam-summary-dialog .vc-exam-summary-eyebrow {
+  margin: 0;
+  color: #0F172A;
+  letter-spacing: -0.31px;
+}
+
+/* Texto secundario debajo del eyebrow del resumen. */
+.vc-exam-summary-dialog .vc-exam-summary-description {
+  margin: 0;
+  color: #4A5565;
+  letter-spacing: -0.15px;
+}
+
+/* Coloca restart antes de back en el orden visual. */
+.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
+  order: 1;
+}
+
+/* Coloca back despues de restart en el orden visual. */
+.vc-exam-summary-dialog .vc-flashcards-summary-action--back {
+  order: 2;
+}
+
+/* Tamano y tipografia compartidos por ambos botones del resumen. */
+.vc-exam-summary-dialog .vc-flashcards-summary-action--back,
+.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
+  min-height: 44px;
+  opacity: 1;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border-width: 1.67px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
   text-align: center;
 }
+
 
 /* ── Summary / Results ────────────────────────────────────────────────────── */
 
-/* Result badge: circle with checkmark or X. */
+/* Badge circular del resultado final: check o X. */
 .vc-exam-result-badge {
   width: 80px;
   height: 80px;
+  padding: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
+  margin: 0 auto 40px;
   font-size: 36px;
   font-weight: 700;
   color: #ffffff;
-  background: #e2e8f0; /* default neutral */
+  background: #e2e8f0; /* estado neutro por defecto */
   transition: background 0.3s ease;
+  box-sizing: border-box;
 }
 
+/* Color del badge cuando el resultado es aprobado. */
 .vc-exam-result-badge--passed {
-  background: linear-gradient(135deg, #00a63e 0%, #0ea44b 100%);
+  background: #F0FDF4;
 }
 
+/* Color del badge cuando el resultado es reprobado. */
 .vc-exam-result-badge--failed {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: #FFE2E2;
 }
 
-/* Accuracy bar: green when passed, red when failed – toggled by JS. */
-.vc-exam-summary-box .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: #1447e6;
-  transition: width 0.6s ease;
-}
-
-.vc-exam-summary-box.is-passed .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
-  background: #00a63e;
-}
-
-.vc-exam-summary-box.is-failed .vc-flashcards-summary-accuracy-card [data-vc-exam-score-bar] {
-  background: #dc2626;
-}
-
-/* Result meta row (required score + time used). */
-.vc-exam-result-meta {
-  margin: 12px 0 4px;
-  font-size: 14px;
-  color: #666666;
-  text-align: center;
-}
-
-.vc-exam-result-meta strong {
+/* Titulo principal del resultado, como "Not approved". */
+.vc-exam-summary-dialog .vc-flashcards-summary-kicker {
+  margin-bottom: 12px;
   color: #212121;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* El contenido del resumen cambia por JS segun el resultado del examen. */
+
+/* ===== Ajustes responsive ===== */
 
 @media (max-width: 680px) {
+  /* Reordena los bloques principales para mantener legibilidad en mobile. */
+  /* En pantallas pequenas, apila los badges superiores en una sola columna. */
+  .vc-exam-intro-badges {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* En mobile, historial y test details pasan a una sola columna. */
+  .vc-exam-history {
+    grid-template-columns: 1fr;
+  }
+
+  /* Permite que cada fila del historial se apile en vertical. */
+  .vc-exam-history-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Alinea a la izquierda el bloque de score cuando la fila se apila. */
+  .vc-exam-history-item-score {
+    justify-content: flex-start;
+  }
+
+  /* Alinea a la izquierda el texto del score en mobile. */
+  .vc-exam-history-item-score-copy {
+    justify-items: start;
+  }
+
+  /* Permite que el header de la sesion haga wrap en mobile. */
   .vc-exam-session-header {
     flex-wrap: wrap;
   }
 
+  /* Ajusta un poco el cronometro para mejorar legibilidad en mobile. */
   .vc-exam-timer {
     font-size: 16px;
     padding: 4px 10px;

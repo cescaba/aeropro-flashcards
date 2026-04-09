@@ -24,30 +24,45 @@
 
     var homeView    = root.querySelector('[data-vc-exam-view="home"]');
     var sessionView = root.querySelector('[data-vc-exam-view="session"]');
-    var summaryModal = root.querySelector('[data-vc-exam-modal]');
+    var summaryView = root.querySelector('[data-vc-exam-view="summary"]');
     var feedbackEl  = root.querySelector('[data-vc-exam-feedback]');
+    var sessionHeader = root.querySelector('.vc-exam-session-header');
+    var finishButton = root.querySelector('.vc-exam-finish-btn');
 
     // Session
     var progressEl    = root.querySelector('[data-vc-exam-progress]');
     var timerEl       = root.querySelector('[data-vc-exam-timer]');
+    var timerValueEl  = root.querySelector('[data-vc-exam-timer-value]');
     var barFill       = root.querySelector('[data-vc-exam-bar-fill]');
     var questionEl    = root.querySelector('[data-vc-exam-question]');
     var answersWrap   = root.querySelector('[data-vc-exam-answers]');
+    var prevButton    = root.querySelector('[data-vc-exam-prev]');
     var nextButton    = root.querySelector('[data-vc-exam-next]');
     var nextLabel     = root.querySelector('[data-vc-exam-next-label]');
     var topicLabelEl  = root.querySelector('[data-vc-exam-topic-label]');
     var subtopicLabelEl = root.querySelector('[data-vc-exam-subtopic-label]');
 
-    // Summary modal
+    // Summary view
     var resultBadge   = root.querySelector('[data-vc-exam-result-badge]');
     var resultKicker  = root.querySelector('[data-vc-exam-result-kicker]');
-    var resultMessage = root.querySelector('[data-vc-exam-result-message]');
     var correctCount  = root.querySelector('[data-vc-exam-correct-count]');
     var incorrectCount = root.querySelector('[data-vc-exam-incorrect-count]');
-    var scorePercentEl = root.querySelector('[data-vc-exam-score-percent]');
-    var scoreBar      = root.querySelector('[data-vc-exam-score-bar]');
-    var timeUsedEl    = root.querySelector('[data-vc-exam-time-used]');
-    var summaryBox    = root.querySelector('.vc-exam-modal-dialog');
+    var unansweredCount = root.querySelector('[data-vc-exam-unanswered-count]');
+    var breakdownGeneralMeta = root.querySelector('[data-vc-exam-breakdown-general-meta]');
+    var breakdownGeneralScore = root.querySelector('[data-vc-exam-breakdown-general-score]');
+    var breakdownAirframeMeta = root.querySelector('[data-vc-exam-breakdown-airframe-meta]');
+    var breakdownAirframeScore = root.querySelector('[data-vc-exam-breakdown-airframe-score]');
+    var breakdownPowerplantMeta = root.querySelector('[data-vc-exam-breakdown-powerplant-meta]');
+    var breakdownPowerplantScore = root.querySelector('[data-vc-exam-breakdown-powerplant-score]');
+    var summaryBox    = root.querySelector('.vc-exam-summary-dialog');
+    var historyContent = root.querySelector('.vc-exam-history-content');
+    var dashboardPanel = root.closest('.vc-dashboard-panel--mock-test');
+    var dashboardContent = root.closest('.vc-dashboard-content');
+    var dashboardHeadingMeta = null;
+
+    if (dashboardPanel && dashboardPanel.previousElementSibling && dashboardPanel.previousElementSibling.classList.contains('vc-dashboard-heading')) {
+      dashboardHeadingMeta = dashboardPanel.previousElementSibling.querySelector('.vc-dashboard-heading-session-meta');
+    }
 
     /* ── Mutable state ──────────────────────────────────────────────────── */
 
@@ -61,6 +76,19 @@
     var answerStartedAt    = 0;
     var isSubmitting       = false;
     var lastTopicTermId    = 0;
+
+    // Resetea por completo el estado del examen en memoria.
+    // Se usa cuando cerramos una sesion, limpiamos progreso o partimos de cero.
+    function resetExamState() {
+      sessionId = 0;
+      cards = [];
+      cardIndex = 0;
+      attempts = [];
+      examStartTime = 0;
+      answeredCurrentCard = false;
+      answerStartedAt = 0;
+      isSubmitting = false;
+    }
 
     /* ── Utilities ──────────────────────────────────────────────────────── */
 
@@ -87,11 +115,135 @@
       return Math.floor((Date.now() - examStartTime) / 1000);
     }
 
+    // Convierte el estado local de las preguntas en un payload plano listo para guardar o resumir.
+    // Aqui se empaqueta, por cada tarjeta del examen, la respuesta elegida, la correcta y el tiempo de respuesta.
+    function buildAttemptPayload() {
+      return cards.map(function (card, index) {
+        var attempt = attempts[index] || {};
+
+        return {
+          flashcardId: card.id,
+          topicTermId: card.topicTermId,
+          selectedAnswer: attempt.selectedAnswer || '',
+          correctAnswer: card.correctAnswer,
+          responseTimeMs: Number(attempt.responseTimeMs || 0),
+        };
+      });
+    }
+
+    // Agrupa el resultado del examen por categoria principal para alimentar el desglose del summary.
+    // Calcula cuantas preguntas hubo por tema y cuantas quedaron correctas dentro de ese tema.
+    function buildTopicBreakdown(attemptPayload) {
+      var topics = {
+        General: { total: 0, correct: 0 },
+        Airframe: { total: 0, correct: 0 },
+        Powerplant: { total: 0, correct: 0 },
+      };
+
+      attemptPayload.forEach(function (attempt, index) {
+        var card = cards[index];
+        var topicName = card && card.topicLabel ? card.topicLabel : '';
+
+        if (!topics[topicName]) { return; }
+
+        topics[topicName].total += 1;
+
+        if (attempt.selectedAnswer && attempt.selectedAnswer === attempt.correctAnswer) {
+          topics[topicName].correct += 1;
+        }
+      });
+
+      return topics;
+    }
+
+    // Construye el resumen global del examen a partir del payload final.
+    // Devuelve aciertos, errores, no respondidas, porcentaje final, tiempo consumido y el desglose por categoria.
+    function buildSummaryResults(attemptPayload, elapsed, expired) {
+      var correct = 0;
+
+      attemptPayload.forEach(function (attempt) {
+        if (attempt.selectedAnswer && attempt.selectedAnswer === attempt.correctAnswer) {
+          correct += 1;
+        }
+      });
+
+      var total = attemptPayload.length;
+      var unanswered = attemptPayload.reduce(function (count, attempt) {
+        return !attempt.selectedAnswer ? count + 1 : count;
+      }, 0);
+
+      return {
+        correct: correct,
+        incorrect: total - correct,
+        unanswered: unanswered,
+        breakdown: buildTopicBreakdown(attemptPayload),
+        score: total > 0 ? Math.round((correct / total) * 100) : 0,
+        elapsed: elapsed,
+        expired: expired,
+      };
+    }
+
+    // Mueve cronometro, progreso y boton Finish entre el heading del dashboard y la sesion del examen.
+    // Esto permite que el header superior muestre los controles correctos solo mientras el examen esta en curso.
+    function syncSessionHeading(name) {
+      if (!dashboardHeadingMeta || !sessionHeader || !progressEl || !timerEl || !finishButton) {
+        return;
+      }
+
+      if (name === 'session') {
+        dashboardHeadingMeta.hidden = false;
+        dashboardHeadingMeta.appendChild(timerEl);
+        dashboardHeadingMeta.appendChild(finishButton);
+        sessionHeader.appendChild(progressEl);
+        return;
+      }
+
+      dashboardHeadingMeta.hidden = true;
+      sessionHeader.appendChild(finishButton);
+      sessionHeader.appendChild(progressEl);
+      sessionHeader.appendChild(timerEl);
+    }
+
+    // Vuelve a pedir al servidor el historial de examenes ya completados y reemplaza el HTML del bloque.
+    // Se usa despues de terminar el examen para refrescar la lista sin recargar toda la pagina.
+    function refreshExamHistory() {
+      if (!historyContent || !ajaxUrl || !nonce) { return Promise.resolve(); }
+
+      var body = new URLSearchParams();
+      body.append('action', 'vc_flashcards_get_exam_history');
+      body.append('nonce', nonce);
+
+      return fetch(ajaxUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: body.toString(),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (payload) {
+          if (!payload.success || !payload.data || typeof payload.data.html !== 'string') {
+            throw new Error('history');
+          }
+
+          historyContent.innerHTML = payload.data.html;
+        })
+        .catch(function () {
+          return null;
+        });
+    }
+
+    // Hace scroll al inicio del contenedor real del dashboard.
+    // Se usa al cambiar de vista para que home, session y summary siempre arranquen desde arriba.
+    function scrollDashboardContentToTop() {
+      if (!dashboardContent) { return; }
+      dashboardContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     /* ── State persistence ──────────────────────────────────────────────── */
 
     function persistState() {
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({
+          view:                'session',
           sessionId:           sessionId,
           cards:               cards,
           cardIndex:           cardIndex,
@@ -99,6 +251,18 @@
           examStartTime:       examStartTime,
           answeredCurrentCard: answeredCurrentCard,
           lastTopicTermId:     lastTopicTermId,
+        }));
+      } catch (e) {}
+    }
+
+    // Guarda el resumen final en sessionStorage para poder restaurarlo si la vista se recarga.
+    // Aqui no se guardan las preguntas activas; solo el estado final del summary.
+    function persistSummaryState(results) {
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify({
+          view:            'summary',
+          lastTopicTermId: lastTopicTermId,
+          summaryResults:  results,
         }));
       } catch (e) {}
     }
@@ -113,7 +277,19 @@
         if (!raw) { return false; }
 
         var state = JSON.parse(raw);
-        if (!state || !state.sessionId || !state.cards || !state.cards.length) {
+        if (!state) {
+          return false;
+        }
+
+        // Si la ultima vista guardada fue el resumen, reconstruimos directamente esa pantalla.
+        if (state.view === 'summary' && state.summaryResults) {
+          resetExamState();
+          lastTopicTermId = state.lastTopicTermId || 0;
+          renderSummary(state.summaryResults);
+          return true;
+        }
+
+        if (!state.sessionId || !state.cards || !state.cards.length) {
           return false;
         }
 
@@ -132,6 +308,11 @@
         answeredCurrentCard = !!state.answeredCurrentCard;
         lastTopicTermId     = state.lastTopicTermId || 0;
 
+        // Si hay una vista guardada distinta de session, no intentamos restaurar una sesion activa.
+        if (state.view && state.view !== 'session') {
+          return false;
+        }
+
         renderCard();
         startTimer();
         showView('session');
@@ -143,22 +324,14 @@
     /* ── View management ────────────────────────────────────────────────── */
 
     function showView(name) {
-      homeView.hidden    = (name !== 'home' && name !== 'session');
+      homeView.hidden    = (name !== 'home');
       sessionView.hidden = (name !== 'session');
-    }
-
-    function openSummaryModal() {
-      if (summaryModal) {
-        summaryModal.hidden = false;
-        document.body.classList.add('vc-exam-modal-open');
+      if (summaryView) {
+        summaryView.hidden = (name !== 'summary');
       }
-    }
-
-    function closeSummaryModal() {
-      if (summaryModal) {
-        summaryModal.hidden = true;
-        document.body.classList.remove('vc-exam-modal-open');
-      }
+      // Reubica controles del header y reposiciona el scroll al inicio del panel actual.
+      syncSessionHeading(name);
+      scrollDashboardContentToTop();
     }
 
     function setFeedback(message, type) {
@@ -193,7 +366,13 @@
       var remaining = getRemainingSeconds();
 
       if (timerEl) {
-        timerEl.textContent = formatTime(remaining);
+        // Si existe un nodo interno dedicado al valor del timer, escribimos ahi;
+        // si no, usamos el contenedor completo como fallback.
+        if (timerValueEl) {
+          timerValueEl.textContent = formatTime(remaining);
+        } else {
+          timerEl.textContent = formatTime(remaining);
+        }
         timerEl.classList.toggle('vc-exam-timer--warning', remaining > 0 && remaining <= 300);
         timerEl.classList.toggle('vc-exam-timer--expired', remaining === 0);
       }
@@ -208,31 +387,40 @@
 
     function renderCard() {
       var card = cards[cardIndex];
+      // Recupera la respuesta ya guardada de la pregunta actual, si existe.
+      var currentAttempt = attempts[cardIndex] || null;
 
       if (!card) {
         finishExam(false);
         return;
       }
 
-      answeredCurrentCard = false;
+      answeredCurrentCard = !!(currentAttempt && currentAttempt.selectedAnswer);
       answerStartedAt     = Date.now();
 
       // Reset answer area
       answersWrap.innerHTML = '';
       if (nextButton) {
-        nextButton.hidden   = true;
-        nextButton.disabled = true;
+        nextButton.hidden   = false;
+        nextButton.disabled = false;
+      }
+      if (prevButton) {
+        prevButton.hidden = false;
+        prevButton.disabled = (cardIndex === 0);
       }
       setFeedback('', '');
 
       var total = cards.length;
+      var answeredCount = attempts.reduce(function (count, attempt) {
+        return attempt && attempt.selectedAnswer ? count + 1 : count;
+      }, 0);
 
       // Progress text
       if (progressEl) {
         progressEl.textContent =
-          (labels.question || 'Question') + ' ' +
-          (cardIndex + 1) + ' ' +
-          (labels.of || 'of') + ' ' +
+          answeredCount + ' ' +
+          (labels.answered || 'answered') + ' ' +
+          (labels.outOf || 'out of') + ' ' +
           total;
       }
 
@@ -251,7 +439,9 @@
 
       // Topic breadcrumb
       if (topicLabelEl)    { topicLabelEl.textContent    = card.topicLabel    || ''; }
-      if (subtopicLabelEl) { subtopicLabelEl.textContent = card.subtopicLabel || ''; }
+      if (subtopicLabelEl) {
+        subtopicLabelEl.textContent = (labels.question || 'Question') + ' ' + (cardIndex + 1);
+      }
 
       // Question text
       if (questionEl) { questionEl.textContent = card.question; }
@@ -269,6 +459,11 @@
         answersWrap.appendChild(btn);
       });
 
+      // Si la pregunta ya tenia respuesta, la volvemos a pintar al re-renderizar la card.
+      if (currentAttempt && currentAttempt.selectedAnswer) {
+        updateSelectedAnswerState(currentAttempt.selectedAnswer);
+      }
+
       persistState();
     }
 
@@ -280,38 +475,37 @@
         .replace(/"/g, '&quot;');
     }
 
+    // Mantiene una sola opcion marcada a la vez dentro de la pregunta actual.
+    // Si el usuario cambia de A a C, esta funcion marca C y limpia el resto.
+    function updateSelectedAnswerState(selectedAnswer) {
+      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (buttonEl) {
+        if (buttonEl.dataset.answerKey === selectedAnswer) {
+          buttonEl.dataset.state = 'selected';
+          return;
+        }
+
+        delete buttonEl.dataset.state;
+      });
+    }
+
     /* ── Answer handling ────────────────────────────────────────────────── */
 
     function handleAnswer(button) {
-      if (answeredCurrentCard) { return; }
-
       var card         = cards[cardIndex];
       var selected     = button.dataset.answerKey;
       var responseMs   = Date.now() - answerStartedAt;
 
       answeredCurrentCard = true;
 
-      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (b) {
-        b.disabled = true;
-        if (b.dataset.answerKey === card.correctAnswer) {
-          b.dataset.state = 'correct';
-        } else if (b.dataset.answerKey === selected) {
-          b.dataset.state = 'incorrect';
-        }
-      });
+      updateSelectedAnswerState(selected);
 
-      attempts.push({
+      attempts[cardIndex] = {
         flashcardId:    card.id,
         topicTermId:    card.topicTermId,
         selectedAnswer: selected,
         correctAnswer:  card.correctAnswer,
         responseTimeMs: responseMs,
-      });
-
-      if (nextButton) {
-        nextButton.hidden   = false;
-        nextButton.disabled = false;
-      }
+      };
 
       persistState();
     }
@@ -324,26 +518,17 @@
       stopTimer();
 
       var elapsed = getElapsedSeconds();
+      var attemptPayload = buildAttemptPayload();
+      var summaryResults = buildSummaryResults(attemptPayload, elapsed, expired);
 
-      // Fill blank attempts for unanswered cards (time-expired scenario).
-      if (expired) {
-        for (var i = attempts.length; i < cards.length; i++) {
-          var c = cards[i];
-          attempts.push({
-            flashcardId:    c.id,
-            topicTermId:    c.topicTermId,
-            selectedAnswer: '',
-            correctAnswer:  c.correctAnswer,
-            responseTimeMs: 0,
-          });
-        }
-      }
+      persistSummaryState(summaryResults);
+      renderSummary(summaryResults);
 
       var body = new URLSearchParams();
       body.append('action',     'vc_flashcards_complete_session');
       body.append('nonce',      nonce);
       body.append('session_id', String(sessionId));
-      body.append('attempts',   JSON.stringify(attempts));
+      body.append('attempts',   JSON.stringify(attemptPayload));
 
       fetch(ajaxUrl, {
         method:  'POST',
@@ -353,32 +538,10 @@
         .then(function (r) { return r.json(); })
         .then(function (payload) {
           if (!payload.success) { throw new Error('server'); }
-          var d = payload.data;
-          clearState();
-          renderSummary({
-            correct:  Number(d.correctAnswers  || 0),
-            incorrect: Number(d.incorrectAnswers || 0),
-            score:    Number(d.scorePercent    || 0),
-            elapsed:  elapsed,
-            expired:  expired,
-          });
+          return refreshExamHistory();
         })
         .catch(function () {
-          // Fallback: compute locally.
-          var correct = 0;
-          attempts.forEach(function (a) {
-            if (a.selectedAnswer && a.selectedAnswer === a.correctAnswer) { correct++; }
-          });
-          var total = attempts.length;
-          var score = total > 0 ? Math.round((correct / total) * 100) : 0;
-          clearState();
-          renderSummary({
-            correct:  correct,
-            incorrect: total - correct,
-            score:    score,
-            elapsed:  elapsed,
-            expired:  expired,
-          });
+          return null;
         })
         .finally(function () {
           isSubmitting = false;
@@ -396,10 +559,14 @@
           'vc-exam-result-badge ' +
           (passed ? 'vc-exam-result-badge--passed' : 'vc-exam-result-badge--failed');
         var iconEl = resultBadge.querySelector('[data-vc-exam-result-icon]');
-        if (iconEl) { iconEl.textContent = passed ? '\u2713' : '\u2717'; }
+        if (iconEl && iconEl.tagName === 'IMG') {
+          iconEl.src = passed
+            ? (iconEl.dataset.passSrc || iconEl.src)
+            : (iconEl.dataset.failSrc || iconEl.src);
+        }
       }
 
-      // Summary box class for score bar color
+      // Summary box state class
       if (summaryBox) {
         summaryBox.classList.toggle('is-passed', passed);
         summaryBox.classList.toggle('is-failed', !passed);
@@ -407,38 +574,55 @@
 
       // Kicker / headline
       if (resultKicker) {
-        if (results.expired) {
-          resultKicker.textContent = labels.timeExpired || 'Time expired';
-        } else if (passed) {
-          resultKicker.textContent = labels.passed || 'Passed!';
-        } else {
-          resultKicker.textContent = labels.examComplete || 'Exam complete!';
-        }
-      }
-
-      // Message
-      if (resultMessage) {
-        resultMessage.textContent = passed
-          ? (labels.congratulations || 'Congratulations! You passed the exam.')
-          : (labels.keepStudying    || 'Keep studying. You need 70% to pass.');
+        resultKicker.textContent = passed
+          ? (labels.approved || 'Approved')
+          : (labels.notApproved || 'Not approved');
       }
 
       // Counts
       if (correctCount)   { correctCount.textContent   = String(results.correct); }
       if (incorrectCount) { incorrectCount.textContent = String(results.incorrect); }
+      // Refleja cuantas preguntas quedaron sin responder en el resumen final.
+      if (unansweredCount) { unansweredCount.textContent = String(results.unanswered || 0); }
 
-      // Score percentage
-      if (scorePercentEl) { scorePercentEl.textContent = Math.round(results.score) + '%'; }
+      // Toma el desglose por categoria y asegura una estructura segura aunque falten datos.
+      var breakdown = results.breakdown || {};
+      var general = breakdown.General || { total: 0, correct: 0 };
+      var airframe = breakdown.Airframe || { total: 0, correct: 0 };
+      var powerplant = breakdown.Powerplant || { total: 0, correct: 0 };
 
-      // Score bar
-      if (scoreBar) {
-        scoreBar.style.width = Math.max(0, Math.min(100, results.score)) + '%';
+      // Llena el bloque de General con su texto auxiliar y porcentaje.
+      if (breakdownGeneralMeta) {
+        breakdownGeneralMeta.textContent = general.correct + ' of ' + general.total + ' correct';
+      }
+      if (breakdownGeneralScore) {
+        var generalPercent = general.total ? Math.round((general.correct / general.total) * 100) : 0;
+        breakdownGeneralScore.textContent = generalPercent + '%';
+        breakdownGeneralScore.classList.toggle('is-passing', generalPercent >= config.passingScore);
       }
 
-      // Time used
-      if (timeUsedEl) { timeUsedEl.textContent = formatTime(results.elapsed); }
+      // Llena el bloque de Airframe con su texto auxiliar y porcentaje.
+      if (breakdownAirframeMeta) {
+        breakdownAirframeMeta.textContent = airframe.correct + ' of ' + airframe.total + ' correct';
+      }
+      if (breakdownAirframeScore) {
+        var airframePercent = airframe.total ? Math.round((airframe.correct / airframe.total) * 100) : 0;
+        breakdownAirframeScore.textContent = airframePercent + '%';
+        breakdownAirframeScore.classList.toggle('is-passing', airframePercent >= config.passingScore);
+      }
 
-      openSummaryModal();
+      // Llena el bloque de Powerplant con su texto auxiliar y porcentaje.
+      if (breakdownPowerplantMeta) {
+        breakdownPowerplantMeta.textContent = powerplant.correct + ' of ' + powerplant.total + ' correct';
+      }
+      if (breakdownPowerplantScore) {
+        var powerplantPercent = powerplant.total ? Math.round((powerplant.correct / powerplant.total) * 100) : 0;
+        breakdownPowerplantScore.textContent = powerplantPercent + '%';
+        breakdownPowerplantScore.classList.toggle('is-passing', powerplantPercent >= config.passingScore);
+      }
+
+      // Finalmente cambia la interfaz a la vista final del examen.
+      showView('summary');
     }
 
     /* ── Start exam ─────────────────────────────────────────────────────── */
@@ -501,6 +685,16 @@
       });
     }
 
+    // Permite volver a la pregunta anterior sin salir del rango valido del examen.
+    if (prevButton) {
+      prevButton.addEventListener('click', function () {
+        if (prevButton.disabled) { return; }
+        if (cardIndex === 0) { return; }
+        cardIndex -= 1;
+        renderCard();
+      });
+    }
+
     // Abandon exam (with confirmation)
     root.querySelectorAll('[data-vc-exam-abandon]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -508,28 +702,22 @@
         if (!window.confirm(msg)) { return; }
         stopTimer();
         clearState();
-        // Reset state
-        sessionId = 0; cards = []; cardIndex = 0; attempts = []; examStartTime = 0;
-        isSubmitting = false;
+        resetExamState();
         showView('home');
         setFeedback('', '');
       });
     });
 
-    // Summary modal: close on backdrop click
-    var modalBackdrop = root.querySelector('[data-vc-exam-modal-backdrop]');
-    if (modalBackdrop) {
-      modalBackdrop.addEventListener('click', function () {
-        closeSummaryModal();
-        showView('home');
-        setFeedback('', '');
+    if (finishButton) {
+      finishButton.addEventListener('click', function () {
+        finishExam(false);
       });
     }
 
-    // Summary: back to menu (also acts as modal close button)
+    // Summary: back to menu (also acts as close button)
     root.querySelectorAll('[data-vc-exam-summary-back]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        closeSummaryModal();
+        clearState();
         showView('home');
         setFeedback('', '');
       });
@@ -538,7 +726,7 @@
     // Summary: try again (same category)
     root.querySelectorAll('[data-vc-exam-retry]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        closeSummaryModal();
+        clearState();
         if (lastTopicTermId) {
           showView('home');
           setFeedback('', '');
@@ -565,6 +753,8 @@
     if (!restoreState()) {
       showView('home');
     }
+
+    root.classList.remove('is-booting');
   }
 
   /* ── Boot all exam apps on the page ──────────────────────────────────── */
