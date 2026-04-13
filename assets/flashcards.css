@@ -1627,14 +1627,20 @@
 .vc-flashcards-summary-action--back,
 .vc-flashcards-summary-action--back:hover,
 .vc-flashcards-summary-action--back:focus,
+.vc-flashcards-summary-action--back:focus-visible,
 .vc-flashcards-summary-action--back:active {
+  opacity: 1;
   background: #1447E6;
   color: #ffffff;
   border: 1px solid #1447E6;
+  border-radius: 14px;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.31px;
+  transform: none;
+  box-shadow: none;
+  transition: none;
   text-decoration: none;
 }
 
