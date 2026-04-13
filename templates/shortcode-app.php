@@ -1,51 +1,51 @@
-﻿<?php
+<?php
 if (!defined('ABSPATH')) {
   exit;
 }
 ?>
 <div class="vc-flashcards-app" data-categories="<?php echo esc_attr(wp_json_encode($categories)); ?>">
-  <?php /* Resumen rapido de metricas visibles antes de iniciar una sesion. */ ?>
-  <section class="vc-flashcards-stats">
-    <article class="vc-flashcards-stat-card">
-      <div class="vc-flashcards-stat-card-content">
-        <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
-          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Best.svg'); ?>" alt="" width="24" height="24">
-        </span>
-        <div class="vc-flashcards-stat-card-copy">
-          <small><?php esc_html_e('Best score', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="best-score"><?php echo esc_html((string) ($stats['bestScore'] ?? 0)); ?>%</strong>
-        </div>
-      </div>
-    </article>
-    <article class="vc-flashcards-stat-card">
-      <div class="vc-flashcards-stat-card-content">
-        <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
-          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Average.svg'); ?>" alt="" width="24" height="24">
-        </span>
-        <div class="vc-flashcards-stat-card-copy">
-          <small><?php esc_html_e('Average', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="average-score"><?php echo esc_html((string) ($stats['averageScore'] ?? 0)); ?>%</strong>
-        </div>
-      </div>
-    </article>
-    <article class="vc-flashcards-stat-card">
-      <div class="vc-flashcards-stat-card-content">
-        <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
-          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Passed.svg'); ?>" alt="" width="24" height="24">
-        </span>
-        <div class="vc-flashcards-stat-card-copy">
-          <small><?php esc_html_e('Passed attempts', 'vc-flashcards'); ?></small>
-          <strong data-vc-flashcards-stat="passed-attempts"><?php echo esc_html((string) ($stats['passedAttempts'] ?? '0/5')); ?></strong>
-        </div>
-      </div>
-    </article>
-  </section>
-
   <?php /* Area comun para mensajes de error, carga o feedback contextual. */ ?>
   <p class="vc-flashcards-feedback" data-vc-flashcards-feedback hidden></p>
 
   <?php /* Vista inicial con las categorias disponibles para estudiar. */ ?>
-  <section class="vc-flashcards-view" data-vc-flashcards-view="home">
+  <section class="vc-flashcards-view vc-flashcards-home" data-vc-flashcards-view="home">
+    <?php /* Resumen rapido de metricas visibles antes de iniciar una sesion. */ ?>
+    <section class="vc-flashcards-stats">
+      <article class="vc-flashcards-stat-card">
+        <div class="vc-flashcards-stat-card-content">
+          <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Best.svg'); ?>" alt="" width="24" height="24">
+          </span>
+          <div class="vc-flashcards-stat-card-copy">
+            <small><?php esc_html_e('Best score', 'vc-flashcards'); ?></small>
+            <strong data-vc-flashcards-stat="best-score"><?php echo esc_html((string) ($stats['bestScore'] ?? 0)); ?>%</strong>
+          </div>
+        </div>
+      </article>
+      <article class="vc-flashcards-stat-card">
+        <div class="vc-flashcards-stat-card-content">
+          <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Average.svg'); ?>" alt="" width="24" height="24">
+          </span>
+          <div class="vc-flashcards-stat-card-copy">
+            <small><?php esc_html_e('Average', 'vc-flashcards'); ?></small>
+            <strong data-vc-flashcards-stat="average-score"><?php echo esc_html((string) ($stats['averageScore'] ?? 0)); ?>%</strong>
+          </div>
+        </div>
+      </article>
+      <article class="vc-flashcards-stat-card">
+        <div class="vc-flashcards-stat-card-content">
+          <span class="vc-flashcards-stat-card-icon" aria-hidden="true">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Passed.svg'); ?>" alt="" width="24" height="24">
+          </span>
+          <div class="vc-flashcards-stat-card-copy">
+            <small><?php esc_html_e('Passed attempts', 'vc-flashcards'); ?></small>
+            <strong data-vc-flashcards-stat="passed-attempts"><?php echo esc_html((string) ($stats['passedAttempts'] ?? '0/5')); ?></strong>
+          </div>
+        </div>
+      </article>
+    </section>
+
     <?php if (empty($categories)): ?>
       <?php /* Estado vacio cuando todavia no hay contenido listo para estudiar. */ ?>
       <article class="vc-flashcards-empty">
@@ -59,12 +59,14 @@ if (!defined('ABSPATH')) {
             <div class="vc-flashcards-category-top">
               <h3><?php echo esc_html($category['name']); ?></h3>
             </div>
-            <div class="vc-flashcards-category-progress">
-              <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
-              <strong><?php echo esc_html((string) $category['progress']); ?>%</strong>
-            </div>
-            <div class="vc-flashcards-topic-bar" aria-hidden="true">
-              <span style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
+            <div class="vc-flashcards-category-progress-block">
+              <div class="vc-flashcards-category-progress">
+                <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
+                <strong><?php echo esc_html((string) $category['progress']); ?>%</strong>
+              </div>
+              <div class="vc-flashcards-topic-bar" aria-hidden="true">
+                <span style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
+              </div>
             </div>
             <div class="vc-flashcards-category-meta">
               <span><?php echo count($category['children'] ?? []) . ' subtopics · ' . $category['progress'] . ' reviewed'; ?></span>
@@ -129,7 +131,7 @@ if (!defined('ABSPATH')) {
           <h3 class="vc-flashcards-card-cardtitle"><?php esc_html_e('Study Full Category', 'vc-flashcards'); ?></h3>
           <p class="vc-flashcards-card-cardsubtitle"><?php esc_html_e('Study all General cards in order', 'vc-flashcards'); ?></p>
         </div>
-        <button type="button" class="vc-flashcards-start vc-flashcards-start--icon vc-flashcards-config-card-action" data-vc-flashcards-launch="category" aria-label="<?php esc_attr_e('Study full category', 'vc-flashcards'); ?>">
+        <button type="button" class="vc-flashcards-start vc-flashcards-start--category vc-flashcards-config-card-action" data-vc-flashcards-launch="category" aria-label="<?php esc_attr_e('Study full category', 'vc-flashcards'); ?>">
           <span class="vc-flashcards-start-list-icon vc-flashcards-config-card-action-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Icon.svg'); ?>" alt="" width="24" height="24">
           </span>
@@ -142,7 +144,7 @@ if (!defined('ABSPATH')) {
           <h3 class="vc-flashcards-card-cardtitle"><?php esc_html_e('Random practice', 'vc-flashcards'); ?></h3>
           <p class="vc-flashcards-card-cardsubtitle"><?php esc_html_e('Mix cards from all General subtopics', 'vc-flashcards'); ?></p>
         </div>
-        <button type="button" class="vc-flashcards-start vc-flashcards-start--secondary vc-flashcards-config-card-action" data-vc-flashcards-launch="random" aria-label="<?php esc_attr_e('Study random', 'vc-flashcards'); ?>">
+        <button type="button" class="vc-flashcards-start vc-flashcards-start--random vc-flashcards-config-card-action" data-vc-flashcards-launch="random" aria-label="<?php esc_attr_e('Study random', 'vc-flashcards'); ?>">
           <span class="vc-flashcards-start-random-icon vc-flashcards-config-card-action-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
           </span>
@@ -259,7 +261,7 @@ if (!defined('ABSPATH')) {
         <?php /* CTA secundario del summary con icono izquierdo para reiniciar la sesión actual. */ ?>
         <button type="button" class="vc-flashcards-start vc-flashcards-summary-action vc-flashcards-summary-action--restart" data-vc-flashcards-restart>
           <span class="vc-flashcards-summary-action-icon" aria-hidden="true">
-            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/repeat-session.svg'); ?>" alt="" width="16" height="16">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try.svg'); ?>" alt="" width="16" height="16">
           </span>
           <span><?php esc_html_e('Repeat session', 'vc-flashcards'); ?></span>
         </button>

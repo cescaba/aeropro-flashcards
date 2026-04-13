@@ -60,6 +60,27 @@
     let currentExplanationHtml = '';
     const storageKey = 'vcFlashcardsState:' + window.location.pathname;
 
+    function clearPersistedState() {
+      try {
+        window.sessionStorage.removeItem(storageKey);
+      } catch (error) {}
+    }
+
+    function bindDashboardExitReset() {
+      document.querySelectorAll('.vc-dashboard-nav-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+          try {
+            const nextUrl = new URL(link.href, window.location.origin);
+            const nextView = nextUrl.searchParams.get('view') || 'flashcards';
+
+            if (nextView !== 'flashcards') {
+              clearPersistedState();
+            }
+          } catch (error) {}
+        });
+      });
+    }
+
     function parseCategories(serialized) {
       if (!serialized) {
         return [];
@@ -834,6 +855,8 @@
         answerButton.click();
       }
     });
+
+    bindDashboardExitReset();
 
     if (!restoreState()) {
       openHome();

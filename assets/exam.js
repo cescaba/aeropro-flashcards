@@ -5,7 +5,7 @@
 
   var DEFAULT_CONFIG = {
     totalQuestions:   100,
-    timeLimitSeconds: 9000,  // 2 h 30 min
+    timeLimitSeconds: 60,    // 1 min de prueba
     passingScore:     70,
   };
 

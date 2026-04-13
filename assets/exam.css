@@ -9,6 +9,11 @@
   font-family: Poppins, sans-serif;
   position: relative;
   min-height: 100%;
+  --vc-exam-surface-radius: 12px;
+  --vc-exam-inner-surface-radius: 10px;
+  --vc-flashcards-home-surface-radius: var(--vc-exam-surface-radius);
+  --vc-flashcards-session-surface-radius: var(--vc-exam-surface-radius);
+  --vc-flashcards-summary-surface-radius: var(--vc-exam-surface-radius);
 }
 
 /* Estado oculto temporal mientras JS inicializa la UI del examen. */
@@ -45,7 +50,7 @@
 }
 
 /* Espacio debajo de la grilla de categorias antes de historial y detalles. */
-.vc-exam-app .vc-flashcards-category-grid {
+.vc-exam-app .vc-flashcards-category-grid--mock {
   margin-bottom: 24px;
 }
 
@@ -115,7 +120,7 @@
 /* Caja externa de cada badge superior del examen. */
 .vc-exam-badge {
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--vc-exam-surface-radius);
   opacity: 1;
   padding: 12px 20px;
   background: #F1F5F9;
@@ -180,16 +185,9 @@
 
 /* ===== Home del examen: cards de categoria ===== */
 
-/* ===== Home del examen: variante visual de las categorias ===== */
-/* Oculta la barra de progreso normal en las cards de categoria del examen. */
-.vc-exam-category-card .vc-flashcards-topic-bar,
-.vc-exam-category-card .vc-flashcards-category-progress {
-  display: none;
-}
-
 /* Fila de metadata que muestra subtopics/cards por categoria. */
 .vc-exam-category-meta {
-  margin: 10px 0 6px;
+  margin: 0;
   font-size: 14px;
   color: #666666;
 }
@@ -197,30 +195,6 @@
 /* Resetea margenes del parrafo dentro de la metadata de categoria. */
 .vc-exam-category-meta p {
   margin: 0;
-}
-
-/* Pill verde que aparece debajo de cada card de categoria. */
-.vc-exam-category-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: #0ea44b;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  margin-bottom: 14px;
-}
-
-/* Evita que el icono del pill se estire. */
-.vc-exam-category-pill svg {
-  flex: 0 0 auto;
-}
-
-/* Variante del boton Start propia del examen. */
-.vc-exam-start-btn {
-  background: #1447e6 !important;
 }
 
 /* Bloque de historial del examen debajo de la grilla de categorias. */
@@ -236,7 +210,7 @@
 .vc-exam-history-content {
   padding: 25px;
   border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  border-radius: var(--vc-exam-surface-radius);
   background: #FFFFFF;
 }
 
@@ -252,7 +226,7 @@
   gap: 14px;
   padding: 12px 24px 17px;
   border: 1px solid #E2E8F0;
-  border-radius: 12px;
+  border-radius: var(--vc-exam-surface-radius);
   background: #F1F5F9;
 }
 
@@ -502,8 +476,19 @@
 }
 
 /* Espacio extra debajo de los pills de topic/subtopic en la card del examen. */
+.vc-exam-card {
+  display: grid;
+  gap: 30px;
+}
+
 .vc-exam-card .vc-flashcards-session-context {
-  margin: 0 0 30px;
+  margin: 0;
+}
+
+.vc-exam-card .vc-flashcards-answers,
+.vc-exam-card .vc-exam-session-actions {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* Espaciado del wrapper de la barra de progreso dentro de la card del examen. */
@@ -525,24 +510,37 @@
 /* Fila de botones de navegacion dentro de la card del examen. */
 .vc-exam-card .vc-exam-session-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 18px;
+  margin-top: 0;
+}
+
+/* Base compartida para botones de accion del mock: sesion y resumen. */
+.vc-exam-card .vc-flashcards-session-next,
+.vc-exam-summary-dialog .vc-flashcards-summary-action--back,
+.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  height: 44px;
+  opacity: 1;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
 }
 
 /* Estilo base compartido por Next y Previous en el footer de la card. */
 .vc-exam-card .vc-flashcards-session-next {
   flex: 1 1 0;
-  height: 44px;
-  opacity: 1;
   margin-top: 0;
   width: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   padding: 0;
-  border-radius: 6px;
-  background: #1E3C80;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
   box-shadow: none;
@@ -552,14 +550,14 @@
 .vc-exam-card .vc-exam-session-prev {
   flex: 1 1 0;
   background: #ffffff;
-  color: #1E3C80;
-  border: 1.67px solid #1E3C80;
+  color: #1447E6;
+  border: 2px solid #1447E6;
 }
 
 /* Fuerza flecha y texto azules en el boton Previous. */
 .vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon,
 .vc-exam-card .vc-exam-session-prev span {
-  color: #1E3C80;
+  color: #1447E6;
 }
 
 /* Estado disabled de Previous para la primera pregunta. */
@@ -569,8 +567,8 @@
 .vc-exam-card .vc-exam-session-prev:disabled:focus-visible,
 .vc-exam-card .vc-exam-session-prev:disabled:active {
   background: #ffffff;
-  color: #1E3C80;
-  border: 1.67px solid #1E3C80;
+  color: #1447E6;
+  border: 2px solid #1447E6;
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.45;
@@ -579,7 +577,7 @@
 /* Mantiene texto e icono de Previous disabled en el mismo azul. */
 .vc-exam-card .vc-exam-session-prev:disabled .vc-flashcards-next-icon,
 .vc-exam-card .vc-exam-session-prev:disabled span {
-  color: #1E3C80;
+  color: #1447E6;
 }
 
 /* Tipografia compartida de los dos botones del footer de la card. */
@@ -605,20 +603,25 @@
   content: none;
 }
 
-/* Mantiene Next estable, sin hover visual extra. */
+/* Mantiene Next sin variaciones visuales en hover/focus. */
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):hover,
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus,
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus-visible,
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):active {
-  background: #1E3C80;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
   box-shadow: none;
 }
 
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):is(:hover, :focus, :focus-visible, :active) span,
+.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):is(:hover, :focus, :focus-visible, :active) .vc-flashcards-next-icon {
+  color: #ffffff;
+}
+
 /* Estilo de una respuesta seleccionada dentro de la pregunta del examen. */
 .vc-exam-card .vc-flashcards-answer[data-state="selected"] {
-  border-color: #1E3C80;
+  border-color: #1447E6;
   background: #FFFFFF;
   box-shadow: none;
 }
@@ -626,7 +629,7 @@
 /* Bloquea el look de la respuesta seleccionada en hover/focus/disabled. */
 .vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active),
 .vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) {
-  border-color: #1E3C80 !important;
+  border-color: #1447E6 !important;
   background: #FFFFFF !important;
   box-shadow: none !important;
   color: inherit !important;
@@ -637,14 +640,14 @@
 
 /* Estilo del chip de letra/indice cuando la respuesta esta seleccionada. */
 .vc-exam-card .vc-flashcards-answer[data-state="selected"] span {
-  background: #1E3C80;
+  background: #1447E6;
   color: #FFFFFF;
 }
 
 /* Mantiene los colores del chip seleccionado en todos los estados. */
 .vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active) span,
 .vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) span {
-  background: #1E3C80 !important;
+  background: #1447E6 !important;
   color: #FFFFFF !important;
 }
 
@@ -701,23 +704,24 @@
 /* Card blanca del resumen que envuelve resultados, desglose y acciones. */
 .vc-exam-summary-dialog .vc-exam-summary-section--content {
   display: grid;
-  gap: 0;
+  gap: 24px;
+  opacity: 1;
   background: #ffffff;
-  padding: 20px 24px 26px;
-  border-radius: 12px;
+  padding: 28px 32px 26px;
+  border-radius: var(--vc-exam-surface-radius);
   border-width: 1.67px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
   box-sizing: border-box;
 }
 
 /* Espaciado inferior del bloque superior del resumen. */
 .vc-exam-summary-dialog .vc-flashcards-summary-top {
-  margin-bottom: 26px;
+  margin-bottom: 0;
 }
 
 /* Separacion entre las cards superiores del resumen. */
 .vc-exam-summary-dialog .vc-flashcards-summary-results {
-  gap: 12px;
+  gap: 18px;
 }
 
 /* Texto auxiliar debajo del titulo de aprobado/reprobado. */
@@ -738,7 +742,7 @@
   display: flex;
   flex-direction: column-reverse;
   gap: 0;
-  padding: 12px;
+  padding: 16px;
 }
 
 /* Color neutro del valor de Unanswered. */
@@ -797,7 +801,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 13px 10px;
-  border-radius: 10px;
+  border-radius: var(--vc-exam-inner-surface-radius);
   background: #F8FAFC;
 }
 
@@ -877,20 +881,7 @@
 /* Tamano y tipografia compartidos por ambos botones del resumen. */
 .vc-exam-summary-dialog .vc-flashcards-summary-action--back,
 .vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
-  min-height: 44px;
-  opacity: 1;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  gap: 6px;
-  padding: 10px 12px;
-  border-radius: 6px;
   border-width: 1.67px;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: -0.15px;
-  text-align: center;
 }
 
 

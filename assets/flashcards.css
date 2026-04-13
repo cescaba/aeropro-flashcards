@@ -10,11 +10,37 @@
 
 
 /* Estructura base de las grillas principales del modulo. */
-.vc-flashcards-stats,
-.vc-flashcards-category-grid,
 .vc-flashcards-config-grid {
   display: grid;
   gap: 24px;
+}
+
+.vc-flashcards-view[hidden] {
+  display: none !important;
+}
+
+.vc-flashcards-home {
+  --vc-flashcards-home-surface-radius: 12px;
+  display: grid;
+  gap: 24px;
+}
+
+.vc-flashcards-view[data-vc-flashcards-view="detail"] {
+  --vc-flashcards-detail-surface-radius: 12px;
+}
+
+.vc-flashcards-session {
+  --vc-flashcards-session-surface-radius: 12px;
+}
+
+.vc-flashcards-summary {
+  --vc-flashcards-summary-surface-radius: 12px;
+}
+
+.vc-flashcards-stats,
+.vc-flashcards-category-grid {
+  display: grid;
+  gap: 17px;
 }
 
 /* Distribuye las tarjetas de estadisticas en tres columnas. */
@@ -39,6 +65,14 @@
   display: none;
 }
 
+.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+  padding: 50px 41px 57px;
+}
+
+.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+  padding: 50px 80px 274px;
+}
+
 
 
 /* Distribuye las categorias principales en tres columnas. */
@@ -54,13 +88,11 @@
 
 /* Separa la grilla principal de categorias del bloque global que vive debajo en home. */
 .vc-flashcards-category-grid + .vc-flashcards-global-section {
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 /* Base visual compartida para tarjetas y paneles del modulo. */
-.vc-flashcards-stat-card,
 .vc-flashcards-category-card,
-.vc-flashcards-config-card,
 .vc-flashcards-subtopics-card,
 .vc-flashcards-card,
 .vc-flashcards-summary-box,
@@ -72,8 +104,23 @@
 
 /* Tarjeta de estadistica con fondo suave para metricas destacadas. */
 .vc-flashcards-stat-card {
+  opacity: 1;
   padding: 12px 20px;
-  background: #e2e8f0;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--vc-flashcards-home-surface-radius);
+  background: #F1F5F9;
+}
+
+.vc-flashcards-category-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--vc-flashcards-home-surface-radius);
+  background: #FFFFFF;
+}
+
+.vc-flashcards-home .vc-flashcards-empty {
+  border-radius: var(--vc-flashcards-home-surface-radius);
 }
 
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
@@ -132,7 +179,7 @@
 }
 
 .vc-flashcards-summary-accuracy-title {
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
   line-height: 20px;
   letter-spacing: -0.15px;
@@ -188,7 +235,7 @@
 
 .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
   margin: 0 0 4px;
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
@@ -219,7 +266,7 @@
 #vc-flashcards-modal-title {
   margin: 0;
   font-weight: 400;
-  font-size: 30px;
+  font-size: 28px;
   line-height: 120%;
   color: #000000;
 }
@@ -256,7 +303,7 @@
   opacity: 0.8;
   padding: 7px 11px;
   border-radius: 6px;
-  border: 1px solid #314158;
+  border: 1px solid #1447E6;
 }
 
 .vc-flashcards-detail-header .vc-flashcards-back span {
@@ -264,7 +311,8 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
-  color: #0F172A;
+  text-align: center;
+  color: #1447E6;
 }
 
 /* Tarjeta global de practica aleatoria en el home de flashcards. */
@@ -274,7 +322,7 @@
   justify-content: space-between;
   padding: 16px 28px 16px 24px;
   border: 1px solid #E2E8F0;
-  border-radius: 20px;
+  border-radius: var(--vc-flashcards-home-surface-radius);
   background: #F1F5F9;
 }
 
@@ -344,6 +392,7 @@
 /* Boton exclusivo del bloque global random. */
 .vc-flashcards-start.vc-flashcards-global-random-start {
   display: inline-flex;
+  min-height: 40px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -361,10 +410,12 @@
 
 .vc-flashcards-start.vc-flashcards-global-random-start > span {
   display: block;
+  font-family: Poppins, sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 100%;
-  letter-spacing: -0.3px;
+  letter-spacing: 0.2px;
+  text-align: center;
   color: #1447E6;
 }
 
@@ -406,8 +457,10 @@
 .vc-flashcards-back:focus,
 .vc-flashcards-back:active {
   background: transparent;
-  color: #212121;
-  border: 1px solid #212121;
+  color: #1447E6;
+  border: 1px solid #1447E6;
+  opacity: 0.8;
+  border-radius: 6px;
   transform: none;
   box-shadow: none;
   transition: none;
@@ -420,8 +473,17 @@
   align-items: center;
   gap: 8px;
   justify-content: center;
-  padding: 9px 11px;
+  padding: 7px 11px;
   line-height: 1;
+}
+
+.vc-flashcards-back span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
+  color: #1447E6;
 }
 
 /* Icono de vc-flashcards-back con una flecha hacia la izquierda. */
@@ -437,7 +499,7 @@
 }
 
 /* Variante icono del CTA lateral con caja compacta y centrada. */
-.vc-flashcards-start--icon {
+.vc-flashcards-start--category {
   display: inline-flex;
   flex: 0 0 55px;
   width: 55px;
@@ -463,27 +525,27 @@
 }
 
 /* Reordena los CTA laterales para ubicarlos a la izquierda del bloque de texto. */
-.vc-flashcards-config-card > .vc-flashcards-start--icon,
-.vc-flashcards-config-card > .vc-flashcards-start--secondary {
+.vc-flashcards-config-card > .vc-flashcards-start--category,
+.vc-flashcards-config-card > .vc-flashcards-start--random {
   order: -1;
   align-self: stretch;
+  flex: 0 0 auto;
+  width: 48px;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  opacity: 1;
+  border-radius: 12px;
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
 /* Mantiene este CTA lateral cuadrado aunque el ancho disponible cambie. */
-.vc-flashcards-config-card > .vc-flashcards-start--icon {
-  flex: 0 0 auto;
-  width: 55px;
-  min-height: 0;
-  aspect-ratio: 1 / 1;
+.vc-flashcards-config-card > .vc-flashcards-start--category {
   background: #155dfc;
 }
 
 /* Variante secundaria del config card como boton icon-only verde sin afectar otros secundarios. */
-.vc-flashcards-config-card > .vc-flashcards-start--secondary {
-  flex: 0 0 auto;
-  width: 55px;
-  min-height: 0;
-  aspect-ratio: 1 / 1;
+.vc-flashcards-config-card > .vc-flashcards-start--random {
   background: #00a63e;
   border: 0;
 
@@ -532,7 +594,7 @@
 }
 
 /* Variante lateral para la accion de practica aleatoria. */
-.vc-flashcards-start--secondary {
+.vc-flashcards-start--random {
 
   display: inline-flex;
   flex: 0 0 auto;
@@ -551,7 +613,7 @@
 }
 
 /* Escala el icono de la accion secundaria sin tocar otros SVG del modulo. */
-.vc-flashcards-start--secondary img {
+.vc-flashcards-start--random img {
   width: 24px;
   height: 24px;
 }
@@ -573,6 +635,7 @@
 
 .vc-flashcards-card {
   padding: 32px;
+  border-radius: var(--vc-flashcards-session-surface-radius, 20px);
 }
 
 /* Contenedor neutro para el listado de subtemas sin apariencia de tarjeta. */
@@ -619,9 +682,21 @@
   margin: 0;
 }
 
+.vc-flashcards-category-card .vc-flashcards-category-top,
+.vc-flashcards-category-card .vc-flashcards-category-progress-block,
+.vc-flashcards-category-card .vc-flashcards-category-meta {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Wrapper semantico del progreso completo de categoria: texto + barra. */
+.vc-flashcards-category-progress-block {
+  margin-top: 0;
+}
+
 /* Separacion superior de la fila de progreso. */
 .vc-flashcards-category-progress {
-  margin-top: 14px;
+  margin-top: 0;
 }
 
 /* Texto auxiliar de la fila de progreso de categoria. */
@@ -676,7 +751,7 @@
 .vc-flashcards-topic-bar {
   width: 100%;
   height: 10px;
-  margin: 12px 0 16px;
+  margin: 12px 0 0;
   border-radius: 999px;
   background: #d7dce7;
   overflow: hidden;
@@ -735,7 +810,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #1E3C80;
+  background: #1447E6;
 }
 
 /* Separa la barra del header para que el cambio de bloque se sienta mas limpio. */
@@ -746,8 +821,12 @@
 /* Tarjetas de configuracion disponibles en la vista de detalle. */
 .vc-flashcards-config-card {
   display: flex;
+  opacity: 1;
   align-items: stretch;
   gap: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--vc-flashcards-detail-surface-radius);
+  background: #FFFFFF;
 }
 
 .vc-flashcards-config-card[data-vc-flashcards-launch-card] {
@@ -782,13 +861,14 @@
 /* Boton individual para abrir un subtema especifico. */
 .vc-flashcards-subtopic-item {
   width: 100%;
+  opacity: 1;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
   padding: 16px 44px 23px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border: 0.56px solid #e2e8f0;
+  border-radius: var(--vc-flashcards-detail-surface-radius);
   background: #f8fbff;
   cursor: pointer;
   text-align: left;
@@ -1311,7 +1391,7 @@
   opacity: 1;
   padding: 30px;
   border: 0.56px solid #dbe4f0;
-  border-radius: 12px;
+  border-radius: var(--vc-flashcards-summary-surface-radius);
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
@@ -1360,9 +1440,9 @@
   justify-content: center;
   width: 112px;
   height: 112px;
-  margin: 10px auto 18px;
+  margin: 0 auto 18px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #1D235F 0%, #3237B7 52%, #464DFF 100%);
+  background: #1447E6;
 }
 
 .vc-flashcards-summary-badge img {
@@ -1375,17 +1455,18 @@
 .vc-flashcards-summary-top {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 24px;
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
 }
 
 /* Titulo principal del resumen. */
 .vc-flashcards-summary-kicker {
   margin: 0 0 18px;
   color: #111827;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 600;
+  line-height: 53.33px;
 }
 
 /* Mensaje final del resumen. */
@@ -1417,7 +1498,7 @@
 .vc-flashcards-summary-count {
   display: block;
   margin-bottom: 6px;
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 30px;
   line-height: 36px;
@@ -1426,7 +1507,7 @@
 }
 
 [data-vc-flashcards-summary-precision] {
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 30px;
   line-height: 36px;
@@ -1446,7 +1527,7 @@
 /* Etiqueta de cada resultado. */
 .vc-flashcards-summary-result-card h3 {
   margin: 0;
-  font-family: Inter, sans-serif;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
@@ -1547,10 +1628,9 @@
 .vc-flashcards-summary-action--back:hover,
 .vc-flashcards-summary-action--back:focus,
 .vc-flashcards-summary-action--back:active {
-  background: #1E3C80;
+  background: #1447E6;
   color: #ffffff;
-  border: 1px solid #1E3C80;
-  font-family: Inter, sans-serif;
+  border: 1px solid #1447E6;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
@@ -1568,9 +1648,8 @@
   justify-content: center;
   gap: 8px;
   background: #ffffff;
-  color: #1E3C80;
-  border: 1px solid #1E3C80;
-  font-family: Inter, sans-serif;
+  color: #1447E6;
+  border: 1px solid #1447E6;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
@@ -1590,6 +1669,7 @@
 
 .vc-flashcards-summary-action-icon img {
   display: block;
+  color: #1447E6;
   width: 16px;
   height: 16px;
 }
@@ -1633,7 +1713,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 
 .vc-flashcards-modal-heading {
@@ -1687,11 +1767,12 @@
 .vc-flashcards-modal-count strong {
   width: 74px;
   height: 96px;
+  opacity: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: #3f3dc7;
+  border-radius: 6px;
+  background: #1447E6;
   color: #ffffff;
   font-size: 36px;
   font-weight: 500;
@@ -1725,7 +1806,7 @@
   height: 15px;
   appearance: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, #3237B7 0 var(--vc-range-progress, 0%), #d7dce7 var(--vc-range-progress, 0%) 100%);
+  background: linear-gradient(90deg, #1447E6 0 var(--vc-range-progress, 0%), #d7dce7 var(--vc-range-progress, 0%) 100%);
 }
 
 /* Mantiene transparente la pista nativa para que el relleno dinamico lo controle el propio input. */
@@ -1741,7 +1822,7 @@
   height: 26px;
   margin-top: -5.5px;
   appearance: none;
-  border: 2px solid #3237B7;
+  border: 2px solid #1447E6;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: none;
@@ -1759,14 +1840,14 @@
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-progress {
   height: 15px;
   border-radius: 999px;
-  background: #3237B7;
+  background: #1447E6;
 }
 
 /* Replica la bola blanca del slider para Firefox. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
   width: 26px;
   height: 26px;
-  border: 2px solid #3237B7;
+  border: 2px solid #1447E6;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: none;
@@ -1784,7 +1865,7 @@
 .vc-flashcards-count-option {
   min-height: 44px;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #f3f6fb;
   color: #667085;
   cursor: pointer;
@@ -1794,8 +1875,8 @@
 
 /* Estado activo de la cantidad elegida. */
 .vc-flashcards-count-option.is-active {
-  border-color: #3237B7;
-  background: #3237B7;
+  border-color: #1447E6;
+  background: #1447E6;
   color: #ffffff;
 }
 
@@ -1839,12 +1920,12 @@
 
 .vc-flashcards-modal-cancel {
   background: transparent;
-  color: #3f3dc7;
-  border: 1px solid #3f3dc7;
+  color: #1447E6;
+  border: 1px solid #1447E6;
 }
 
 .vc-flashcards-modal-confirm {
-  background: #3237B7;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
 }
@@ -1854,8 +1935,8 @@
 .vc-flashcards-modal-cancel:focus-visible,
 .vc-flashcards-modal-cancel:active {
   background: transparent;
-  color: #3f3dc7;
-  border-color: #3f3dc7;
+  color: #1447E6;
+  border-color: #1447E6;
   box-shadow: none;
 }
 
@@ -1863,7 +1944,7 @@
 .vc-flashcards-modal-confirm:focus,
 .vc-flashcards-modal-confirm:focus-visible,
 .vc-flashcards-modal-confirm:active {
-  background: #3237B7;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
   box-shadow: none;
@@ -1875,8 +1956,8 @@
 .vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus-visible,
 .vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:active {
   background: transparent;
-  color: #3f3dc7;
-  border-color: #3f3dc7;
+  color: #1447E6;
+  border-color: #1447E6;
   box-shadow: none;
   outline: none;
   text-decoration: none;
@@ -1890,7 +1971,7 @@
 .vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus,
 .vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus-visible,
 .vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:active {
-  background: #3237B7;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
   box-shadow: none;
@@ -1906,7 +1987,7 @@
 .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus) .vc-flashcards-modal-confirm,
 .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus-visible) .vc-flashcards-modal-confirm,
 .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:active) .vc-flashcards-modal-confirm {
-  background: #3237B7;
+  background: #1447E6;
   color: #ffffff;
   border: 0;
   box-shadow: none;
@@ -1921,8 +2002,8 @@
 .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus-visible) .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:active) .vc-flashcards-modal-cancel {
   background: transparent;
-  color: #3f3dc7;
-  border-color: #3f3dc7;
+  color: #1447E6;
+  border-color: #1447E6;
   box-shadow: none;
   outline: none;
   text-decoration: none;

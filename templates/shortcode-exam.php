@@ -78,11 +78,11 @@ if (!defined('ABSPATH')) {
       </article>
     <?php else: ?>
       <?php /* Grilla principal del home: cards por categoria para iniciar el examen por tema. */ ?>
-      <div class="vc-flashcards-category-grid">
+      <div class="vc-flashcards-category-grid vc-flashcards-category-grid--mock">
         <?php foreach ($exam_categories as $category): ?>
           <?php /* Card individual de categoria: nombre, metadata, pill informativo y CTA Start Exam. */ ?>
           <article
-            class="vc-flashcards-category-card vc-exam-category-card"
+            class="vc-flashcards-category-card"
             aria-labelledby="vc-exam-category-<?php echo esc_attr((string) $category['id']); ?>-title"
           >
 
@@ -109,17 +109,11 @@ if (!defined('ABSPATH')) {
               </p>
             </div>
 
-            <div class="vc-exam-category-pill">
-              <?php /* Pill informativo que indica que las preguntas se distribuyen por subtopics. */ ?>
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <?php esc_html_e('Distributed across subtopics', 'vc-flashcards'); ?>
-            </div>
-
             <div class="vc-flashcards-category-meta">
               <?php /* Boton que dispara el inicio del examen para esta categoria concreta. */ ?>
               <button
                 type="button"
-                class="vc-flashcards-start vc-flashcards-start--full vc-exam-start-btn"
+                class="vc-flashcards-start vc-flashcards-start--full"
                 data-vc-exam-start="<?php echo esc_attr((string) $category['id']); ?>"
               >
                 <span><?php esc_html_e('Start Exam', 'vc-flashcards'); ?></span>
@@ -216,7 +210,7 @@ if (!defined('ABSPATH')) {
             <path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
           </svg>
         </span>
-        <span data-vc-exam-timer-value>0:15:00</span>
+        <span data-vc-exam-timer-value>0:01:00</span>
       </div>
     </div>
 
@@ -374,7 +368,7 @@ if (!defined('ABSPATH')) {
           data-vc-exam-retry
         >
           <span class="vc-flashcards-summary-action-icon" aria-hidden="true">
-            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/repeat-session.svg'); ?>" alt="" width="16" height="16">
+            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try.svg'); ?>" alt="" width="16" height="16">
           </span>
 
           <span><?php esc_html_e('Try again', 'vc-flashcards'); ?></span>
