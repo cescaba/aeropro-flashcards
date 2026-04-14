@@ -1448,7 +1448,7 @@
 .vc-flashcards-summary-top {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 26px;
   margin-bottom: 24px;
   font-family: Poppins, sans-serif;
 }
