@@ -9,11 +9,9 @@
   font-family: Poppins, sans-serif;
   position: relative;
   min-height: 100%;
+  --vc-flashcards-surface-radius: 12px;
   --vc-exam-surface-radius: 12px;
   --vc-exam-inner-surface-radius: 10px;
-  --vc-flashcards-home-surface-radius: var(--vc-exam-surface-radius);
-  --vc-flashcards-session-surface-radius: var(--vc-exam-surface-radius);
-  --vc-flashcards-summary-surface-radius: var(--vc-exam-surface-radius);
 }
 
 /* Estado oculto temporal mientras JS inicializa la UI del examen. */
@@ -120,7 +118,7 @@
 /* Caja externa de cada badge superior del examen. */
 .vc-exam-badge {
   border: 1px solid #e2e8f0;
-  border-radius: var(--vc-exam-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   opacity: 1;
   padding: 12px 20px;
   background: #F1F5F9;
@@ -210,7 +208,7 @@
 .vc-exam-history-content {
   padding: 25px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-exam-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #FFFFFF;
 }
 
@@ -226,7 +224,7 @@
   gap: 14px;
   padding: 12px 24px 17px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-exam-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #F1F5F9;
 }
 
@@ -708,7 +706,7 @@
   opacity: 1;
   background: #ffffff;
   padding: 28px 32px 26px;
-  border-radius: var(--vc-exam-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   border-width: 1.67px;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
   box-sizing: border-box;
@@ -734,7 +732,6 @@
 .vc-exam-summary-dialog .vc-exam-result-header {
   display: grid;
   justify-items: center;
-  margin-bottom: 24px;
 }
 
 /* Mini-card usada para Correct / Incorrect / Unanswered. */
@@ -896,7 +893,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 40px;
+  margin: 0 auto 20px;
   font-size: 36px;
   font-weight: 700;
   color: #ffffff;
@@ -917,7 +914,7 @@
 
 /* Titulo principal del resultado, como "Not approved". */
 .vc-exam-summary-dialog .vc-flashcards-summary-kicker {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: #212121;
   font-weight: 400;
   font-size: 22px;

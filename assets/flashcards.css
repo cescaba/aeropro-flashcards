@@ -4,6 +4,8 @@
   gap: 24px;
   color: #212121;
   font-family: Poppins, sans-serif;
+  --vc-flashcards-surface-radius: 12px;
+  --vc-flashcards-icon-box-radius: 12px;
 }
 
 
@@ -20,21 +22,8 @@
 }
 
 .vc-flashcards-home {
-  --vc-flashcards-home-surface-radius: 12px;
   display: grid;
   gap: 24px;
-}
-
-.vc-flashcards-view[data-vc-flashcards-view="detail"] {
-  --vc-flashcards-detail-surface-radius: 12px;
-}
-
-.vc-flashcards-session {
-  --vc-flashcards-session-surface-radius: 12px;
-}
-
-.vc-flashcards-summary {
-  --vc-flashcards-summary-surface-radius: 12px;
 }
 
 .vc-flashcards-stats,
@@ -91,23 +80,14 @@
   margin-top: 0;
 }
 
-/* Base visual compartida para tarjetas y paneles del modulo. */
-.vc-flashcards-category-card,
-.vc-flashcards-subtopics-card,
-.vc-flashcards-card,
-.vc-flashcards-summary-box,
-.vc-flashcards-empty {
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  background: #ffffff;
-}
+
 
 /* Tarjeta de estadistica con fondo suave para metricas destacadas. */
 .vc-flashcards-stat-card {
   opacity: 1;
   padding: 12px 20px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-home-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #F1F5F9;
 }
 
@@ -115,12 +95,12 @@
   display: grid;
   gap: 16px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-home-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #FFFFFF;
 }
 
 .vc-flashcards-home .vc-flashcards-empty {
-  border-radius: var(--vc-flashcards-home-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
 }
 
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
@@ -322,7 +302,7 @@
   justify-content: space-between;
   padding: 16px 28px 16px 24px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-home-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #F1F5F9;
 }
 
@@ -355,7 +335,7 @@
   padding: 14px;
   box-sizing: border-box;
   opacity: 1;
-  border-radius: 12px;
+  border-radius: var(--vc-flashcards-icon-box-radius);
   background: #1447E6;
 }
 
@@ -534,7 +514,7 @@
   min-height: 0;
   aspect-ratio: 1 / 1;
   opacity: 1;
-  border-radius: 12px;
+  border-radius: var(--vc-flashcards-icon-box-radius);
   padding-right: 12px;
   padding-left: 12px;
 }
@@ -635,7 +615,9 @@
 
 .vc-flashcards-card {
   padding: 32px;
-  border-radius: var(--vc-flashcards-session-surface-radius, 20px);
+  border: 1px solid #E2E8F0;
+  border-radius: var(--vc-flashcards-surface-radius);
+  background: #FFFFFF;
 }
 
 /* Contenedor neutro para el listado de subtemas sin apariencia de tarjeta. */
@@ -825,7 +807,7 @@
   align-items: stretch;
   gap: 16px;
   border: 1px solid #e2e8f0;
-  border-radius: var(--vc-flashcards-detail-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #FFFFFF;
 }
 
@@ -868,7 +850,7 @@
   gap: 16px;
   padding: 16px 44px 23px 16px;
   border: 0.56px solid #e2e8f0;
-  border-radius: var(--vc-flashcards-detail-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #f8fbff;
   cursor: pointer;
   text-align: left;
@@ -1014,7 +996,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--vc-flashcards-surface-radius);
   font-size: 14px;
   line-height: 1;
 }
@@ -1057,7 +1039,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 18px;
-  border-radius: 16px;
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #f7f9fc;
   color: #666666;
   cursor: pointer;
@@ -1391,7 +1373,7 @@
   opacity: 1;
   padding: 30px;
   border: 0.56px solid #dbe4f0;
-  border-radius: var(--vc-flashcards-summary-surface-radius);
+  border-radius: var(--vc-flashcards-surface-radius);
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
@@ -1491,7 +1473,7 @@
   padding: 17px;
   border-style: solid;
   border-width: 1px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 /* Valor principal de cada resultado. */
@@ -1562,7 +1544,7 @@
   width: 100%;
   border: 1px solid #bedbff;
   padding: 17px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #eff6ff;
 }
 
@@ -1620,7 +1602,7 @@
 .vc-flashcards-summary-action {
   width: 100%;
   min-height: 48px;
-  border-radius: 14px;
+  border-radius: 6px;
 }
 
 /* Accion principal. */
@@ -1633,7 +1615,7 @@
   background: #1447E6;
   color: #ffffff;
   border: 1px solid #1447E6;
-  border-radius: 14px;
+  border-radius: 6px;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
