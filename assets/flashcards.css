@@ -103,6 +103,12 @@
   border-radius: var(--vc-flashcards-surface-radius);
 }
 
+.vc-flashcards-empty {
+  padding: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
 .vc-flashcards-stat-card-content {
   display: flex;
@@ -394,7 +400,7 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 100%;
-  letter-spacing: 0.2px;
+  letter-spacing: -0.3px;
   text-align: center;
   color: #1447E6;
 }
@@ -608,9 +614,15 @@
 .vc-flashcards-category-card,
 .vc-flashcards-config-card,
 .vc-flashcards-subtopics-card,
-.vc-flashcards-summary-box,
-.vc-flashcards-empty {
+.vc-flashcards-summary-box {
   padding: 24px 24px 29px;
+}
+
+
+.vc-flashcards-empty {
+  padding: 0px;
+  font-size: 13px;
+  font-weight: 400px;
 }
 
 .vc-flashcards-card {
