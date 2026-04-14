@@ -680,13 +680,15 @@
 /* La vista summary funciona como una vista normal del examen, no como overlay. */
 .vc-exam-app > [data-vc-exam-view="summary"] {
   min-height: 100%;
+  justify-items: center;
 }
 
 /* Wrapper principal con ancho maximo para la pantalla de resumen. */
 .vc-exam-summary-dialog {
   position: relative;
-  width: min(100%, 896px);
-  margin: 0 auto;
+  justify-self: center;
+  width: min(100%, 500px);
+  margin: 0;
   opacity: 1;
   overflow-y: auto;
   padding: 0;
