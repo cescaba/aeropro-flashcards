@@ -1510,7 +1510,7 @@ class VC_Flashcards_Plugin {
       'nonce'   => wp_create_nonce(self::NONCE_ACTION),
       'examConfig' => [
         'totalQuestions'   => 100,
-        'timeLimitSeconds' => 60,
+        'timeLimitSeconds' => 900,
         'passingScore'     => self::PASSING_SCORE,
       ],
       'labels' => [
