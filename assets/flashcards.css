@@ -803,7 +803,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #1447E6;
+  background: #999999;
 }
 
 /* Separa la barra del header para que el cambio de bloque se sienta mas limpio. */
