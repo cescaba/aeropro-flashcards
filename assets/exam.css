@@ -1,3 +1,8 @@
+/* ==========================================================================
+   Base
+   Estructura raiz del simulador de examen y estados iniciales.
+   ========================================================================== */
+
 /* ===== Simulador de examen ===== */
 
 /* ===== Simulador de examen: estructura general ===== */
@@ -28,6 +33,11 @@
   display: none !important;
 }
 
+/* ==========================================================================
+   Component: Exam Home
+   Intro, badges superiores, categorias, historial y detalles del test.
+   ========================================================================== */
+
 /* ===== Home del examen: bloque superior ===== */
 
 /* ===== Home del examen: encabezado, badges y cards ===== */
@@ -49,6 +59,7 @@
 
 /* Espacio debajo de la grilla de categorias antes de historial y detalles. */
 .vc-exam-app .vc-flashcards-category-grid--mock {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-bottom: 24px;
 }
 
@@ -117,6 +128,8 @@
 
 /* Caja externa de cada badge superior del examen. */
 .vc-exam-badge {
+  min-width: 0;
+  display: flex;
   border: 1px solid #e2e8f0;
   border-radius: var(--vc-flashcards-surface-radius);
   opacity: 1;
@@ -126,14 +139,18 @@
 
 /* Layout horizontal que alinea icono + texto dentro de cada badge. */
 .vc-exam-badge-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* Caja verde del icono usada en cada badge superior. */
 .vc-exam-badge-icon {
-  flex: 0 0 auto;
+  width: 50px;
+  height: 50px;
   padding: 11px;
   border-radius: 5px;
   background: #00a63e;
@@ -159,7 +176,7 @@
 
 /* Columna de texto dentro de cada badge superior. */
 .vc-exam-badge-copy {
-  flex: 1 1 auto;
+  min-width: 0;
   min-height: 44px;
   display: flex;
   flex-direction: column;
@@ -169,6 +186,9 @@
 /* Texto secundario del badge, como "Best score" o "Average". */
 .vc-exam-badge-copy small {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Valor principal del badge, como "81%" o "0/5". */
@@ -179,6 +199,9 @@
   color: #0ea44b;
   font-size: 30px;
   line-height: 42px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== Home del examen: cards de categoria ===== */
@@ -385,6 +408,11 @@
   color: currentColor;
 }
 
+/* ==========================================================================
+   Component: Exam Session
+   Header de sesion, cronometro, card de pregunta, respuestas y acciones.
+   ========================================================================== */
+
 /* ===== Sesion en curso: cabecera ===== */
 
 /* ===== Sesion en curso: header y cronometro ===== */
@@ -460,13 +488,14 @@
   padding: 7px 10px;
   border-radius: 6px;
   border-width: 1.67px;
-  border-color: #1E3C80;
+  border-color: #1447E6;
   box-sizing: border-box;
 }
 
 /* Estilo del texto dentro del boton Finish exam. */
 .vc-exam-finish-btn span {
-  color: #1E3C80;
+  color: #1447E6;
+  border-width: 1.67px;
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
@@ -479,10 +508,12 @@
   gap: 30px;
 }
 
+/* Exam card context: pills de topic/subtopic dentro de la pregunta. */
 .vc-exam-card .vc-flashcards-session-context {
   margin: 0;
 }
 
+/* Exam card internal spacing: respuestas y acciones sin margenes externos. */
 .vc-exam-card .vc-flashcards-answers,
 .vc-exam-card .vc-exam-session-actions {
   margin-top: 0;
@@ -674,6 +705,11 @@
   background: #e2e8f0 !important;
   color: #4A5565 !important;
 }
+
+/* ==========================================================================
+   Component: Exam Summary
+   Vista final con resultado, cards de conteo, breakdown y acciones.
+   ========================================================================== */
 
 /* ===== Resumen final del examen ===== */
 
@@ -925,7 +961,45 @@
 
 /* El contenido del resumen cambia por JS segun el resultado del examen. */
 
+/* ==========================================================================
+   Responsive
+   Ajustes compactos del simulador de examen.
+   ========================================================================== */
+
+/* Base desktop */
+
 /* ===== Ajustes responsive ===== */
+
+@media (max-width: 1180px) {
+  /* Exam badges compact desktop: reduce separacion antes de tablet sin cambiar estructura. */
+  .vc-exam-intro-badges {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 960px) {
+  /* Exam badges tablet: mantiene cuatro columnas usando badges internos estables. */
+  .vc-exam-intro-badges {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Exam category mock tablet: mantiene tres cards por fila en 960px. */
+  .vc-exam-app .vc-flashcards-category-grid--mock {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  /* Exam badges tablet small: muestra dos badges por fila antes del mobile real. */
+  .vc-exam-intro-badges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Exam category mock tablet small: mantiene tres cards por fila. */
+  .vc-exam-app .vc-flashcards-category-grid--mock {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 
 @media (max-width: 680px) {
   /* Reordena los bloques principales para mantener legibilidad en mobile. */
@@ -966,4 +1040,8 @@
     font-size: 16px;
     padding: 4px 10px;
   }
+}
+
+@media (max-width: 480px) {
+  /* Reservado: ajustes finos para celular pequeno. */
 }

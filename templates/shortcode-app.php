@@ -56,8 +56,12 @@ if (!defined('ABSPATH')) {
       <div class="vc-flashcards-category-grid">
         <?php foreach ($categories as $category): ?>
           <article class="vc-flashcards-category-card">
-            <div class="vc-flashcards-category-top">
-              <h3><?php echo esc_html($category['name']); ?></h3>
+            <?php /* Flashcards category mobile: header agrupa titulo y meta para controlar su separacion. */ ?>
+            <div class="vc-flashcards-category-header">
+              <div class="vc-flashcards-category-top">
+                <h3><?php echo esc_html($category['name']); ?></h3>
+              </div>
+              <span class="vc-flashcards-category-meta"><?php echo esc_html(count($category['children'] ?? []) . ' subtopics · ' . $category['progress'] . ' reviewed'); ?></span>
             </div>
             <div class="vc-flashcards-category-progress-block">
               <div class="vc-flashcards-category-progress">
@@ -68,17 +72,14 @@ if (!defined('ABSPATH')) {
                 <span style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
               </div>
             </div>
-            <div class="vc-flashcards-category-meta">
-              <span><?php echo count($category['children'] ?? []) . ' subtopics · ' . $category['progress'] . ' reviewed'; ?></span>
-              <button type="button" class="vc-flashcards-start vc-flashcards-start--full" data-vc-flashcards-open-category="<?php echo esc_attr((string) $category['id']); ?>">
-                <span><?php esc_html_e('Study', 'vc-flashcards'); ?></span>
-                <span class="vc-flashcards-start-icon" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1.5 6H10.5M7.5 3L10.5 6L7.5 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </button>
-            </div>
+            <button type="button" class="vc-flashcards-start vc-flashcards-start--full" data-vc-flashcards-open-category="<?php echo esc_attr((string) $category['id']); ?>">
+              <span><?php esc_html_e('Study', 'vc-flashcards'); ?></span>
+              <span class="vc-flashcards-start-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1.5 6H10.5M7.5 3L10.5 6L7.5 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </button>
           </article>
         <?php endforeach; ?>
       </div>
@@ -88,7 +89,7 @@ if (!defined('ABSPATH')) {
         <article class="vc-flashcards-global-random">
           <div class="vc-flashcards-global-random-main">
             <span class="vc-flashcards-global-random-icon" aria-hidden="true">
-              <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/mundo.svg'); ?>" alt="" width="24" height="24">
+              <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/mundo-azul.svg'); ?>" alt="" width="24" height="24">
             </span>
             <div class="vc-flashcards-global-random-content">
               <div class="vc-flashcards-global-random-copy">
@@ -203,6 +204,7 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/libro.svg'); ?>" alt="" width="16" height="16">
           </span>
           <span class="vc-flashcards-explanation-toggle-label"><?php esc_html_e('View detailed explanation', 'vc-flashcards'); ?></span>
+          <span class="vc-flashcards-next-icon" aria-hidden="true">&gt;</span>
         </button>
       </div>
       <?php /* Panel expandible donde se inyecta la explicacion de la respuesta. */ ?>
@@ -210,7 +212,6 @@ if (!defined('ABSPATH')) {
       <?php /* CTA final para avanzar despues de resolver o revelar la respuesta. */ ?>
       <button type="button" class="vc-flashcards-session-action vc-flashcards-session-next" data-vc-flashcards-next hidden disabled>
         <span class="vc-flashcards-next-label"><?php esc_html_e('Next question', 'vc-flashcards'); ?></span>
-        <span class="vc-flashcards-next-icon" aria-hidden="true">&gt;</span>
       </button>
     </article>
   </section>
@@ -219,12 +220,6 @@ if (!defined('ABSPATH')) {
   <section class="vc-flashcards-summary" data-vc-flashcards-summary hidden>
     <?php /* Caja principal del resumen con score y siguientes acciones. */ ?>
     <div class="vc-flashcards-summary-box">
-      <div class="vc-flashcards-summary-header">
-        <?php /* Cierre rapido del overlay sin cambiar el flujo principal del resumen. */ ?>
-        <button type="button" class="vc-flashcards-close-button vc-flashcards-summary-close" data-vc-flashcards-summary-close aria-label="<?php esc_attr_e('Close summary', 'vc-flashcards'); ?>">
-          <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/cerrar.svg'); ?>" alt="" width="20" height="20">
-        </button>
-      </div>
       <?php /* Insignia visual del resumen final con copa centrada sobre un circulo degradado. */ ?>
       <div class="vc-flashcards-summary-badge" aria-hidden="true">
         <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/copa.svg'); ?>" alt="" width="42" height="42">
@@ -248,13 +243,12 @@ if (!defined('ABSPATH')) {
           <?php /* Titulo de la tarjeta de precision encima del porcentaje principal. */ ?>
           <span class="vc-flashcards-summary-accuracy-title"><?php esc_html_e('Accuracy', 'vc-flashcards'); ?></span>
           <strong data-vc-flashcards-summary-precision>0%</strong>
-          <?php /* Barra visual que representa el porcentaje de precision de la sesion. */ ?>
-          <span class="vc-flashcards-summary-accuracy-bar">
-            <span data-vc-flashcards-summary-precision-bar></span>
-          </span>
         </div>
       </div>
-      <h3 class="vc-flashcards-summary-message"><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></h3>
+      <h3 class="vc-flashcards-summary-message">
+        <span><?php esc_html_e('Keep studying.', 'vc-flashcards'); ?></span>
+        <span><?php esc_html_e('Practice makes perfect.', 'vc-flashcards'); ?></span>
+      </h3>
       <div class="vc-flashcards-summary-actions">
         <?php /* Variante visual exclusiva del summary para el retorno al menú. */ ?>
         <button type="button" class="vc-flashcards-back vc-flashcards-summary-action vc-flashcards-summary-action--back" data-vc-flashcards-summary-back><?php esc_html_e('Back to menu', 'vc-flashcards'); ?></button>

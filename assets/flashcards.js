@@ -1,10 +1,12 @@
 ﻿(function () {
   
   function initFlashcardsApp(root) {
+    // Datos iniciales entregados por PHP y valores por defecto del modulo.
     const categories = parseCategories(root.dataset.categories);
     const labels = (window.vcFlashcardsData && window.vcFlashcardsData.labels) || {};
     const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30, 40, 50];
 
+    // Referencias DOM principales: vistas, controles, modal y metricas del home.
     const feedback = root.querySelector('[data-vc-flashcards-feedback]');
     const homeView = root.querySelector('[data-vc-flashcards-view="home"]');
     const detailView = root.querySelector('[data-vc-flashcards-view="detail"]');
@@ -21,7 +23,6 @@
     const explanationToggleLabel = root.querySelector('.vc-flashcards-explanation-toggle-label');
     const restartButton = root.querySelector('[data-vc-flashcards-restart]');
     const summaryBackButton = root.querySelector('[data-vc-flashcards-summary-back]');
-    const summaryCloseButton = root.querySelector('[data-vc-flashcards-summary-close]');
     const answersWrap = root.querySelector('[data-vc-flashcards-answers]');
     const questionEl = root.querySelector('[data-vc-flashcards-question]');
     const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
@@ -30,9 +31,8 @@
     const kicker = root.querySelector('[data-vc-flashcards-kicker]');
     const nextButtonLabel = root.querySelector('.vc-flashcards-next-label');
     const summaryPrecision = root.querySelector('[data-vc-flashcards-summary-precision]');
-    const summaryPrecisionBar = root.querySelector('[data-vc-flashcards-summary-precision-bar]');
     const summaryScore = root.querySelector('[data-vc-flashcards-summary-score]');
-    
+
     const summaryCorrectCount = root.querySelector('[data-vc-flashcards-correct-count]');
     const summaryIncorrectCount = root.querySelector('[data-vc-flashcards-incorrect-count]');
     const modalTitle = root.querySelector('[data-vc-flashcards-modal-title]');
@@ -46,6 +46,7 @@
     const statAverageScore = root.querySelector('[data-vc-flashcards-stat="average-score"]');
     const statPassedAttempts = root.querySelector('[data-vc-flashcards-stat="passed-attempts"]');
 
+    // Estado vivo de la app: categoria activa, sesion, respuestas y modal.
     let currentCategory = null;
     let pendingConfig = null;
     let lastConfig = null;
@@ -58,14 +59,17 @@
     let answerStartedAt = 0;
     let answeredCurrentCard = false;
     let currentExplanationHtml = '';
+    let activeConfigCard = null;
     const storageKey = 'vcFlashcardsState:' + window.location.pathname;
 
+    // Persistencia: limpia el estado cuando el usuario sale de flashcards.
     function clearPersistedState() {
       try {
         window.sessionStorage.removeItem(storageKey);
       } catch (error) {}
     }
 
+    // Persistencia: borra el estado si el dashboard navega a otra seccion.
     function bindDashboardExitReset() {
       document.querySelectorAll('.vc-dashboard-nav-link').forEach(function (link) {
         link.addEventListener('click', function () {
@@ -81,6 +85,7 @@
       });
     }
 
+    // Datos: normaliza el JSON de categorias para evitar errores con payloads vacios.
     function parseCategories(serialized) {
       if (!serialized) {
         return [];
@@ -94,6 +99,7 @@
       }
     }
 
+    // Persistencia: guarda lo minimo para restaurar una practica al recargar.
     function persistState() {
       try {
         window.sessionStorage.setItem(storageKey, JSON.stringify({
@@ -114,6 +120,7 @@
       } catch (error) {}
     }
 
+    // Summary: controla la visibilidad del panel final sin perder el estado.
     function setSummaryOpen(isOpen) {
       if (!summaryPanel) {
         return;
@@ -123,6 +130,7 @@
       persistState();
     }
 
+    // Summary: pinta los resultados finales devueltos por el backend.
     function renderSummaryMetrics(metrics) {
       if (!metrics) {
         return;
@@ -137,14 +145,12 @@
       if (summaryPrecision) {
         summaryPrecision.textContent = String(Math.round(metrics.precisionPercent)) + '%';
       }
-      if (summaryPrecisionBar) {
-        summaryPrecisionBar.style.width = String(Math.max(0, Math.min(100, Number(metrics.precisionPercent) || 0))) + '%';
-      }
       if (summaryScore) {
         summaryScore.textContent = String(Math.round(metrics.scorePercent)) + '%';
       }
     }
 
+    // Detail: actualiza el header con la categoria seleccionada.
     function renderCategoryHeader(category) {
       if (!category) {
         return;
@@ -162,6 +168,7 @@
       }
     }
 
+    // Persistencia: reconstruye detail, session o summary desde sessionStorage.
     function restoreState() {
       try {
         const rawState = window.sessionStorage.getItem(storageKey);
@@ -193,6 +200,7 @@
 
         if (state.activeView === 'session' && currentCategory && cards.length) {
           renderCard();
+          restoreAnsweredCardUi(Boolean(state.explanationVisible));
           renderSummaryMetrics(summaryMetrics);
           setSummaryOpen(Boolean(state.summaryOpen));
 
@@ -215,6 +223,7 @@
       return false;
     }
 
+    // Session: construye chips de topic y subtopic para la tarjeta actual.
     function renderSessionKicker(topicLabel, subtopicLabel) {
       if (!kicker) {
         return;
@@ -237,6 +246,7 @@
       }
     }
 
+    // Feedback: muestra errores o mensajes informativos de la app.
     function setFeedback(message, type) {
       if (!feedback) {
         return;
@@ -254,6 +264,7 @@
       feedback.dataset.state = type || 'info';
     }
 
+    // Navegacion: alterna home, detail, session y summary.
     function showView(viewName) {
       root.dataset.activeView = viewName;
       homeView.hidden = viewName !== 'home';
@@ -263,6 +274,7 @@
       persistState();
     }
 
+    // Navegacion: vuelve al home y limpia la categoria activa.
     function openHome() {
       currentCategory = null;
       showView('home');
@@ -270,12 +282,14 @@
       persistState();
     }
 
+    // Datos: busca una categoria por id normalizando tipos numericos.
     function getCategoryById(categoryId) {
       return categories.find(function (item) {
         return Number(item.id) === Number(categoryId);
       }) || null;
     }
 
+    // Detail: abre una categoria y renderiza sus subtopics.
     function openCategory(categoryId) {
       currentCategory = getCategoryById(categoryId);
 
@@ -290,6 +304,7 @@
       persistState();
     }
 
+    // Detail: renderiza subtopics como botones que abren el modal.
     function renderSubtopics(subtopics) {
       subtopicsWrap.innerHTML = '';
 
@@ -303,15 +318,23 @@
 
       subtopics.forEach(function (subtopic) {
         const item = document.createElement('button');
+        const copy = document.createElement('div');
+        const heading = document.createElement('div');
+        const title = document.createElement('strong');
+        const description = document.createElement('span');
+
         item.type = 'button';
         item.className = 'vc-flashcards-subtopic-item';
-        item.innerHTML =
-          '<div class="vc-flashcards-subtopic-copy">' +
-            '<div class="vc-flashcards-subtopic-heading">' +
-              '<strong>' + subtopic.name + '</strong>' +
-            '</div>' +
-            '<span>' + subtopic.description + '</span>' +
-          '</div>';
+
+        copy.className = 'vc-flashcards-subtopic-copy';
+        heading.className = 'vc-flashcards-subtopic-heading';
+        title.textContent = subtopic.name || '';
+        description.textContent = subtopic.description || '';
+
+        heading.appendChild(title);
+        copy.appendChild(heading);
+        copy.appendChild(description);
+        item.appendChild(copy);
 
         item.addEventListener('click', function () {
           openConfigModal({
@@ -328,12 +351,14 @@
       });
     }
 
+    // Modal: limita la cantidad seleccionada al rango permitido.
     function normalizeCount(value, maxCards) {
       const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const safeValue = Math.max(1, Math.min(safeMax, Number(value || safeMax)));
       return safeValue;
     }
 
+    // Modal: calcula las opciones rapidas de cantidad segun el maximo disponible.
     function getOptionValues(maxCards) {
       const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const filtered = cardOptions
@@ -353,6 +378,7 @@
       });
     }
 
+    // Modal: sincroniza slider, contador y botones rapidos.
     function updateModalSelection(value) {
       if (!pendingConfig) {
         return;
@@ -369,6 +395,7 @@
       updateRangeFill();
     }
 
+    // Modal: actualiza el relleno visual del range con una variable CSS.
     function updateRangeFill() {
       const min = Number(rangeInput.min || 0);
       const max = Number(rangeInput.max || 100);
@@ -378,6 +405,7 @@
       rangeInput.style.setProperty('--vc-range-progress', percent + '%');
     }
 
+    // Modal: dibuja los botones de cantidades predefinidas.
     function renderModalOptions(maxCards) {
       const values = getOptionValues(maxCards);
       optionsWrap.innerHTML = '';
@@ -395,9 +423,24 @@
       });
     }
 
+    // Detail: marca la tarjeta que disparo el modal de configuracion.
+    function setActiveConfigCard(card) {
+      if (activeConfigCard && activeConfigCard !== card) {
+        activeConfigCard.classList.remove('is-active');
+      }
+
+      activeConfigCard = card || null;
+
+      if (activeConfigCard) {
+        activeConfigCard.classList.add('is-active');
+      }
+    }
+
+    // Modal: prepara titulo, descripcion, rango y cantidad antes de mostrarlo.
     function openConfigModal(config) {
       const maxCards = Number(config.maxCards || 0);
       if (maxCards < 1) {
+        setActiveConfigCard(null);
         setFeedback(labels.noCards || 'No flashcards were found for this selection.', 'error');
         return;
       }
@@ -426,12 +469,15 @@
       persistState();
     }
 
+    // Modal: cierra el dialogo y limpia el estado visual de la tarjeta activa.
     function closeConfigModal() {
       modal.hidden = true;
       document.body.classList.remove('vc-flashcards-modal-open');
+      setActiveConfigCard(null);
       persistState();
     }
 
+    // Modal: bloquea el CTA mientras se crea la sesion por AJAX.
     function setSessionStartLoading(isLoading) {
       isStartingSession = isLoading;
 
@@ -443,6 +489,7 @@
       }
     }
 
+    // Session: actualiza el texto del toggle de explicacion.
     function setExplanationToggleLabel(label) {
       if (!explanationToggleLabel) {
         return;
@@ -451,6 +498,17 @@
       explanationToggleLabel.textContent = label;
     }
 
+    // Session: sincroniza el estado visual y ARIA del toggle de explicacion.
+    function setExplanationToggleOpen(isOpen) {
+      if (!explanationToggle) {
+        return;
+      }
+
+      explanationToggle.classList.toggle('is-open', isOpen);
+      explanationToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    // Session: limpia pregunta, respuestas y explicacion antes de pintar una nueva tarjeta.
     function resetSessionUi() {
       answersWrap.innerHTML = '';
       explanationEl.hidden = true;
@@ -461,6 +519,7 @@
       }
       if (explanationToggle) {
         explanationToggle.hidden = true;
+        setExplanationToggleOpen(false);
         setExplanationToggleLabel(labels.viewExplanation || 'View detailed explanation');
       }
       nextButton.hidden = true;
@@ -468,21 +527,39 @@
       setFeedback('', '');
     }
 
+    // Session: crea cada respuesta como boton para controlar estados y teclado.
     function buildAnswerButton(key, text) {
       const button = document.createElement('button');
+      const badge = document.createElement('span');
+      const label = document.createElement('strong');
+
       button.type = 'button';
       button.className = 'vc-flashcards-answer';
       button.dataset.answerKey = key;
-      button.innerHTML = '<span>' + key.toUpperCase() + '</span><strong>' + text + '</strong>';
+      badge.textContent = key.toUpperCase();
+      label.textContent = text;
+      button.appendChild(badge);
+      button.appendChild(label);
       button.addEventListener('click', function () {
         handleAnswer(button);
       });
       return button;
     }
 
+    // Seguridad: escapa textos dinamicos antes de insertarlos en HTML controlado.
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Session: prepara explicacion y referencias sin abrirlas automaticamente.
     function renderExplanation(card, isCorrect) {
       const refs = Array.isArray(card.references) && card.references.length
-        ? '<ul>' + card.references.map(function (ref) { return '<li>' + ref + '</li>'; }).join('') + '</ul>'
+        ? '<ul>' + card.references.map(function (ref) { return '<li>' + escapeHtml(ref) + '</li>'; }).join('') + '</ul>'
         : '';
 
       currentExplanationHtml =
@@ -496,9 +573,64 @@
 
       if (explanationToggle) {
         explanationToggle.hidden = false;
+        setExplanationToggleOpen(false);
       }
     }
 
+    // Session: busca el ultimo intento guardado para una tarjeta.
+    function findAttemptForCard(card) {
+      if (!card) {
+        return null;
+      }
+
+      for (let index = attempts.length - 1; index >= 0; index -= 1) {
+        if (Number(attempts[index].flashcardId) === Number(card.id)) {
+          return attempts[index];
+        }
+      }
+
+      return null;
+    }
+
+    // Session: restaura una pregunta ya respondida despues de recargar o volver.
+    function restoreAnsweredCardUi(explanationVisible) {
+      const card = cards[cardIndex];
+      const attempt = findAttemptForCard(card);
+
+      if (!card || !attempt) {
+        return;
+      }
+
+      answeredCurrentCard = true;
+
+      if (revealButton) {
+        revealButton.hidden = true;
+      }
+
+      nextButton.hidden = false;
+      nextButton.disabled = false;
+
+      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (answerButton) {
+        answerButton.disabled = true;
+
+        if (answerButton.dataset.answerKey === attempt.correctAnswer) {
+          answerButton.dataset.state = 'correct';
+        } else if (attempt.selectedAnswer && answerButton.dataset.answerKey === attempt.selectedAnswer) {
+          answerButton.dataset.state = 'incorrect';
+        }
+      });
+
+      renderExplanation(card, attempt.selectedAnswer === attempt.correctAnswer);
+      explanationEl.hidden = !explanationVisible;
+      setExplanationToggleOpen(!explanationEl.hidden);
+      setExplanationToggleLabel(
+        explanationEl.hidden
+          ? (labels.viewExplanation || 'View detailed explanation')
+          : (labels.hideExplanation || 'Hide detailed explanation')
+      );
+    }
+
+    // Session: pinta la tarjeta actual y termina cuando no quedan preguntas.
     function renderCard() {
       const card = cards[cardIndex];
 
@@ -529,6 +661,7 @@
       persistState();
     }
 
+    // Session: registra la opcion elegida y marca correcto o incorrecto.
     function handleAnswer(button) {
       if (answeredCurrentCard) {
         return;
@@ -567,6 +700,7 @@
       persistState();
     }
 
+    // Session: revela la respuesta sin seleccion y guarda el intento.
     function revealAnswer() {
       if (answeredCurrentCard) {
         return;
@@ -581,6 +715,7 @@
       }
       if (explanationToggle) {
         explanationToggle.hidden = true;
+        setExplanationToggleOpen(false);
       }
       nextButton.hidden = false;
       nextButton.disabled = false;
@@ -602,9 +737,11 @@
 
       renderExplanation(card, false);
       explanationEl.hidden = false;
+      setExplanationToggleOpen(true);
       persistState();
     }
 
+    // Home: refresca metricas despues de completar una sesion.
     function updateStats(stats) {
       if (!stats) {
         return;
@@ -621,6 +758,7 @@
       }
     }
 
+    // AJAX: envia intentos al backend y abre el summary final.
     function finishSession() {
       const body = new window.URLSearchParams();
       body.append('action', 'vc_flashcards_complete_session');
@@ -663,6 +801,7 @@
         });
     }
 
+    // AJAX: crea una sesion con la configuracion elegida en el modal.
     function startSession(config) {
       if (!config || isStartingSession) {
         return;
@@ -716,21 +855,26 @@
         });
     }
 
+    // Eventos: navegacion hacia categorias desde el home.
     root.querySelectorAll('[data-vc-flashcards-open-category]').forEach(function (button) {
       button.addEventListener('click', function () {
         openCategory(Number(button.dataset.vcFlashcardsOpenCategory));
       });
     });
 
+    // Eventos: apertura de modal para categoria, random y global random.
     root.querySelectorAll('[data-vc-flashcards-launch]').forEach(function (button) {
       button.addEventListener('click', function () {
         const mode = button.dataset.vcFlashcardsLaunch;
         const isRandom = mode === 'random';
         const isGlobalRandom = mode === 'global-random';
+        const launchCard = button.closest('[data-vc-flashcards-launch-card]');
 
         if (!isGlobalRandom && !currentCategory) {
           return;
         }
+
+        setActiveConfigCard(launchCard);
 
         openConfigModal({
           mode: isGlobalRandom ? 'global-random' : (isRandom ? 'random' : 'category'),
@@ -747,6 +891,7 @@
       });
     });
 
+    // Eventos: permite activar una tarjeta completa sin duplicar el click del boton interno.
     root.querySelectorAll('[data-vc-flashcards-launch-card]').forEach(function (card) {
       const launchButton = card.querySelector('[data-vc-flashcards-launch]');
 
@@ -776,6 +921,7 @@
       });
     });
 
+    // Eventos: controles compartidos de regreso, cierre de modal y avance.
     root.querySelectorAll('[data-vc-flashcards-back]').forEach(function (button) {
       button.addEventListener('click', openHome);
     });
@@ -818,6 +964,7 @@
         }
 
         explanationEl.hidden = !explanationEl.hidden;
+        setExplanationToggleOpen(!explanationEl.hidden);
         setExplanationToggleLabel(
           explanationEl.hidden
             ? (labels.viewExplanation || 'View detailed explanation')
@@ -836,13 +983,7 @@
       openHome();
     });
 
-    if (summaryCloseButton) {
-      summaryCloseButton.addEventListener('click', function () {
-        setSummaryOpen(false);
-        openHome();
-      });
-    }
-
+    // Eventos: atajos de teclado para responder con la letra de la opcion.
     document.addEventListener('keydown', function (event) {
       if (root.dataset.activeView !== 'session') {
         return;
@@ -858,11 +999,13 @@
 
     bindDashboardExitReset();
 
+    // Arranque: restaura una sesion previa o inicia en home.
     if (!restoreState()) {
       openHome();
     }
   }
 
+  // Inicializa todas las instancias del shortcode presentes en la pagina.
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.vc-flashcards-app').forEach(initFlashcardsApp);
   });
