@@ -34,6 +34,12 @@ class VC_Flashcards_Plugin {
   // CuÃ¡ntos intentos recientes se muestran en historial o mÃ©tricas resumidas.
   const EXAM_HISTORY_LIMIT = 5;
 
+  // Tiempo corto de cache para pools de IDs del mock test. La sesion sigue siendo unica por usuario.
+  const EXAM_POOL_CACHE_TTL = 600;
+
+  // Version logica para invalidar todos los pools de examen sin buscar transients por prefijo.
+  const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
+
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
   const DB_VERSION = '1.2.0';
 
@@ -90,6 +96,7 @@ class VC_Flashcards_Plugin {
 
     // Guarda los metadatos de una flashcard cuando se guarda el post.
     add_action('save_post_' . self::POST_TYPE, [$this, 'save_flashcard_meta']);
+    add_action('set_object_terms', [$this, 'clear_exam_pool_cache_for_object_terms'], 10, 6);
 
     // Endpoints del admin para importar CSV y descargar el archivo ejemplo.
     add_action('admin_post_vc_flashcards_import_csv', [$this, 'handle_import_csv']);
@@ -377,6 +384,16 @@ class VC_Flashcards_Plugin {
       ]);
       add_action('save_post_' . self::POST_TYPE, [$this, 'save_flashcard_meta']);
     }
+
+    $this->clear_exam_pool_cache();
+  }
+
+  public function clear_exam_pool_cache_for_object_terms($object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids): void {
+    if ($taxonomy !== self::TAXONOMY || get_post_type((int) $object_id) !== self::POST_TYPE) {
+      return;
+    }
+
+    $this->clear_exam_pool_cache();
   }
 
   // Ajuste menor del checklist de terms para que WordPress no suba los seleccionados al tope.
@@ -682,6 +699,10 @@ class VC_Flashcards_Plugin {
     }
 
     fclose($handle);
+
+    if ($created > 0 || $updated > 0) {
+      $this->clear_exam_pool_cache();
+    }
 
     return [
       'created' => $created,
@@ -1751,7 +1772,7 @@ class VC_Flashcards_Plugin {
       'nonce'   => wp_create_nonce(self::NONCE_ACTION),
       'examConfig' => $exam_config,
       'labels' => [
-        'loading'      => __('Preparing your examâ€¦', 'vc-flashcards'),
+        'loading'      => __('Preparing your exam', 'vc-flashcards'),
         'noCards'      => __('No questions were found for this category.', 'vc-flashcards'),
         'question'     => __('Question', 'vc-flashcards'),
         'of'           => __('of', 'vc-flashcards'),
@@ -1913,6 +1934,80 @@ class VC_Flashcards_Plugin {
   // Devuelve las preguntas que formarÃ¡n parte del examen para un topic padre.
   // Intenta llenar hasta el total pedido recorriendo sus subtopics/hijos.
   private function get_exam_cards_for_topic(int $topic_term_id, int $total = 100): array {
+    $pool = $this->get_exam_id_pool_for_topic($topic_term_id);
+    $parent_ids = isset($pool['parent_ids']) && is_array($pool['parent_ids'])
+      ? array_values(array_map('intval', $pool['parent_ids']))
+      : [];
+    $subtopic_order = isset($pool['subtopic_order']) && is_array($pool['subtopic_order'])
+      ? array_values(array_map('intval', $pool['subtopic_order']))
+      : [];
+    $subtopic_ids = isset($pool['subtopic_ids']) && is_array($pool['subtopic_ids'])
+      ? $pool['subtopic_ids']
+      : [];
+
+    if (empty($parent_ids)) {
+      return [];
+    }
+
+    if (empty($subtopic_order)) {
+      shuffle($parent_ids);
+      return $this->build_exam_cards_from_ids(array_slice($parent_ids, 0, $total), $total);
+    }
+
+    /* Distribute $total questions across subtopics.
+     * e.g. 2 subtopics â†’ 50 / 50
+     *      3 subtopics â†’ 33 / 33 / 34
+     *      4 subtopics â†’ 25 / 25 / 25 / 25  */
+    $n             = count($subtopic_order);
+    $base          = intdiv($total, $n);
+    $remainder     = $total % $n;
+
+    $quotas           = array_fill(0, $n, $base);
+    $quotas[$n - 1]  += $remainder;
+
+    $selected_ids = [];
+
+    foreach ($subtopic_order as $index => $subtopic_id) {
+      $quota = $quotas[$index];
+      $ids = isset($subtopic_ids[$subtopic_id]) && is_array($subtopic_ids[$subtopic_id])
+        ? array_values(array_map('intval', $subtopic_ids[$subtopic_id]))
+        : [];
+      if (empty($ids)) {
+        continue;
+      }
+
+      shuffle($ids);
+      $selected = array_slice($ids, 0, $quota);
+      $selected_ids = array_merge($selected_ids, $selected);
+    }
+
+    // Some subtopics may not have enough cards to fill their proportional quota.
+    // Backfill from the whole parent topic so the exam reaches the configured total when possible.
+    if (count($selected_ids) < $total) {
+      $remaining_slots = $total - count($selected_ids);
+      $selected_lookup = array_fill_keys(array_map('intval', $selected_ids), true);
+      $backfill_ids = array_values(array_filter($parent_ids, static function (int $post_id) use ($selected_lookup): bool {
+        return !isset($selected_lookup[$post_id]);
+      }));
+      shuffle($backfill_ids);
+      $backfill_ids = array_slice($backfill_ids, 0, $remaining_slots);
+
+      if (!empty($backfill_ids)) {
+        $selected_ids = array_merge($selected_ids, $backfill_ids);
+      }
+    }
+
+    shuffle($selected_ids);
+    return $this->build_exam_cards_from_ids(array_slice(array_values(array_unique($selected_ids)), 0, $total), $total);
+  }
+
+  private function get_exam_id_pool_for_topic(int $topic_term_id): array {
+    $cache_key = $this->get_exam_id_pool_cache_key($topic_term_id);
+    $cached_pool = get_transient($cache_key);
+    if (is_array($cached_pool)) {
+      return $cached_pool;
+    }
+
     $subtopics = get_terms([
       'taxonomy'   => self::TAXONOMY,
       'hide_empty' => false,
@@ -1921,135 +2016,77 @@ class VC_Flashcards_Plugin {
       'order'      => 'ASC',
     ]);
 
-    /* No subtopics: fall back to pulling cards directly from the parent topic. */
-    if (is_wp_error($subtopics) || empty($subtopics)) {
-      $query = new WP_Query([
-        'post_type'      => self::POST_TYPE,
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-        'fields'         => 'ids',
-        'no_found_rows'  => true,
-        'tax_query'      => [[
-          'taxonomy'         => self::TAXONOMY,
-          'field'            => 'term_id',
-          'terms'            => [$topic_term_id],
-          'include_children' => true,
-        ]],
-      ]);
+    $parent_ids = $this->query_flashcard_ids_for_term($topic_term_id, true);
+    $pool = [
+      'parent_ids' => $parent_ids,
+      'subtopic_order' => [],
+      'subtopic_ids' => [],
+    ];
 
-      $ids = $query->posts ?: [];
-      shuffle($ids);
-      $selected = array_slice($ids, 0, $total);
-
-      if (empty($selected)) {
-        return [];
-      }
-
-      update_meta_cache('post', $selected);
-      update_object_term_cache($selected, self::POST_TYPE);
-
-      $cards = [];
-      foreach ($selected as $post_id) {
-        $card = $this->build_flashcard_payload((int) $post_id);
-        if (!empty($card)) {
-          $cards[] = $card;
-        }
-      }
-
-      shuffle($cards);
-      return $cards;
-    }
-
-    /* Distribute $total questions across subtopics.
-     * e.g. 2 subtopics â†’ 50 / 50
-     *      3 subtopics â†’ 33 / 33 / 34
-     *      4 subtopics â†’ 25 / 25 / 25 / 25  */
-    $subtopics_arr = array_values($subtopics);
-    $n             = count($subtopics_arr);
-    $base          = intdiv($total, $n);
-    $remainder     = $total % $n;
-
-    $quotas           = array_fill(0, $n, $base);
-    $quotas[$n - 1]  += $remainder;
-
-    $all_cards = [];
-    $selected_ids = [];
-
-    foreach ($subtopics_arr as $index => $subtopic) {
-      $quota = $quotas[$index];
-
-      $query = new WP_Query([
-        'post_type'      => self::POST_TYPE,
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-        'fields'         => 'ids',
-        'no_found_rows'  => true,
-        'tax_query'      => [[
-          'taxonomy'         => self::TAXONOMY,
-          'field'            => 'term_id',
-          'terms'            => [(int) $subtopic->term_id],
-          'include_children' => false,
-        ]],
-      ]);
-
-      $ids = $query->posts ?: [];
-      if (empty($ids)) {
-        continue;
-      }
-
-      shuffle($ids);
-      $selected = array_slice($ids, 0, $quota);
-      $selected_ids = array_merge($selected_ids, array_map('intval', $selected));
-
-      update_meta_cache('post', $selected);
-      update_object_term_cache($selected, self::POST_TYPE);
-
-      foreach ($selected as $post_id) {
-        $card = $this->build_flashcard_payload((int) $post_id);
-        if (!empty($card)) {
-          $all_cards[] = $card;
-        }
+    if (!is_wp_error($subtopics) && !empty($subtopics)) {
+      foreach (array_values($subtopics) as $subtopic) {
+        $subtopic_id = (int) $subtopic->term_id;
+        $ids = $this->query_flashcard_ids_for_term($subtopic_id, false);
+        $pool['subtopic_order'][] = $subtopic_id;
+        $pool['subtopic_ids'][$subtopic_id] = $ids;
       }
     }
 
-    // Some subtopics may not have enough cards to fill their proportional quota.
-    // Backfill from the whole parent topic so the exam reaches the configured total when possible.
-    if (count($all_cards) < $total) {
-      $remaining_slots = $total - count($all_cards);
-      $backfill_query = new WP_Query([
-        'post_type'      => self::POST_TYPE,
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-        'fields'         => 'ids',
-        'no_found_rows'  => true,
-        'post__not_in'   => array_values(array_unique($selected_ids)),
-        'tax_query'      => [[
-          'taxonomy'         => self::TAXONOMY,
-          'field'            => 'term_id',
-          'terms'            => [$topic_term_id],
-          'include_children' => true,
-        ]],
-      ]);
+    set_transient($cache_key, $pool, self::EXAM_POOL_CACHE_TTL);
+    return $pool;
+  }
 
-      $backfill_ids = $backfill_query->posts ?: [];
-      shuffle($backfill_ids);
-      $backfill_ids = array_slice($backfill_ids, 0, $remaining_slots);
+  private function query_flashcard_ids_for_term(int $term_id, bool $include_children): array {
+    $query = new WP_Query([
+      'post_type'      => self::POST_TYPE,
+      'post_status'    => 'publish',
+      'posts_per_page' => -1,
+      'fields'         => 'ids',
+      'no_found_rows'  => true,
+      'tax_query'      => [[
+        'taxonomy'         => self::TAXONOMY,
+        'field'            => 'term_id',
+        'terms'            => [$term_id],
+        'include_children' => $include_children,
+      ]],
+    ]);
 
-      if (!empty($backfill_ids)) {
-        update_meta_cache('post', $backfill_ids);
-        update_object_term_cache($backfill_ids, self::POST_TYPE);
+    return array_values(array_map('intval', $query->posts ?: []));
+  }
 
-        foreach ($backfill_ids as $post_id) {
-          $card = $this->build_flashcard_payload((int) $post_id);
-          if (!empty($card)) {
-            $all_cards[] = $card;
-          }
-        }
+  private function build_exam_cards_from_ids(array $selected_ids, int $total): array {
+    $selected_ids = array_values(array_unique(array_map('intval', $selected_ids)));
+    if (empty($selected_ids)) {
+      return [];
+    }
+
+    update_meta_cache('post', $selected_ids);
+    update_object_term_cache($selected_ids, self::POST_TYPE);
+
+    $cards = [];
+    foreach ($selected_ids as $post_id) {
+      $card = $this->build_flashcard_payload($post_id);
+      if (!empty($card)) {
+        $cards[] = $card;
       }
     }
 
-    shuffle($all_cards);
-    return array_slice($all_cards, 0, $total);
+    shuffle($cards);
+    return array_slice($cards, 0, $total);
+  }
+
+  private function get_exam_id_pool_cache_key(int $topic_term_id): string {
+    return 'vc_flashcards_exam_id_pool_' . $this->get_exam_pool_cache_version() . '_' . $topic_term_id;
+  }
+
+  private function get_exam_pool_cache_version(): int {
+    $version = (int) get_option(self::EXAM_POOL_CACHE_VERSION_OPTION, 1);
+    return max(1, $version);
+  }
+
+  private function clear_exam_pool_cache(): void {
+    $version = (int) get_option(self::EXAM_POOL_CACHE_VERSION_OPTION, 1);
+    update_option(self::EXAM_POOL_CACHE_VERSION_OPTION, max(1, $version) + 1, false);
   }
 
   /* Returns parent topics enriched with subtopic count and total card count for the exam selector. */

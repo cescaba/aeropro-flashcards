@@ -27,6 +27,7 @@
     var summaryView = root.querySelector('[data-vc-exam-summary]');
     var feedbackEl  = root.querySelector('[data-vc-exam-feedback]');
     var finishButton = root.querySelector('.vc-exam-finish-btn');
+    var dashboardContent = root.closest ? root.closest('.vc-dashboard-content--mock-test') : null;
 
     // Session
     var progressEl    = root.querySelector('[data-vc-exam-progress]');
@@ -47,6 +48,7 @@
     var correctCount  = root.querySelector('[data-vc-exam-correct-count]');
     var incorrectCount = root.querySelector('[data-vc-exam-incorrect-count]');
     var historyContent = root.querySelector('.vc-exam-history-content');
+    var startButtons = root.querySelectorAll('[data-vc-exam-start]');
 
     /* ── Mutable state ──────────────────────────────────────────────────── */
 
@@ -59,9 +61,28 @@
     var answerStartedAt    = 0;
     var autoAdvanceTimer   = null;
     var isSubmitting       = false;
+    var isStartingExam     = false;
     var lastTopicTermId    = 0;
     var activeSummaryResults = null;
     var activeViewName     = homeView && !homeView.hidden ? 'home' : 'session';
+
+    // Publica el estado visual del mock test sin obligar al dashboard a inspeccionar
+    // nodos internos con :has(). El dashboard solo consume estas clases publicas.
+    function syncViewStateClasses() {
+      var isHome = activeViewName === 'home';
+      var isSession = activeViewName === 'session';
+      var isSummaryOpen = !!(summaryView && !summaryView.hidden);
+
+      root.classList.toggle('is-home', isHome);
+      root.classList.toggle('is-session', isSession);
+      root.classList.toggle('is-summary-open', isSummaryOpen);
+
+      if (dashboardContent) {
+        dashboardContent.classList.toggle('is-exam-home', isHome);
+        dashboardContent.classList.toggle('is-exam-session', isSession);
+        dashboardContent.classList.toggle('is-exam-summary-open', isSummaryOpen);
+      }
+    }
 
     // Resetea por completo el estado del examen en memoria.
     // Se usa cuando cerramos una sesion, limpiamos progreso o partimos de cero.
@@ -328,6 +349,7 @@
       homeView.hidden    = (name !== 'home');
       sessionView.hidden = (name !== 'session');
       setSummaryOpen(false, false);
+      syncViewStateClasses();
       scrollExamToTop(opts.behavior);
 
       if (opts.persist !== false) {
@@ -340,6 +362,7 @@
     function setSummaryOpen(isOpen, shouldPersist) {
       if (!summaryView) { return; }
       summaryView.hidden = !isOpen;
+      syncViewStateClasses();
       if (shouldPersist !== false) {
         persistState();
       }
@@ -614,8 +637,13 @@
     // Inicia una nueva sesion de examen para la categoria elegida.
     // Este mismo flujo se reutiliza tanto desde la home como desde "Try again".
     function startExam(topicTermId) {
+      if (isStartingExam) { return; }
+      isStartingExam = true;
       lastTopicTermId = topicTermId;
       setFeedback(labels.loading || 'Preparing your exam...', 'info');
+      startButtons.forEach(function (button) {
+        button.disabled = true;
+      });
 
       var body = new URLSearchParams();
       body.append('action',        'vc_flashcards_start_exam');
@@ -653,13 +681,19 @@
         })
         .catch(function (err) {
           setFeedback(err.message || (labels.noCards || 'No questions found.'), 'error');
+        })
+        .finally(function () {
+          isStartingExam = false;
+          startButtons.forEach(function (button) {
+            button.disabled = false;
+          });
         });
     }
 
     /* ── Event listeners ────────────────────────────────────────────────── */
 
     // Start exam buttons (one per category card)
-    root.querySelectorAll('[data-vc-exam-start]').forEach(function (btn) {
+    startButtons.forEach(function (btn) {
       btn.addEventListener('click', function () {
         startExam(Number(btn.dataset.vcExamStart));
       });
@@ -707,8 +741,12 @@
     // Summary: back to menu (also acts as close button)
     root.querySelectorAll('[data-vc-exam-summary-back]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        stopTimer();
+        clearAutoAdvanceTimer();
+        resetExamState();
+        setSummaryOpen(false, false);
+        showView('home', { persist: false });
         clearState();
-        showView('home');
         setFeedback('', '');
       });
     });
@@ -716,13 +754,18 @@
     // Summary: try again (same category)
     root.querySelectorAll('[data-vc-exam-retry]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        var topicTermId = lastTopicTermId;
         clearState();
-        if (lastTopicTermId) {
-          // Reinicia directamente la misma categoria sin pasar primero por la home.
-          // Asi evitamos el salto visual mientras el servidor prepara la nueva sesion.
-          startExam(lastTopicTermId);
+        if (topicTermId) {
+          // Cierra el resultado anterior antes de pedir una nueva sesion. Si el
+          // servidor falla, el usuario ve el error sin un modal obsoleto encima.
+          setSummaryOpen(false, false);
+          startExam(topicTermId);
         } else {
-          showView('home');
+          resetExamState();
+          setSummaryOpen(false, false);
+          showView('home', { persist: false });
+          clearState();
         }
       });
     });

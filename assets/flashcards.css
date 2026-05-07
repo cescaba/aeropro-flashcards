@@ -256,9 +256,8 @@
 }
 
 
-/* Titulo principal compartido de la pregunta dentro de la card. */
-.vc-flashcards-card [data-vc-flashcards-question],
-.vc-flashcards-card [data-vc-exam-question] {
+/* Titulo principal de la pregunta dentro de la card. */
+.vc-flashcards-card [data-vc-flashcards-question] {
   font-weight: 400;
   font-size: 18px;
   line-height: 130%;
@@ -2444,13 +2443,12 @@ body.vc-flashcards-modal-open {
     line-height: 24px;
   }
 
-  .vc-flashcards-card [data-vc-flashcards-question], .vc-flashcards-card [data-vc-exam-question] {
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  letter-spacing: -0.15;
-
-}
+  .vc-flashcards-card [data-vc-flashcards-question] {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: -0.15px;
+  }
 
   /* Subtopic item mobile: ajusta el titulo del subtema a escala compacta. */
   .vc-flashcards-subtopic-copy strong {
@@ -2968,8 +2966,7 @@ body.vc-flashcards-modal-open {
   }
 
   /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */
-  .vc-flashcards-session > .vc-flashcards-card [data-vc-flashcards-question],
-  .vc-flashcards-session > .vc-flashcards-card [data-vc-exam-question] {
+  .vc-flashcards-session > .vc-flashcards-card [data-vc-flashcards-question] {
     max-width: 100%;
     min-width: 0;
     font-size: 16px;

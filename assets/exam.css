@@ -44,17 +44,40 @@
   display: none !important;
 }
 
+.vc-exam-app.is-home .vc-exam-home,
+.vc-exam-app.is-session .vc-exam-session {
+  display: grid;
+}
+
+.vc-exam-app.is-home .vc-exam-session,
+.vc-exam-app.is-session .vc-exam-home {
+  display: none;
+}
+
+.vc-exam-app.is-summary-open .vc-exam-summary {
+  display: grid;
+}
+
 .vc-exam-feedback[hidden] {
   display: none;
 }
 
-.vc-exam-feedback,
 .vc-exam-empty {
   margin: 0;
   padding: 18px;
   border: 1px solid var(--vc-exam-border);
   border-radius: var(--vc-exam-surface-radius);
   background: #FFFFFF;
+  color: var(--vc-exam-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.vc-exam-feedback {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--vc-exam-muted);
   font-size: 14px;
   line-height: 20px;
@@ -73,10 +96,40 @@
    Home
    ========================================================================== */
 
+.vc-exam-page-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.vc-exam-page-header h1 {
+  margin: 0;
+  color: var(--vc-exam-text);
+  font-family: Poppins, sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.vc-exam-page-header p {
+  margin: 0;
+  color: var(--vc-exam-muted);
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
 .vc-exam-intro {
   display: grid;
   margin-bottom: 24px;
 }
+
+/* ==========================================================================
+   Intro Badges
+   ========================================================================== */
 
 .vc-exam-intro-badges {
   display: grid;
@@ -176,6 +229,10 @@
   font-size: 30px;
   line-height: 42px;
 }
+
+/* ==========================================================================
+   Category Cards
+   ========================================================================== */
 
 .vc-exam-category-grid {
   display: grid;
@@ -453,6 +510,10 @@
    Session
    ========================================================================== */
 
+/* ==========================================================================
+   Session Header
+   ========================================================================== */
+
 .vc-exam-session-header {
   display: grid;
   gap: 12px;
@@ -583,6 +644,10 @@
   background: var(--vc-exam-blue);
 }
 
+/* ==========================================================================
+   Exam Card
+   ========================================================================== */
+
 .vc-exam-card {
   display: grid;
   gap: 0;
@@ -623,13 +688,17 @@
 }
 
 .vc-exam-card [data-vc-exam-question] {
-  margin: 0 0 18px;
+  padding-bottom:30px ;
   color: var(--vc-exam-text);
   font-weight: 500;
   font-size: 18px;
   line-height: 28px;
   letter-spacing: -0.31px;
 }
+
+/* ==========================================================================
+   Answers
+   ========================================================================== */
 
 .vc-exam-answers {
   display: grid;
@@ -699,12 +768,18 @@
 }
 
 .vc-exam-answer strong {
+  display: block;
+  flex: 1 1 auto;
   min-width: 0;
-  color: var(--vc-exam-text);
+  max-width: 100%;
+  color: #666666;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .vc-exam-session-actions {
@@ -1067,6 +1142,22 @@
 }
 
 @media (max-width: 480px) {
+  .vc-exam-app.is-home {
+    padding: 0 16px 33px;
+  }
+
+  .vc-exam-page-header {
+    min-height: 72px;
+    height: auto;
+    gap: 5px;
+    align-content: center;
+    margin: 0 -16px 16px;
+    padding: 16px;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    box-sizing: border-box;
+  }
+
   /* Mobile exam session: conserva el comportamiento compacto existente en 480px. */
   .vc-exam-session .vc-exam-session-title,
   .vc-exam-session .vc-exam-session-header-copy,
@@ -1092,7 +1183,7 @@
     border-bottom: 1px solid #E2E8F0;
     background: #FFFFFF;
     gap: 12px;
-    margin-bottom: 10px;
+    margin: 0px;
     box-sizing: border-box;
   }
 
@@ -1115,18 +1206,21 @@
   .vc-exam-question-topic,
   .vc-exam-question-subtopic {
     margin: 0;
-    padding: 5px 10px;
+    padding: 4px 10px;
+    min-height: 25px;
     border: 1px solid var(--vc-exam-border);
     border-radius: 6px;
     color: var(--vc-exam-muted);
     font-weight: 400;
     font-size: 12px;
     line-height: 16px;
+    letter-spacing: -0.15px;
   }
 
   .vc-exam-card [data-vc-exam-question] {
-    margin: 0 0 18px;
+    margin-bottom: 18px;
     color: #212121;
+    padding-bottom: 0px;
     font-weight: 400;
     font-size: 16px;
     line-height: 22px;
@@ -1136,13 +1230,26 @@
   .vc-exam-card {
     /* Mobile exam card: reemplaza el padding del panel para que el borde externo sea visible. */
     margin: 16px 16px 33px;
-    padding: 26px 17px;
+    padding: 16px 16px;
   }
 
   .vc-exam-session-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .vc-exam-answers {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 26px;
+}
+
+  .vc-exam-page-header h1 {
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
   }
 
   .vc-exam-action {
@@ -1165,7 +1272,7 @@
 
   .vc-exam-intro-badges {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .vc-exam-badge {
@@ -1228,6 +1335,11 @@
     font-size: 12px;
     line-height: 130%;
     letter-spacing: 0;
+  }
+
+  .vc-exam-badge--passed-attempts {
+    padding-left: 6px;
+    padding-right: 6px;
   }
 
   .vc-exam-category-grid,
