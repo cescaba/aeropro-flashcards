@@ -5,7 +5,7 @@
 
   var DEFAULT_CONFIG = {
     totalQuestions:   100,
-    timeLimitSeconds: 60,    // 1 min de prueba
+    timeLimitSeconds: 900,
     passingScore:     70,
   };
 
@@ -26,7 +26,6 @@
     var sessionView = root.querySelector('[data-vc-exam-view="session"]');
     var summaryView = root.querySelector('[data-vc-exam-summary]');
     var feedbackEl  = root.querySelector('[data-vc-exam-feedback]');
-    var sessionHeader = root.querySelector('.vc-exam-session-header');
     var finishButton = root.querySelector('.vc-exam-finish-btn');
 
     // Session
@@ -47,22 +46,7 @@
     var resultKicker  = root.querySelector('[data-vc-exam-result-kicker]');
     var correctCount  = root.querySelector('[data-vc-exam-correct-count]');
     var incorrectCount = root.querySelector('[data-vc-exam-incorrect-count]');
-    var unansweredCount = root.querySelector('[data-vc-exam-unanswered-count]');
-    var breakdownGeneralMeta = root.querySelector('[data-vc-exam-breakdown-general-meta]');
-    var breakdownGeneralScore = root.querySelector('[data-vc-exam-breakdown-general-score]');
-    var breakdownAirframeMeta = root.querySelector('[data-vc-exam-breakdown-airframe-meta]');
-    var breakdownAirframeScore = root.querySelector('[data-vc-exam-breakdown-airframe-score]');
-    var breakdownPowerplantMeta = root.querySelector('[data-vc-exam-breakdown-powerplant-meta]');
-    var breakdownPowerplantScore = root.querySelector('[data-vc-exam-breakdown-powerplant-score]');
-    var summaryBox    = root.querySelector('.vc-exam-summary-dialog');
     var historyContent = root.querySelector('.vc-exam-history-content');
-    var dashboardPanel = root.closest('.vc-dashboard-panel--mock-test');
-    var dashboardContent = root.closest('.vc-dashboard-content');
-    var dashboardHeadingMeta = null;
-
-    if (dashboardPanel && dashboardPanel.previousElementSibling && dashboardPanel.previousElementSibling.classList.contains('vc-dashboard-heading')) {
-      dashboardHeadingMeta = dashboardPanel.previousElementSibling.querySelector('.vc-dashboard-heading-session-meta');
-    }
 
     /* ── Mutable state ──────────────────────────────────────────────────── */
 
@@ -72,11 +56,12 @@
     var attempts           = [];
     var examStartTime      = 0;   // Unix ms when the exam started
     var timerInterval      = null;
-    var answeredCurrentCard = false;
     var answerStartedAt    = 0;
+    var autoAdvanceTimer   = null;
     var isSubmitting       = false;
     var lastTopicTermId    = 0;
     var activeSummaryResults = null;
+    var activeViewName     = homeView && !homeView.hidden ? 'home' : 'session';
 
     // Resetea por completo el estado del examen en memoria.
     // Se usa cuando cerramos una sesion, limpiamos progreso o partimos de cero.
@@ -86,8 +71,8 @@
       cardIndex = 0;
       attempts = [];
       examStartTime = 0;
-      answeredCurrentCard = false;
       answerStartedAt = 0;
+      clearAutoAdvanceTimer();
       isSubmitting = false;
       activeSummaryResults = null;
     }
@@ -106,6 +91,12 @@
       return n < 10 ? '0' + n : String(n);
     }
 
+    function clearAutoAdvanceTimer() {
+      if (!autoAdvanceTimer) { return; }
+      clearTimeout(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
+
     function getRemainingSeconds() {
       if (!examStartTime) { return config.timeLimitSeconds; }
       var elapsed = Math.floor((Date.now() - examStartTime) / 1000);
@@ -117,8 +108,8 @@
       return Math.floor((Date.now() - examStartTime) / 1000);
     }
 
-    // Convierte el estado local de las preguntas en un payload plano listo para guardar o resumir.
-    // Aqui se empaqueta, por cada tarjeta del examen, la respuesta elegida, la correcta y el tiempo de respuesta.
+    // Convierte el estado local en un payload minimo. El servidor decide si cada
+    // respuesta es correcta usando el snapshot confiable de la sesion.
     function buildAttemptPayload() {
       return cards.map(function (card, index) {
         var attempt = attempts[index] || {};
@@ -127,95 +118,21 @@
           flashcardId: card.id,
           topicTermId: card.topicTermId,
           selectedAnswer: attempt.selectedAnswer || '',
-          correctAnswer: card.correctAnswer,
           responseTimeMs: Number(attempt.responseTimeMs || 0),
         };
       });
     }
 
-    // Agrupa el resultado del examen por categoria principal para alimentar el desglose del summary.
-    // Calcula cuantas preguntas hubo por tema y cuantas quedaron correctas dentro de ese tema.
-    function buildTopicBreakdown(attemptPayload) {
-      var topics = {
-        General: { total: 0, correct: 0 },
-        Airframe: { total: 0, correct: 0 },
-        Powerplant: { total: 0, correct: 0 },
-      };
-
-      attemptPayload.forEach(function (attempt, index) {
-        var card = cards[index];
-        var topicName = card && card.topicLabel ? card.topicLabel : '';
-
-        if (!topics[topicName]) { return; }
-
-        topics[topicName].total += 1;
-
-        if (attempt.selectedAnswer && attempt.selectedAnswer === attempt.correctAnswer) {
-          topics[topicName].correct += 1;
-        }
-      });
-
-      return topics;
-    }
-
-    // Construye el resumen global del examen a partir del payload final.
-    // Devuelve aciertos, errores, no respondidas, porcentaje final, tiempo consumido y el desglose por categoria.
-    function buildSummaryResults(attemptPayload, elapsed, expired) {
-      var total = attemptPayload.length;
-      // Separa cada intento en tres estados excluyentes:
-      // correcta, incorrecta o no respondida.
-      // Asi evitamos que una pregunta vacia se sume tambien como incorrecta.
-      var counts = attemptPayload.reduce(function (result, attempt) {
-        if (!attempt.selectedAnswer) {
-          result.unanswered += 1;
-          return result;
-        }
-
-        if (attempt.selectedAnswer === attempt.correctAnswer) {
-          result.correct += 1;
-          return result;
-        }
-
-        result.incorrect += 1;
-        return result;
-      }, {
-        correct: 0,
-        incorrect: 0,
-        unanswered: 0,
-      });
-
+    // Normaliza el resultado que ya fue validado y guardado por el servidor.
+    function buildServerSummaryResults(serverData, elapsed, expired) {
+      var data = serverData || {};
       return {
-        correct: counts.correct,
-        incorrect: counts.incorrect,
-        unanswered: counts.unanswered,
-        breakdown: buildTopicBreakdown(attemptPayload),
-        // El porcentaje final del examen se calcula con respuestas correctas
-        // sobre el total de preguntas del mock test.
-        score: total > 0 ? Math.round((counts.correct / total) * 100) : 0,
+        correct: Number(data.correctAnswers || 0),
+        incorrect: Number(data.incorrectAnswers || 0),
+        score: Math.round(Number(data.scorePercent || 0)),
         elapsed: elapsed,
         expired: expired,
       };
-    }
-
-    // Mueve cronometro, progreso y boton Finish entre el heading del dashboard y la sesion del examen.
-    // Esto permite que el header superior muestre los controles correctos solo mientras el examen esta en curso.
-    function syncSessionHeading(name) {
-      if (!dashboardHeadingMeta || !sessionHeader || !progressEl || !timerEl || !finishButton) {
-        return;
-      }
-
-      if (name === 'session') {
-        dashboardHeadingMeta.hidden = false;
-        dashboardHeadingMeta.appendChild(timerEl);
-        dashboardHeadingMeta.appendChild(finishButton);
-        sessionHeader.appendChild(progressEl);
-        return;
-      }
-
-      dashboardHeadingMeta.hidden = true;
-      sessionHeader.appendChild(finishButton);
-      sessionHeader.appendChild(progressEl);
-      sessionHeader.appendChild(timerEl);
     }
 
     // Vuelve a pedir al servidor el historial de examenes ya completados y reemplaza el HTML del bloque.
@@ -245,11 +162,22 @@
         });
     }
 
-    // Hace scroll al inicio del contenedor real del dashboard.
-    // Se usa al cambiar entre home y session; el summary es modal y no debe forzar scroll.
-    function scrollDashboardContentToTop() {
-      if (!dashboardContent) { return; }
-      dashboardContent.scrollTo({ top: 0, behavior: 'smooth' });
+    // Mock Test scroll: usa el scroller real del dashboard para entrar siempre al inicio del panel.
+    function scrollExamToTop(behavior) {
+      var scrollBehavior = behavior || 'smooth';
+      var dashboardContent = root.closest('.vc-dashboard-content');
+
+      if (dashboardContent && typeof dashboardContent.scrollTo === 'function') {
+        dashboardContent.scrollTo({ top: 0, behavior: scrollBehavior });
+        return;
+      }
+
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo({
+          top: Math.max(0, root.getBoundingClientRect().top + window.pageYOffset),
+          behavior: scrollBehavior,
+        });
+      }
     }
 
     /* ── State persistence ──────────────────────────────────────────────── */
@@ -257,7 +185,7 @@
     function persistState() {
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({
-          view:                'session',
+          view:                activeViewName,
           summaryOpen:         summaryView ? !summaryView.hidden : false,
           summaryResults:      activeSummaryResults,
           sessionId:           sessionId,
@@ -265,7 +193,6 @@
           cardIndex:           cardIndex,
           attempts:            attempts,
           examStartTime:       examStartTime,
-          answeredCurrentCard: answeredCurrentCard,
           lastTopicTermId:     lastTopicTermId,
         }));
       } catch (e) {}
@@ -277,14 +204,13 @@
       activeSummaryResults = results;
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({
-          view:                'session',
+          view:                activeViewName,
           summaryOpen:         true,
           sessionId:           sessionId,
           cards:               cards,
           cardIndex:           cardIndex,
           attempts:            attempts,
           examStartTime:       examStartTime,
-          answeredCurrentCard: answeredCurrentCard,
           lastTopicTermId:     lastTopicTermId,
           summaryResults:      results,
         }));
@@ -351,11 +277,11 @@
           cardIndex           = Math.max(0, Math.min(state.cardIndex || 0, Math.max(cards.length - 1, 0)));
           attempts            = state.attempts || [];
           examStartTime       = state.examStartTime || 0;
-          answeredCurrentCard = Boolean(state.answeredCurrentCard);
           lastTopicTermId     = state.lastTopicTermId || 0;
           activeSummaryResults = state.summaryResults;
 
           if (cards.length) {
+            activeViewName = 'session';
             renderCard();
             showView('session');
           } else {
@@ -382,14 +308,10 @@
         cardIndex           = Math.max(0, Math.min(state.cardIndex || 0, cards.length - 1));
         attempts            = state.attempts || [];
         examStartTime       = state.examStartTime;
-        answeredCurrentCard = !!state.answeredCurrentCard;
         lastTopicTermId     = state.lastTopicTermId || 0;
 
-        // Si hay una vista guardada distinta de session, no intentamos restaurar una sesion activa.
-        if (state.view && state.view !== 'session') {
-          return false;
-        }
-
+        // Restore active exam: versiones anteriores podian guardar view=home con una sesion valida.
+        activeViewName = 'session';
         renderCard();
         startTimer();
         showView('session');
@@ -400,13 +322,17 @@
 
     /* ── View management ────────────────────────────────────────────────── */
 
-    function showView(name) {
+    function showView(name, options) {
+      var opts = options || {};
+      activeViewName = name;
       homeView.hidden    = (name !== 'home');
       sessionView.hidden = (name !== 'session');
       setSummaryOpen(false, false);
-      // Reubica controles del header y reposiciona el scroll al inicio del panel actual.
-      syncSessionHeading(name);
-      scrollDashboardContentToTop();
+      scrollExamToTop(opts.behavior);
+
+      if (opts.persist !== false) {
+        persistState();
+      }
     }
 
     // Controla el summary como modal independiente de las vistas home/session.
@@ -471,6 +397,8 @@
     /* ── Question rendering ─────────────────────────────────────────────── */
 
     function renderCard() {
+      clearAutoAdvanceTimer();
+
       var card = cards[cardIndex];
       // Recupera la respuesta ya guardada de la pregunta actual, si existe.
       var currentAttempt = attempts[cardIndex] || null;
@@ -480,7 +408,6 @@
         return;
       }
 
-      answeredCurrentCard = !!(currentAttempt && currentAttempt.selectedAnswer);
       answerStartedAt     = Date.now();
 
       // Reset answer area
@@ -535,7 +462,7 @@
       Object.keys(card.answers).forEach(function (key) {
         var btn = document.createElement('button');
         btn.type      = 'button';
-        btn.className = 'vc-flashcards-answer';
+        btn.className = 'vc-exam-answer';
         btn.dataset.answerKey = key;
         btn.innerHTML =
           '<span>' + key.toUpperCase() + '</span>' +
@@ -563,7 +490,7 @@
     // Mantiene una sola opcion marcada a la vez dentro de la pregunta actual.
     // Si el usuario cambia de A a C, esta funcion marca C y limpia el resto.
     function updateSelectedAnswerState(selectedAnswer) {
-      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (buttonEl) {
+      answersWrap.querySelectorAll('.vc-exam-answer').forEach(function (buttonEl) {
         if (buttonEl.dataset.answerKey === selectedAnswer) {
           buttonEl.dataset.state = 'selected';
           return;
@@ -577,10 +504,9 @@
 
     function handleAnswer(button) {
       var card         = cards[cardIndex];
+      var selectedCardIndex = cardIndex;
       var selected     = button.dataset.answerKey;
       var responseMs   = Date.now() - answerStartedAt;
-
-      answeredCurrentCard = true;
 
       updateSelectedAnswerState(selected);
 
@@ -588,26 +514,34 @@
         flashcardId:    card.id,
         topicTermId:    card.topicTermId,
         selectedAnswer: selected,
-        correctAnswer:  card.correctAnswer,
         responseTimeMs: responseMs,
       };
 
       persistState();
+
+      clearAutoAdvanceTimer();
+
+      // Auto advance solo cuando existe una siguiente pregunta.
+      // El boton Next queda disponible para saltar preguntas sin responder.
+      if (selectedCardIndex >= cards.length - 1) { return; }
+
+      autoAdvanceTimer = setTimeout(function () {
+        if (cardIndex !== selectedCardIndex || isSubmitting) { return; }
+        cardIndex += 1;
+        renderCard();
+      }, 240);
     }
 
     /* ── Exam completion ────────────────────────────────────────────────── */
 
     function finishExam(expired) {
       if (isSubmitting) { return; }
+      clearAutoAdvanceTimer();
       isSubmitting = true;
       stopTimer();
 
       var elapsed = getElapsedSeconds();
       var attemptPayload = buildAttemptPayload();
-      var summaryResults = buildSummaryResults(attemptPayload, elapsed, expired);
-
-      persistSummaryState(summaryResults);
-      renderSummary(summaryResults);
 
       var body = new URLSearchParams();
       body.append('action',     'vc_flashcards_complete_session');
@@ -623,9 +557,16 @@
         .then(function (r) { return r.json(); })
         .then(function (payload) {
           if (!payload.success) { throw new Error('server'); }
+          var summaryResults = buildServerSummaryResults(payload.data || {}, elapsed, expired);
+          persistSummaryState(summaryResults);
+          renderSummary(summaryResults);
           return refreshExamHistory();
         })
         .catch(function () {
+          setFeedback(labels.saveFailed || 'We could not save your exam. Please try again.', 'error');
+          if (!expired) {
+            startTimer();
+          }
           return null;
         })
         .finally(function () {
@@ -653,12 +594,6 @@
         }
       }
 
-      // Summary box state class
-      if (summaryBox) {
-        summaryBox.classList.toggle('is-passed', passed);
-        summaryBox.classList.toggle('is-failed', !passed);
-      }
-
       // Kicker / headline
       if (resultKicker) {
         resultKicker.textContent = passed
@@ -669,44 +604,6 @@
       // Counts
       if (correctCount)   { correctCount.textContent   = String(results.correct); }
       if (incorrectCount) { incorrectCount.textContent = String(results.incorrect); }
-      // Refleja cuantas preguntas quedaron sin responder en el resumen final.
-      if (unansweredCount) { unansweredCount.textContent = String(results.unanswered || 0); }
-
-      // Toma el desglose por categoria y asegura una estructura segura aunque falten datos.
-      var breakdown = results.breakdown || {};
-      var general = breakdown.General || { total: 0, correct: 0 };
-      var airframe = breakdown.Airframe || { total: 0, correct: 0 };
-      var powerplant = breakdown.Powerplant || { total: 0, correct: 0 };
-
-      // Llena el bloque de General con su texto auxiliar y porcentaje.
-      if (breakdownGeneralMeta) {
-        breakdownGeneralMeta.textContent = general.correct + ' of ' + general.total + ' correct';
-      }
-      if (breakdownGeneralScore) {
-        var generalPercent = general.total ? Math.round((general.correct / general.total) * 100) : 0;
-        breakdownGeneralScore.textContent = generalPercent + '%';
-        breakdownGeneralScore.classList.toggle('is-passing', generalPercent >= config.passingScore);
-      }
-
-      // Llena el bloque de Airframe con su texto auxiliar y porcentaje.
-      if (breakdownAirframeMeta) {
-        breakdownAirframeMeta.textContent = airframe.correct + ' of ' + airframe.total + ' correct';
-      }
-      if (breakdownAirframeScore) {
-        var airframePercent = airframe.total ? Math.round((airframe.correct / airframe.total) * 100) : 0;
-        breakdownAirframeScore.textContent = airframePercent + '%';
-        breakdownAirframeScore.classList.toggle('is-passing', airframePercent >= config.passingScore);
-      }
-
-      // Llena el bloque de Powerplant con su texto auxiliar y porcentaje.
-      if (breakdownPowerplantMeta) {
-        breakdownPowerplantMeta.textContent = powerplant.correct + ' of ' + powerplant.total + ' correct';
-      }
-      if (breakdownPowerplantScore) {
-        var powerplantPercent = powerplant.total ? Math.round((powerplant.correct / powerplant.total) * 100) : 0;
-        breakdownPowerplantScore.textContent = powerplantPercent + '%';
-        breakdownPowerplantScore.classList.toggle('is-passing', powerplantPercent >= config.passingScore);
-      }
 
       // Abre el resultado como modal para mantener visible la ultima pregunta de fondo.
       setSummaryOpen(true);
@@ -718,7 +615,7 @@
     // Este mismo flujo se reutiliza tanto desde la home como desde "Try again".
     function startExam(topicTermId) {
       lastTopicTermId = topicTermId;
-      setFeedback(labels.loading || 'Preparing your exam…', 'info');
+      setFeedback(labels.loading || 'Preparing your exam...', 'info');
 
       var body = new URLSearchParams();
       body.append('action',        'vc_flashcards_start_exam');
@@ -744,11 +641,12 @@
           cards               = payload.data.cards || [];
           cardIndex           = 0;
           attempts            = [];
-          answeredCurrentCard = false;
           isSubmitting        = false;
           examStartTime       = Date.now();
           activeSummaryResults = null;
 
+          // Start exam persistence: renderCard persiste, por eso la vista debe ser session antes de pintar.
+          activeViewName       = 'session';
           renderCard();
           startTimer();
           showView('session');
@@ -770,6 +668,7 @@
     // Next / Finish
     if (nextButton) {
       nextButton.addEventListener('click', function () {
+        clearAutoAdvanceTimer();
         cardIndex += 1;
         renderCard();
       });
@@ -778,6 +677,7 @@
     // Permite volver a la pregunta anterior sin salir del rango valido del examen.
     if (prevButton) {
       prevButton.addEventListener('click', function () {
+        clearAutoAdvanceTimer();
         if (prevButton.disabled) { return; }
         if (cardIndex === 0) { return; }
         cardIndex -= 1;
@@ -833,7 +733,7 @@
       // Mientras el resultado esta abierto, el teclado no debe operar la sesion del fondo.
       if (summaryView && !summaryView.hidden) { return; }
       var key = event.key.toLowerCase();
-      var answerBtn = answersWrap.querySelector('.vc-flashcards-answer[data-answer-key="' + key + '"]');
+      var answerBtn = answersWrap.querySelector('.vc-exam-answer[data-answer-key="' + key + '"]');
       if (answerBtn && !answerBtn.disabled) {
         event.preventDefault();
         answerBtn.click();
@@ -843,7 +743,7 @@
     /* ── Init ───────────────────────────────────────────────────────────── */
 
     if (!restoreState()) {
-      showView('home');
+      showView('home', { behavior: 'auto' });
     }
 
     // Se registra al final del boot para que el cleanup viva durante toda la pagina

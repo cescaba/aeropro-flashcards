@@ -230,8 +230,9 @@ if (!defined('ABSPATH')) {
           <span class="vc-flashcards-explanation-toggle-label"><?php esc_html_e('View detailed explanation', 'vc-flashcards'); ?></span>
           <?php /* Icono vectorial reutilizable para el chevron de avance. */ ?>
           <span class="vc-flashcards-next-icon" aria-hidden="true">
-            <svg class="icono-flecha" viewBox="0 0 5 10" fill="none"  xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 9L4 5L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="vc-arrow-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M11 5L16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
         </button>

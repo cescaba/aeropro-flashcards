@@ -576,13 +576,21 @@
   padding: 0 16px;
   border-radius: 5px;
 }
-/* Wrapper del icono del boton Study con separacion y ajuste visual fino. */
+/* Wrapper del icono del boton Study: queda centrado con el texto del CTA. */
 .vc-flashcards-start-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 10px;
-  transform: translateY(3px);
+  flex: 0 0 auto;
+}
+
+.vc-flashcards-start-icon svg {
+  display: block;
+}
+
+.vc-flashcards-start--full > span {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Variante lateral para la accion de practica aleatoria. */
@@ -727,7 +735,9 @@
 /* Hace que el boton Study de la categoria ocupe todo el ancho del area meta. */
 .vc-flashcards-category-card > .vc-flashcards-start--full {
   width: 100%;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
 }
 
@@ -1398,11 +1408,11 @@
   color: #1447E6;
 }
 
-/* SVG inline del chevron principal: contenedor 16x16, vector visible 3x8 y trazo 2.5. */
-.vc-flashcards-next-icon .icono-flecha {
+/* SVG inline de flecha: ocupa la caja completa para alinear prev/next con el texto. */
+.vc-flashcards-next-icon .vc-arrow-icon {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Reutiliza el mismo asset para Previous invirtiendo solo el contenedor del icono. */
@@ -2328,6 +2338,33 @@ body.vc-flashcards-modal-open {
     align-items: stretch;
   }
 
+  /* Flashcards summary buttons mobile: aplica medidas y tipografia de Figma solo en 480px. */
+  .vc-flashcards-summary-action {
+    min-height: 42px;
+    gap: 8px;
+    font-family: Poppins, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.31px;
+    text-align: center;
+  }
+
+  /* Flashcards summary results mobile: fuerza numero arriba y etiqueta debajo. */
+  .vc-flashcards-summary-result-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vc-flashcards-summary-result-card strong {
+    order: 1;
+  }
+
+  .vc-flashcards-summary-result-card h3,
+  .vc-flashcards-summary-result-card span {
+    order: 2;
+  }
+
   /* Flashcards detail mobile: el aire externo pasa a las secciones internas. */
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
     padding: 0;
@@ -2406,6 +2443,14 @@ body.vc-flashcards-modal-open {
     font-size: 18px;
     line-height: 24px;
   }
+
+  .vc-flashcards-card [data-vc-flashcards-question], .vc-flashcards-card [data-vc-exam-question] {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: -0.15;
+
+}
 
   /* Subtopic item mobile: ajusta el titulo del subtema a escala compacta. */
   .vc-flashcards-subtopic-copy strong {
@@ -2688,26 +2733,6 @@ body.vc-flashcards-modal-open {
     line-height: 20px;
     letter-spacing: -0.15px;
     text-align: center;
-  }
-
-  /* Flashcards category mobile: mantiene el titulo como primer bloque de la card. */
-  .vc-flashcards-category-top {
-    order: 1;
-  }
-
-  /* Flashcards category mobile: coloca el bloque de progreso antes del CTA. */
-  .vc-flashcards-category-progress-block {
-    order: 2;
-  }
-
-  /* Flashcards category mobile: coloca la meta justo debajo del progreso. */
-  .vc-flashcards-category-meta {
-    order: 3;
-  }
-
-  /* Flashcards category mobile: deja el CTA principal como cierre visual de la card. */
-  .vc-flashcards-category-card > .vc-flashcards-start--full {
-    order: 4;
   }
 
   /* Flashcards category mobile: aplica la escala tipografica compacta al titulo. */

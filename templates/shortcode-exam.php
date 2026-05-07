@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('ABSPATH')) {
   exit;
 }
@@ -6,15 +6,15 @@ if (!defined('ABSPATH')) {
 <div class="vc-exam-app is-booting">
 
   <?php /* Mensaje compartido entre todas las vistas del examen para errores, carga o feedback general. */ ?>
-  <p class="vc-flashcards-feedback" data-vc-exam-feedback hidden></p>
+  <p class="vc-exam-feedback" data-vc-exam-feedback hidden></p>
 
-  <?php /* ── HOME: category selection ─────────────────────────────── */ ?>
+  <?php /* HOME: category selection */ ?>
   <?php /* Vista home del examen: resumen superior, categorias disponibles, historial y detalles del test. */ ?>
-  <section data-vc-exam-view="home" aria-labelledby="vc-exam-home-title">
+  <section class="vc-exam-view vc-exam-home" data-vc-exam-view="home" aria-labelledby="vc-exam-home-title">
 
     <?php /* Bloque introductorio del home: badges superiores con metricas rapidas del mock test. */ ?>
     <div class="vc-exam-intro">
-      <h2 id="vc-exam-home-title" class="screen-reader-text"><?php esc_html_e('Exam Simulator', 'vc-flashcards'); ?></h2>
+      <h2 id="vc-exam-home-title" class="screen-reader-text"><?php esc_html_e('A&P Mock Test', 'vc-flashcards'); ?></h2>
       <p class="screen-reader-text"><?php esc_html_e('Select a category to start your final exam simulation.', 'vc-flashcards'); ?></p>
       <ul class="vc-exam-intro-badges" aria-label="<?php esc_attr_e('Exam overview', 'vc-flashcards'); ?>">
         <?php /* Badge 1: mejor porcentaje historico del usuario en modo examen. */ ?>
@@ -61,20 +61,20 @@ if (!defined('ABSPATH')) {
 
     <?php /* Si no hay categorias preparadas para examen, se muestra un estado vacio. */ ?>
     <?php if (empty($exam_categories)): ?>
-      <article class="vc-flashcards-empty">
+      <article class="vc-exam-empty">
         <p><?php esc_html_e('No categories or flashcards are available yet.', 'vc-flashcards'); ?></p>
       </article>
     <?php else: ?>
       <?php /* Grilla principal del home: cards por categoria para iniciar el examen por tema. */ ?>
-      <div class="vc-flashcards-category-grid vc-flashcards-category-grid--mock">
+      <div class="vc-exam-category-grid">
         <?php foreach ($exam_categories as $category): ?>
           <?php /* Card individual de categoria: nombre, metadata, pill informativo y CTA Start Exam. */ ?>
           <article
-            class="vc-flashcards-category-card"
+            class="vc-exam-category-card"
             aria-labelledby="vc-exam-category-<?php echo esc_attr((string) $category['id']); ?>-title"
           >
 
-            <div class="vc-flashcards-category-top">
+            <div class="vc-exam-category-top">
               <?php /* Nombre visible de la categoria de examen. */ ?>
               <h3 id="vc-exam-category-<?php echo esc_attr((string) $category['id']); ?>-title"><?php echo esc_html($category['name']); ?></h3>
             </div>
@@ -84,9 +84,8 @@ if (!defined('ABSPATH')) {
               <p>
                 <?php echo esc_html(
                   sprintf(
-                    /* translators: 1: subtopic count, 2: total cards */
-                    _n('%2$d subtopic', '%1$d subtopics', $category['subtopicCount'], 'vc-flashcards'),
-                    $category['subtopicCount'],
+                    /* translators: %d: subtopic count */
+                    _n('%d subtopic', '%d subtopics', $category['subtopicCount'], 'vc-flashcards'),
                     $category['subtopicCount']
                   ) . ' · ' . sprintf(
                     /* translators: %d: total cards */
@@ -97,15 +96,15 @@ if (!defined('ABSPATH')) {
               </p>
             </div>
 
-            <div class="vc-flashcards-category-meta">
+            <div class="vc-exam-category-action">
               <?php /* Boton que dispara el inicio del examen para esta categoria concreta. */ ?>
               <button
                 type="button"
-                class="vc-flashcards-start vc-flashcards-start--full"
+                class="vc-exam-start"
                 data-vc-exam-start="<?php echo esc_attr((string) $category['id']); ?>"
               >
                 <span><?php esc_html_e('Start Exam', 'vc-flashcards'); ?></span>
-                <span class="vc-flashcards-start-icon" aria-hidden="true">
+                <span class="vc-exam-start-icon" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 12 12" fill="none">
                     <path d="M1.5 6H10.5M7.5 3L10.5 6L7.5 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -145,7 +144,7 @@ if (!defined('ABSPATH')) {
                   <path d="M8 4.75V8l2.25 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </span>
-              <span><?php esc_html_e('2-hour time limit', 'vc-flashcards'); ?></span>
+              <span><?php echo esc_html($exam_time_limit_label); ?></span>
             </li>
             <li class="vc-exam-history-test-details-item">
               <span class="vc-exam-history-test-details-icon" aria-hidden="true">
@@ -172,97 +171,108 @@ if (!defined('ABSPATH')) {
 
   </section>
 
-  <?php /* ── SESSION: question answering + timer ─────────────────── */ ?>
+  <?php /* SESSION: question answering + timer */ ?>
   <?php /* Vista session: header vivo del examen, barra de progreso, pregunta actual y navegacion. */ ?>
-  <section data-vc-exam-view="session" hidden aria-labelledby="vc-exam-session-title">
-    <h2 id="vc-exam-session-title" class="screen-reader-text"><?php esc_html_e('Exam session', 'vc-flashcards'); ?></h2>
+  <section class="vc-exam-view vc-exam-session" data-vc-exam-view="session" hidden aria-labelledby="vc-exam-session-title">
+    <div class="vc-mock-test-exam-shell">
+      <?php /* Header funcional de la sesion: titulo, acciones y progreso. */ ?>
+      <div class="vc-exam-session-header">
+        <div class="vc-exam-session-title-row">
+          <h2 id="vc-exam-session-title" class="vc-exam-session-title"><?php esc_html_e('A&P Mock Test', 'vc-flashcards'); ?></h2>
 
-    <?php /* Header funcional de la sesion: progreso, boton Finish y cronometro. */ ?>
-    <div class="vc-exam-session-header">
-      <?php /* Label fijo que introduce el estado de progreso. */ ?>
-      <p class="vc-exam-progress-label"><?php esc_html_e('Progress', 'vc-flashcards'); ?></p>
+          <div class="vc-exam-session-header-actions">
+            <?php /* Cronometro vivo del examen; JS actualiza su valor y estados visuales. */ ?>
+            <div class="vc-exam-timer" data-vc-exam-timer aria-live="polite" aria-label="<?php esc_attr_e('Time remaining', 'vc-flashcards'); ?>">
+              <span class="vc-exam-timer-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle>
+                  <path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                </svg>
+              </span>
+              <span data-vc-exam-timer-value>0:15:00</span>
+            </div>
 
-      <?php /* CTA para terminar manualmente el examen antes de responder todo. */ ?>
-      <button type="button" class="vc-flashcards-back vc-exam-finish-btn">
-        <span><?php esc_html_e('Finish exam', 'vc-flashcards'); ?></span>
-      </button>
+            <?php /* CTA para terminar manualmente el examen antes de responder todo. */ ?>
+            <button type="button" class="vc-exam-finish-btn">
+              <span><?php esc_html_e('Finish exam', 'vc-flashcards'); ?></span>
+            </button>
+          </div>
+        </div>
 
-      <?php /* Contador dinamico de respuestas contestadas sobre el total. */ ?>
-      <strong data-vc-exam-progress><?php esc_html_e('Question 1 of 100', 'vc-flashcards'); ?></strong>
+        <div class="vc-exam-session-header-copy">
+          <?php /* Label fijo que introduce el estado de progreso. */ ?>
+          <p class="vc-exam-progress-label"><?php esc_html_e('Progress', 'vc-flashcards'); ?></p>
 
-      <?php /* Cronometro vivo del examen; JS actualiza su valor y estados visuales. */ ?>
-      <div class="vc-exam-timer" data-vc-exam-timer aria-live="polite" aria-label="<?php esc_attr_e('Time remaining', 'vc-flashcards'); ?>">
-        <span class="vc-exam-timer-icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"></circle>
-            <path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-          </svg>
-        </span>
-        <span data-vc-exam-timer-value>0:01:00</span>
+          <?php /* Contador dinamico de respuestas contestadas sobre el total. */ ?>
+          <strong data-vc-exam-progress><?php esc_html_e('Question 1 of 100', 'vc-flashcards'); ?></strong>
+        </div>
       </div>
+
+      <?php /* Barra visual que refleja el avance del usuario dentro del total de preguntas. */ ?>
+      <div class="vc-exam-session-bar" aria-hidden="true">
+        <span data-vc-exam-bar-fill style="width: 0%;"></span>
+      </div>
+
+      <?php /* Card principal de la sesion: contexto, pregunta, respuestas y acciones Previous/Next. */ ?>
+      <article class="vc-exam-card">
+        <?php /* Contexto visible de la pregunta actual: tema principal y numero de pregunta. */ ?>
+        <div class="vc-exam-question-context">
+          <?php /* Tema principal de la pregunta actual. */ ?>
+          <p class="vc-exam-question-topic" data-vc-exam-topic-label></p>
+          <?php /* Etiqueta secundaria con el numero de pregunta actual. */ ?>
+          <p class="vc-exam-question-subtopic" data-vc-exam-subtopic-label></p>
+        </div>
+
+        <?php /* Enunciado principal de la pregunta actual. */ ?>
+        <h4 data-vc-exam-question></h4>
+
+        <?php /* Contenedor donde JS inyecta dinamicamente las respuestas de la pregunta actual. */ ?>
+        <div class="vc-exam-answers" data-vc-exam-answers></div>
+
+        <?php /* Footer de navegacion de la card: permite retroceder o avanzar entre preguntas. */ ?>
+        <div class="vc-exam-session-actions">
+          <?php /* Boton para volver a la pregunta anterior dentro de la misma sesion. */ ?>
+          <button
+            type="button"
+            class="vc-exam-action vc-exam-session-prev"
+            data-vc-exam-prev
+          >
+            <?php /* Icono vectorial reutilizable para el chevron de retroceso. */ ?>
+            <span class="vc-exam-next-icon vc-exam-next-icon--prev" aria-hidden="true">
+              <svg class="vc-arrow-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path d="M3 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M11 5L16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span><?php esc_html_e('Previous', 'vc-flashcards'); ?></span>
+          </button>
+
+          <?php /* Boton para avanzar a la siguiente pregunta o finalizar en la ultima. */ ?>
+          <button
+            type="button"
+            class="vc-exam-action vc-exam-session-next"
+            data-vc-exam-next
+          >
+            <span data-vc-exam-next-label><?php esc_html_e('Next question', 'vc-flashcards'); ?></span>
+            <?php /* Icono vectorial reutilizable para el chevron de avance. */ ?>
+            <span class="vc-exam-next-icon" aria-hidden="true">
+              <svg class="vc-arrow-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path d="M3 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M11 5L16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </article>
     </div>
-
-    <?php /* Barra visual que refleja el avance del usuario dentro del total de preguntas. */ ?>
-    <div class="vc-flashcards-session-bar" aria-hidden="true">
-      <span data-vc-exam-bar-fill style="width: 0%;"></span>
-    </div>
-
-    <?php /* Card principal de la sesion: contexto, pregunta, respuestas y acciones Previous/Next. */ ?>
-    <article class="vc-flashcards-card vc-exam-card">
-      <?php /* Contexto visible de la pregunta actual: tema principal y numero de pregunta. */ ?>
-      <div class="vc-flashcards-session-context">
-        <?php /* Tema principal de la pregunta actual. */ ?>
-        <p class="vc-flashcards-session-topic" data-vc-exam-topic-label></p>
-        <?php /* Etiqueta secundaria con el numero de pregunta actual. */ ?>
-        <p class="vc-flashcards-session-subtopic" data-vc-exam-subtopic-label></p>
-      </div>
-
-      <?php /* Enunciado principal de la pregunta actual. */ ?>
-      <h4 data-vc-exam-question></h4>
-
-      <?php /* Contenedor donde JS inyecta dinamicamente las respuestas de la pregunta actual. */ ?>
-      <div class="vc-flashcards-answers" data-vc-exam-answers></div>
-
-      <?php /* Footer de navegacion de la card: permite retroceder o avanzar entre preguntas. */ ?>
-      <div class="vc-exam-session-actions">
-        <?php /* Boton para volver a la pregunta anterior dentro de la misma sesion. */ ?>
-        <button
-          type="button"
-          class="vc-flashcards-session-action vc-flashcards-session-next vc-exam-session-prev"
-          data-vc-exam-prev
-        >
-          <?php /* Icono vectorial reutilizable para el chevron de retroceso. */ ?>
-          <span class="vc-flashcards-next-icon vc-flashcards-next-icon--prev" aria-hidden="true">
-            <svg class="icono-flecha" viewBox="0 0 11 20" fill="none" focusable="false">
-              <path d="M1 19L10 10L1 1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <span><?php esc_html_e('Previous', 'vc-flashcards'); ?></span>
-        </button>
-
-        <?php /* Boton para avanzar a la siguiente pregunta o finalizar en la ultima. */ ?>
-        <button
-          type="button"
-          class="vc-flashcards-session-action vc-flashcards-session-next"
-          data-vc-exam-next
-        >
-          <span data-vc-exam-next-label><?php esc_html_e('Next question', 'vc-flashcards'); ?></span>
-          <?php /* Icono vectorial reutilizable para el chevron de avance. */ ?>
-          <span class="vc-flashcards-next-icon" aria-hidden="true">
-            <svg class="icono-flecha" viewBox="0 0 11 20" fill="none" focusable="false">
-              <path d="M1 19L10 10L1 1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-        </button>
-      </div>
-    </article>
 
   </section>
   
   <?php /* Modal summary: resultado final superpuesto sobre la sesion, sin cambiar la vista activa. */ ?>
-  <section class="vc-exam-summary" data-vc-exam-summary hidden aria-label="<?php esc_attr_e('Mock test results', 'vc-flashcards'); ?>">
+  <section class="vc-exam-summary" data-vc-exam-summary hidden aria-label="<?php esc_attr_e('A&P Mock Test results', 'vc-flashcards'); ?>">
+    <div class="vc-exam-summary-backdrop" data-vc-exam-summary-back></div>
     <?php /* Wrapper general del modal final; ahora contiene solo la card centrada del resultado. */ ?>
-    <article class="vc-exam-summary-dialog" aria-label="<?php esc_attr_e('Mock test results', 'vc-flashcards'); ?>">
+    <article class="vc-exam-summary-dialog" aria-label="<?php esc_attr_e('A&P Mock Test results', 'vc-flashcards'); ?>">
       <?php /* Card blanca principal del summary: resultado, metricas y botones finales. */ ?>
       <div class="vc-exam-summary-section vc-exam-summary-section--content">
         <?php /* Titulo compacto del modal, separado del estado dinamico Approved/Not approved. */ ?>
@@ -283,23 +293,23 @@ if (!defined('ABSPATH')) {
             >
           </div>
           <?php /* Estado textual principal del resultado, por ejemplo Approved o Not approved. */ ?>
-          <p class="vc-flashcards-summary-kicker" data-vc-exam-result-kicker><?php esc_html_e('Not approved', 'vc-flashcards'); ?></p>
+          <p class="vc-exam-summary-kicker" data-vc-exam-result-kicker><?php esc_html_e('Not approved', 'vc-flashcards'); ?></p>
           <?php /* Texto auxiliar con el umbral minimo necesario para aprobar. */ ?>
           <p class="vc-exam-result-requirement"><?php esc_html_e('70% is required to pass', 'vc-flashcards'); ?></p>
         </div>
 
         <?php /* Bloque central del summary: cards de resultado principales. */ ?>
-        <div class="vc-flashcards-summary-top">
+        <div class="vc-exam-summary-metrics">
           <?php /* Cards de resultado rapido: correctas e incorrectas. */ ?>
-          <div class="vc-flashcards-summary-results">
+          <div class="vc-exam-summary-results">
             <?php /* Card de respuestas correctas. */ ?>
-            <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--correct">
-              <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--correct" data-vc-exam-correct-count>0</strong>
+            <div class="vc-exam-summary-result-card vc-exam-summary-result-card--correct">
+              <strong class="vc-exam-summary-count vc-exam-summary-count--correct" data-vc-exam-correct-count>0</strong>
               <h3><?php esc_html_e('Correct', 'vc-flashcards'); ?></h3>
             </div>
             <?php /* Card de respuestas incorrectas. */ ?>
-            <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--incorrect">
-              <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--incorrect" data-vc-exam-incorrect-count>0</strong>
+            <div class="vc-exam-summary-result-card vc-exam-summary-result-card--incorrect">
+              <strong class="vc-exam-summary-count vc-exam-summary-count--incorrect" data-vc-exam-incorrect-count>0</strong>
               <h3><?php esc_html_e('Incorrect', 'vc-flashcards'); ?></h3>
             </div>
           </div>
@@ -309,25 +319,25 @@ if (!defined('ABSPATH')) {
         <p class="vc-exam-summary-message"><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></p>
 
         <?php /* Acciones finales del summary: volver al menu o reiniciar el examen. */ ?>
-        <div class="vc-flashcards-summary-actions">
+        <div class="vc-exam-summary-actions">
           <?php /* Boton para cerrar el resumen y volver al menu principal del examen. */ ?>
           <button
             type="button"
-            class="vc-flashcards-back vc-flashcards-summary-action vc-flashcards-summary-action--back"
+            class="vc-exam-summary-action vc-exam-summary-action--back"
             data-vc-exam-summary-back
           ><?php esc_html_e('Back to menu', 'vc-flashcards'); ?></button>
 
           <?php /* Boton para lanzar un nuevo intento del examen usando la misma categoria. */ ?>
           <button
             type="button"
-            class="vc-flashcards-start vc-flashcards-summary-action vc-flashcards-summary-action--restart"
+            class="vc-exam-summary-action vc-exam-summary-action--restart"
             data-vc-exam-retry
           >
-            <span class="vc-flashcards-summary-action-icon" aria-hidden="true">
+            <span class="vc-exam-summary-action-icon" aria-hidden="true">
               <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try.svg'); ?>" alt="" width="16" height="16">
             </span>
 
-            <span><?php esc_html_e('Try again', 'vc-flashcards'); ?></span>
+            <span><?php esc_html_e('Retake Test', 'vc-flashcards'); ?></span>
           </button>
         </div>
       </div>

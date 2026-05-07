@@ -1,53 +1,83 @@
 /* ==========================================================================
-   Base
-   Estructura raiz del simulador de examen y estados iniciales.
+   A&P Mock Test
+   CSS autonomo del simulador: home, sesion, summary y responsive.
    ========================================================================== */
 
-/* ===== Simulador de examen ===== */
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
-/* ===== Simulador de examen: estructura general ===== */
-/* Contenedor raiz del examen; replica el layout base de flashcards. */
 .vc-exam-app {
+  --vc-exam-surface-radius: 12px;
+  --vc-exam-control-radius: 6px;
+  --vc-exam-border: #E2E8F0;
+  --vc-exam-blue: #1447E6;
+  --vc-exam-text: #212121;
+  --vc-exam-muted: #666666;
   display: grid;
   gap: 24px;
-  color: #212121;
+  min-height: 100%;
+  color: var(--vc-exam-text);
   font-family: Poppins, sans-serif;
   position: relative;
-  min-height: 100%;
-  --vc-flashcards-surface-radius: 12px;
-  --vc-exam-surface-radius: 12px;
-  --vc-exam-inner-surface-radius: 10px;
 }
 
-/* Estado oculto temporal mientras JS inicializa la UI del examen. */
 .vc-exam-app.is-booting {
   visibility: hidden;
 }
 
-/* Cada vista del examen cuelga directo del root; JS alterna el atributo hidden. */
 .vc-exam-app > [data-vc-exam-view] {
   display: grid;
 }
 
-.vc-exam-app > [data-vc-exam-view][hidden] {
+.vc-exam-view {
+  min-width: 0;
+}
+
+.vc-mock-test-exam-shell {
+  display: grid;
+  gap: 0;
+}
+
+.vc-exam-app > [data-vc-exam-view][hidden],
+.vc-exam-summary[hidden] {
   display: none !important;
 }
 
+.vc-exam-feedback[hidden] {
+  display: none;
+}
+
+.vc-exam-feedback,
+.vc-exam-empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
+  background: #FFFFFF;
+  color: var(--vc-exam-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.vc-exam-empty p {
+  margin: 0;
+}
+
+@keyframes vc-exam-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
 /* ==========================================================================
-   Component: Exam Home
-   Intro, badges superiores, categorias, historial y detalles del test.
+   Home
    ========================================================================== */
 
-/* ===== Home del examen: bloque superior ===== */
-
-/* ===== Home del examen: encabezado, badges y cards ===== */
-/* Bloque superior de la home del examen, encima de badges y cards. */
 .vc-exam-intro {
   display: grid;
   margin-bottom: 24px;
 }
 
-/* Grilla que organiza los 3 badges de resumen en la home del examen. */
 .vc-exam-intro-badges {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -57,80 +87,15 @@
   list-style: none;
 }
 
-/* Espacio debajo de la grilla de categorias antes de historial y detalles. */
-.vc-exam-app .vc-flashcards-category-grid--mock {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 24px;
-}
-
-/* Tipografia compartida para textos secundarios pequenos del examen. */
-.vc-exam-badge-copy small,
-.vc-exam-history-header p,
-.vc-exam-history-item-copy-text span,
-.vc-exam-history-item-score-copy small,
-.vc-exam-progress-label,
-.vc-exam-session-header [data-vc-exam-progress],
-.vc-exam-summary-dialog .vc-exam-result-requirement,
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3,
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3 {
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
-}
-
-/* Color compartido para textos secundarios neutrales del examen. */
-.vc-exam-badge-copy small,
-.vc-exam-history-header p,
-.vc-exam-history-item-copy-text span,
-.vc-exam-history-item-score-copy small,
-.vc-exam-session-header [data-vc-exam-progress],
-.vc-exam-summary-dialog .vc-exam-result-requirement {
-  color: #666666;
-}
-
-/* Tipografia compartida para textos base de contenido del examen. */
-.vc-exam-history-item-copy-text strong {
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-/* Tipografia compartida para titulos de seccion del examen. */
-.vc-exam-history-header h2 {
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-/* Wrappers centrados que usan inline-flex para alinear contenido en ambos ejes. */
-.vc-exam-badge-icon,
-.vc-exam-history-item-icon,
-.vc-exam-timer-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Wrappers base apilados con grid. */
-.vc-exam-history-item-copy,
-.vc-exam-history-item-score-copy,
-.vc-exam-history-item-copy-text,
-.vc-exam-history-test-details-list {
-  display: grid;
-}
-
-/* Caja externa de cada badge superior del examen. */
 .vc-exam-badge {
   min-width: 0;
   display: flex;
-  border: 1px solid #e2e8f0;
-  border-radius: var(--vc-flashcards-surface-radius);
-  opacity: 1;
   padding: 12px 20px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
   background: #F1F5F9;
 }
 
-/* Layout horizontal que alinea icono + texto dentro de cada badge. */
 .vc-exam-badge-content {
   display: grid;
   grid-template-columns: 50px minmax(0, 1fr);
@@ -140,26 +105,25 @@
   min-width: 0;
 }
 
-/* Caja verde del icono usada en cada badge superior. */
+.vc-exam-badge-icon,
+.vc-exam-history-item-icon,
+.vc-exam-timer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .vc-exam-badge-icon {
   width: 50px;
   height: 50px;
   padding: 11px;
-  border-radius: 5px;
-  background: #00a63e;
-  color: #ffffff;
+  border-radius: 8px;
+  background: #00A63E;
+  color: #FFFFFF;
   box-sizing: border-box;
 }
 
-/* Tamano del SVG cuando el badge usa icono inline. */
-.vc-exam-badge-icon svg {
-  flex: 0 0 auto;
-  display: block;
-  width: 28px;
-  height: 28px;
-}
-
-/* Tamano del icono cuando el badge usa imagen. */
+.vc-exam-badge-icon svg,
 .vc-exam-badge-icon img {
   flex: 0 0 auto;
   display: block;
@@ -167,7 +131,6 @@
   height: 28px;
 }
 
-/* Columna de texto dentro de cada badge superior. */
 .vc-exam-badge-copy {
   min-width: 0;
   min-height: 44px;
@@ -176,43 +139,143 @@
   justify-content: center;
 }
 
-/* Texto secundario del badge, como "Best score" o "Average". */
-.vc-exam-badge-copy small {
+.vc-exam-badge-copy small,
+.vc-exam-history-header p,
+.vc-exam-history-item-copy-text span,
+.vc-exam-history-item-score-copy small,
+.vc-exam-progress-label,
+.vc-exam-session-header [data-vc-exam-progress],
+.vc-exam-result-requirement,
+.vc-exam-summary-result-card h3 {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.vc-exam-badge-copy small,
+.vc-exam-history-header p,
+.vc-exam-history-item-copy-text span,
+.vc-exam-history-item-score-copy small,
+.vc-exam-session-header [data-vc-exam-progress],
+.vc-exam-result-requirement {
+  color: var(--vc-exam-muted);
+}
+
+.vc-exam-badge-copy small,
+.vc-exam-badge-copy strong {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Valor principal del badge, como "81%" o "0/5". */
 .vc-exam-badge-copy strong {
-  font-weight: 400;
-  display: block;
   margin-top: 0;
-  color: #0ea44b;
+  color: #0EA44B;
+  font-weight: 400;
   font-size: 30px;
   line-height: 42px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* ===== Home del examen: cards de categoria ===== */
+.vc-exam-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
 
-/* Fila de metadata que muestra subtopics/cards por categoria. */
+.vc-exam-category-card {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
+  background: #FFFFFF;
+}
+
+.vc-exam-category-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vc-exam-category-top h3 {
+  margin: 0;
+  color: #000000;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
 .vc-exam-category-meta {
   margin: 0;
+  color: var(--vc-exam-muted);
   font-size: 14px;
-  color: #666666;
+  line-height: 20px;
 }
 
-/* Resetea margenes del parrafo dentro de la metadata de categoria. */
 .vc-exam-category-meta p {
   margin: 0;
 }
 
-/* Bloque de historial del examen debajo de la grilla de categorias. */
-/* Layout de dos columnas: historial a la izquierda y detalles a la derecha. */
+.vc-exam-start,
+.vc-exam-action,
+.vc-exam-summary-action,
+.vc-exam-finish-btn {
+  border: 0;
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.vc-exam-start {
+  width: 100%;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--vc-exam-control-radius);
+  background: var(--vc-exam-blue);
+  color: #FFFFFF;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.vc-exam-start:hover,
+.vc-exam-start:focus,
+.vc-exam-start:focus-visible,
+.vc-exam-start:active {
+  background: var(--vc-exam-blue);
+  color: #FFFFFF;
+  box-shadow: none;
+  outline: none;
+}
+
+.vc-exam-start-icon,
+.vc-exam-next-icon,
+.vc-exam-summary-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.vc-exam-start-icon svg,
+.vc-exam-next-icon svg {
+  display: block;
+}
+
+/* ==========================================================================
+   History
+   ========================================================================== */
+
 .vc-exam-history {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
@@ -220,100 +283,89 @@
   gap: 24px;
 }
 
-/* Card blanca que envuelve la lista del historial de examenes. */
-.vc-exam-history-content {
-  padding: 25px;
-  border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
-  background: #FFFFFF;
-}
-
-/* Espaciado compartido entre historial y test details. */
 .vc-exam-history-content,
 .vc-exam-history-test-details {
   display: grid;
   gap: 16px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
 }
 
-/* Card lateral derecha con los detalles del test. */
+.vc-exam-history-content {
+  padding: 25px;
+  background: #FFFFFF;
+}
+
 .vc-exam-history-test-details {
   gap: 14px;
   padding: 12px 24px 17px;
-  border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
   background: #F1F5F9;
 }
 
-/* Estilo del titulo del bloque de historial. */
 .vc-exam-history-header h2 {
   margin: 0;
+  color: var(--vc-exam-text);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
   letter-spacing: -0.31px;
-  color: #212121;
 }
 
-/* Estilo del subtitulo del historial. */
 .vc-exam-history-header p {
   margin: 0;
 }
 
-/* Lista apilada de intentos del historial. */
-.vc-exam-history-list {
+.vc-exam-history-list,
+.vc-exam-history-item-copy,
+.vc-exam-history-item-copy-text,
+.vc-exam-history-item-score-copy,
+.vc-exam-history-test-details-list {
   display: grid;
+}
+
+.vc-exam-history-list {
   gap: 8px;
 }
 
-/* Fila individual de un intento en el historial. */
 .vc-exam-history-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  opacity: 1;
   padding: 11px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--vc-exam-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: #FFFFFF;
 }
 
-/* Lado izquierdo de la fila: icono de estado + fecha/duracion. */
 .vc-exam-history-item-copy {
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 12px;
 }
 
-/* Caja del icono de aprobado/reprobado en el historial. */
 .vc-exam-history-item-icon {
   width: 40px;
   height: 40px;
   padding: 10px;
-  box-sizing: border-box;
   border-radius: 8px;
-  border: 0;
+  box-sizing: border-box;
 }
 
-/* Fija el tamano del icono de aprobado/reprobado. */
 .vc-exam-history-item-icon img {
   display: block;
   width: 20px;
   height: 20px;
 }
 
-/* Texto principal, como la fecha del intento. */
 .vc-exam-history-item-copy-text strong {
-  color: #212121;
+  color: var(--vc-exam-text);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
   letter-spacing: -0.15px;
 }
 
-/* Porcentaje grande mostrado a la derecha de cada fila. */
-.vc-exam-history-item-score-copy strong {
-  font-weight: 400;
-  font-size: 30px;
-  line-height: 42px;
-  letter-spacing: 0.4px;
-}
-
-/* Layout del lado derecho que alinea porcentaje e icono de tendencia. */
 .vc-exam-history-item-score {
   display: flex;
   align-items: flex-start;
@@ -321,12 +373,17 @@
   gap: 20px;
 }
 
-/* Alineacion del texto a la derecha dentro de la columna de score. */
 .vc-exam-history-item-score-copy {
   justify-items: end;
 }
 
-/* Icono pequeno del extremo derecho de cada fila del historial. */
+.vc-exam-history-item-score-copy strong {
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 42px;
+  letter-spacing: 0.4px;
+}
+
 .vc-exam-history-item-score-icon {
   flex: 0 0 auto;
   display: block;
@@ -334,44 +391,37 @@
   padding: 20px 0;
 }
 
-/* Tamano explicito para la imagen del icono de tendencia. */
 .vc-exam-history-item-score-icon img {
   display: block;
   width: 16px;
   height: 16px;
 }
 
-/* Colores del porcentaje cuando el intento fue aprobado. */
 .vc-exam-history-item.is-passed .vc-exam-history-item-score-copy strong {
-  color: #0ea44b;
+  color: #0EA44B;
 }
 
-/* Fondo de la caja izquierda cuando el intento fue aprobado. */
 .vc-exam-history-item.is-passed .vc-exam-history-item-icon {
   background: #00A63E1A;
 }
 
-/* Colores del porcentaje cuando el intento fue reprobado. */
 .vc-exam-history-item.is-failed .vc-exam-history-item-score-copy strong {
-  color: #dc2626;
+  color: #DC2626;
 }
 
-/* Fondo de la caja izquierda cuando el intento fue reprobado. */
 .vc-exam-history-item.is-failed .vc-exam-history-item-icon {
   background: #E2101B1A;
 }
 
-/* Titulo del bloque lateral de test details. */
 .vc-exam-history-test-details h3 {
   margin: 0;
-  font-weight: 500;
   color: #1E3C80;
+  font-weight: 500;
   font-size: 20px;
   line-height: 33.6px;
   letter-spacing: 0.07px;
 }
 
-/* Lista que contiene los bullets de detalles del examen. */
 .vc-exam-history-test-details-list {
   gap: 8px;
   margin: 0;
@@ -379,19 +429,17 @@
   list-style: none;
 }
 
-/* Item individual dentro de la lista de detalles. */
 .vc-exam-history-test-details-item {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  font-weight: 400;
   gap: 8px;
   color: #1E3C80;
+  font-weight: 400;
   font-size: 12px;
   line-height: 16px;
 }
 
-/* Icono pequeno que acompana cada item de test details. */
 .vc-exam-history-test-details-icon {
   display: inline-flex;
   align-items: center;
@@ -402,153 +450,280 @@
 }
 
 /* ==========================================================================
-   Component: Exam Session
-   Header de sesion, cronometro, card de pregunta, respuestas y acciones.
+   Session
    ========================================================================== */
 
-/* ===== Sesion en curso: cabecera ===== */
-
-/* ===== Sesion en curso: header y cronometro ===== */
-/* Barra superior de la sesion en vivo: progreso a un lado y acciones al otro. */
 .vc-exam-session-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
+  display: grid;
+  gap: 12px;
   margin-bottom: 6px;
 }
 
-/* Tipografia compartida para el label de progreso y el contador respondido. */
+.vc-exam-session-title-row,
+.vc-exam-session-header-copy,
+.vc-exam-session-header-actions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.vc-exam-session-title-row,
+.vc-exam-session-header-copy {
+  justify-content: space-between;
+}
+
+.vc-exam-session-title-row {
+  gap: 16px;
+  min-height: 36px;
+}
+
+.vc-exam-session .vc-exam-session-title {
+  margin: 0;
+  color: #212121;
+  font-family: Poppins, sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.vc-exam-session-header-copy {
+  gap: 10px;
+}
+
+.vc-exam-session-header-actions {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .vc-exam-progress-label,
 .vc-exam-session-header [data-vc-exam-progress] {
   margin: 0;
 }
 
-/* Ajuste fino solo para el contador de respuestas del header. */
 .vc-exam-session-header [data-vc-exam-progress] {
   flex: 0 0 auto;
-  margin-left: 0;
 }
 
-/* ===== Sesion en curso: cronometro ===== */
-
-/* ===== Sesion en curso: comportamiento del cronometro ===== */
-/* Pill del cronometro mostrado en el header de la sesion. */
-.vc-exam-timer {
-  flex: 0 0 auto;
+.vc-exam-finish-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 400;
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-  padding: 5px 14px;
-  border-radius: 8px;
-  background: #e2e8f0;
-  color: #212121;
-  white-space: nowrap;
-  transition: background-color 0.4s ease, color 0.4s ease;
-}
-
-/* Wrapper del icono del cronometro. */
-.vc-exam-timer-icon {
-  flex: 0 0 auto;
-}
-
-/* Evita comportamientos inline no deseados en el SVG del cronometro. */
-.vc-exam-timer-icon svg {
-  display: block;
-}
-
-/* Cuando faltan menos de 5 minutos: estado de advertencia. */
-.vc-exam-timer--warning {
-  background: #fef3c7;
-  color: #92400e;
-  animation: vc-exam-pulse 1.2s ease-in-out infinite;
-}
-
-/* Cuando el tiempo termina: estado expirado en rojo. */
-.vc-exam-timer--expired {
-  background: #fee2e2;
-  color: #dc2626;
-  animation: none;
-}
-
-/* Boton Finish exam que aparece junto al cronometro. */
-.vc-exam-finish-btn {
-  opacity: 1;
+  justify-content: center;
   gap: 6px;
+  min-height: 36px;
   padding: 7px 10px;
-  border-radius: 6px;
-  border-width: 1.67px;
-  border-color: #1447E6;
-  box-sizing: border-box;
-}
-
-/* Estilo del texto dentro del boton Finish exam. */
-.vc-exam-finish-btn span {
-  color: #1447E6;
-  border-width: 1.67px;
+  border: 1.67px solid var(--vc-exam-blue);
+  border-radius: var(--vc-exam-control-radius);
+  background: transparent;
+  color: var(--vc-exam-blue);
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
 }
 
-/* Espacio extra debajo de los pills de topic/subtopic en la card del examen. */
-.vc-exam-card {
-  display: grid;
-  gap: 30px;
+.vc-exam-finish-btn:hover,
+.vc-exam-finish-btn:focus,
+.vc-exam-finish-btn:focus-visible,
+.vc-exam-finish-btn:active {
+  border-color: var(--vc-exam-blue);
+  background: transparent;
+  color: var(--vc-exam-blue);
+  box-shadow: none;
+  outline: none;
+  transform: none;
 }
 
-/* Exam card context: pills de topic/subtopic dentro de la pregunta. */
-.vc-exam-card .vc-flashcards-session-context {
+.vc-exam-timer {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  background: #E2E8F0;
+  color: var(--vc-exam-text);
+  font-weight: 400;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.vc-exam-timer-icon svg {
+  display: block;
+}
+
+.vc-exam-timer--warning {
+  background: #FEF3C7;
+  color: #92400E;
+  animation: vc-exam-pulse 1.2s ease-in-out infinite;
+}
+
+.vc-exam-timer--expired {
+  background: #FEE2E2;
+  color: #DC2626;
+  animation: none;
+}
+
+.vc-exam-session-bar {
+  width: 100%;
+  height: 8px;
+  margin: 0 0 35px;
+  border-radius: 999px;
+  background: #E2E8F0;
+  overflow: hidden;
+}
+
+.vc-exam-session-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--vc-exam-blue);
+}
+
+.vc-exam-card {
+  display: grid;
+  gap: 0;
+  padding: 24px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
+  background: #FFFFFF;
+  box-sizing: border-box;
+}
+
+.vc-exam-question-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 30px;
+}
+
+.vc-exam-question-topic,
+.vc-exam-question-subtopic {
+  margin: 0;
+  min-height: 38px;
+  padding: 9px 22px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: 6px;
+  color: var(--vc-exam-muted);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.vc-exam-question-topic {
+  background: #E5E7EB;
+}
+
+.vc-exam-question-subtopic {
+  background: #FFFFFF;
+}
+
+.vc-exam-card [data-vc-exam-question] {
+  margin: 0 0 18px;
+  color: var(--vc-exam-text);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.31px;
+}
+
+.vc-exam-answers {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 30px;
+}
+
+.vc-exam-answer {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: var(--vc-exam-surface-radius);
+  background: #FFFFFF;
+  color: inherit;
+  text-align: left;
+  font-family: Poppins, sans-serif;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+
+.vc-exam-answer:hover,
+.vc-exam-answer:focus,
+.vc-exam-answer:focus-visible,
+.vc-exam-answer:active,
+.vc-exam-answer:disabled {
+  border-color: var(--vc-exam-border);
+  background: #FFFFFF;
+  color: inherit;
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  transform: none;
+}
+
+.vc-exam-answer[data-state="selected"],
+.vc-exam-answer[data-state="selected"]:hover,
+.vc-exam-answer[data-state="selected"]:focus,
+.vc-exam-answer[data-state="selected"]:focus-visible,
+.vc-exam-answer[data-state="selected"]:active {
+  border-color: var(--vc-exam-blue);
+  background: #FFFFFF;
+}
+
+.vc-exam-answer span {
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #E2E8F0;
+  color: #4A5565;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.vc-exam-answer[data-state="selected"] span {
+  background: var(--vc-exam-blue);
+  color: #FFFFFF;
+}
+
+.vc-exam-answer strong {
+  min-width: 0;
+  color: var(--vc-exam-text);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.vc-exam-session-actions {
+  display: flex;
+  gap: 18px;
   margin: 0;
 }
 
-/* Exam card internal spacing: respuestas y acciones sin margenes externos. */
-.vc-exam-card .vc-flashcards-answers,
-.vc-exam-card .vc-exam-session-actions {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-/* Espaciado del wrapper de la barra de progreso dentro de la card del examen. */
-.vc-exam-app .vc-flashcards-session-bar {
-  margin-top: 0;
-  margin-bottom: 35px;
-}
-
-@keyframes vc-exam-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.65; }
-}
-
-/* ===== Sesion en curso: pregunta y acciones ===== */
-
-
-
-/* ===== Sesion en curso: card de pregunta y respuestas ===== */
-/* Fila de botones de navegacion dentro de la card del examen. */
-.vc-exam-card .vc-exam-session-actions {
-  display: flex;
-  gap: 18px;
-  margin-top: 0;
-}
-
-/* Base compartida para botones de accion del mock: sesion y resumen. */
-.vc-exam-card .vc-flashcards-session-next,
-.vc-exam-summary-dialog .vc-flashcards-summary-action--back,
-.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
+.vc-exam-action {
+  flex: 1 1 0;
+  min-height: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  height: 44px;
-  opacity: 1;
   gap: 6px;
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: var(--vc-exam-control-radius);
+  opacity: 1;
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
@@ -556,148 +731,54 @@
   text-align: center;
 }
 
-/* Estilo base compartido por Next y Previous en el footer de la card. */
-.vc-exam-card .vc-flashcards-session-next {
-  flex: 1 1 0;
-  margin-top: 0;
-  width: auto;
-  padding: 0;
-  background: #1447E6;
-  color: #ffffff;
+.vc-exam-session-next,
+.vc-exam-session-next:hover,
+.vc-exam-session-next:focus,
+.vc-exam-session-next:focus-visible,
+.vc-exam-session-next:active {
   border: 0;
+  background: var(--vc-exam-blue);
+  color: #FFFFFF;
   box-shadow: none;
 }
 
-/* Variante visual del boton Previous: fondo blanco y borde azul. */
-.vc-exam-card .vc-exam-session-prev {
-  flex: 1 1 0;
-  background: #ffffff;
-  color: #1447E6;
-  border: 2px solid #1447E6;
-}
-
-/* Fuerza flecha y texto azules en el boton Previous. */
-.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon,
-.vc-exam-card .vc-exam-session-prev span {
-  color: #1447E6;
-}
-
-/* Estado disabled de Previous para la primera pregunta. */
-.vc-exam-card .vc-exam-session-prev:disabled,
-.vc-exam-card .vc-exam-session-prev:disabled:hover,
-.vc-exam-card .vc-exam-session-prev:disabled:focus,
-.vc-exam-card .vc-exam-session-prev:disabled:focus-visible,
-.vc-exam-card .vc-exam-session-prev:disabled:active {
-  background: #ffffff;
-  color: #1447E6;
-  border: 2px solid #1447E6;
+.vc-exam-session-prev,
+.vc-exam-session-prev:hover,
+.vc-exam-session-prev:focus,
+.vc-exam-session-prev:focus-visible,
+.vc-exam-session-prev:active,
+.vc-exam-session-prev:disabled {
+  border: 2px solid var(--vc-exam-blue);
+  background: #FFFFFF;
+  color: var(--vc-exam-blue);
   box-shadow: none;
+}
+
+.vc-exam-session-prev:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
 
-/* Mantiene texto e icono de Previous disabled en el mismo azul. */
-.vc-exam-card .vc-exam-session-prev:disabled .vc-flashcards-next-icon,
-.vc-exam-card .vc-exam-session-prev:disabled span {
-  color: #1447E6;
+.vc-exam-next-icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
 }
 
-/* Tipografia compartida de los dos botones del footer de la card. */
-.vc-exam-card .vc-flashcards-session-next span,
-.vc-exam-card .vc-exam-session-prev span {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: -0.15px;
+.vc-exam-next-icon .vc-arrow-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
-/* Mantiene Next sin variaciones visuales en hover/focus. */
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):hover,
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus,
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus-visible,
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):active {
-  background: #1447E6;
-  color: #ffffff;
-  border: 0;
-  box-shadow: none;
-}
-
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):is(:hover, :focus, :focus-visible, :active) span,
-.vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):is(:hover, :focus, :focus-visible, :active) .vc-flashcards-next-icon {
-  color: #ffffff;
-}
-
-/* Estilo de una respuesta seleccionada dentro de la pregunta del examen. */
-.vc-exam-card .vc-flashcards-answer[data-state="selected"] {
-  border-color: #1447E6;
-  background: #FFFFFF;
-  box-shadow: none;
-}
-
-/* Bloquea el look de la respuesta seleccionada en hover/focus/disabled. */
-.vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active),
-.vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) {
-  border-color: #1447E6 !important;
-  background: #FFFFFF !important;
-  box-shadow: none !important;
-  color: inherit !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-/* Estilo del chip de letra/indice cuando la respuesta esta seleccionada. */
-.vc-exam-card .vc-flashcards-answer[data-state="selected"] span {
-  background: #1447E6;
-  color: #FFFFFF;
-}
-
-/* Mantiene los colores del chip seleccionado en todos los estados. */
-.vc-exam-card .vc-flashcards-answer[data-state="selected"]:is(:hover, :focus, :focus-visible, :active) span,
-.vc-exam-card .vc-flashcards-answer[data-state="selected"]:disabled:is(:hover, :focus, :focus-visible) span {
-  background: #1447E6 !important;
-  color: #FFFFFF !important;
-}
-
-/* Elimina el marcador decorativo por defecto de la respuesta seleccionada. */
-.vc-exam-card .vc-flashcards-answer[data-state="selected"]::after {
-  display: none;
-}
-
-/* Las respuestas no seleccionadas conservan el estilo neutro en todos los estados. */
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]),
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):is(:hover, :focus, :focus-visible, :active, :disabled),
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):disabled:is(:hover, :focus, :focus-visible) {
-  background: #ffffff !important;
-  color: inherit !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-/* Estilo neutro del chip para respuestas no seleccionadas. */
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]) span,
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):is(:hover, :focus, :focus-visible, :active, :disabled) span,
-.vc-exam-card .vc-flashcards-answer:not([data-state="selected"]):disabled:is(:hover, :focus, :focus-visible) span {
-  background: #e2e8f0 !important;
-  color: #4A5565 !important;
+.vc-exam-next-icon--prev {
+  transform: scaleX(-1);
 }
 
 /* ==========================================================================
-   Component: Exam Summary
-   Vista final con resultado, cards de conteo y acciones.
+   Summary
    ========================================================================== */
 
-/* ===== Resumen final del examen ===== */
-
-/* Garantiza que el modal de resultado no pinte nada mientras JS lo mantiene cerrado. */
-.vc-exam-summary[hidden] {
-  display: none !important;
-}
-
-/* Overlay del resumen final del examen, alineado con el resumen de flashcards. */
 .vc-exam-summary {
   position: fixed;
   inset: 0;
@@ -706,123 +787,170 @@
   place-items: center;
   min-height: 100%;
   padding: 24px;
-  background: rgba(15, 23, 42, 0.30);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
   box-sizing: border-box;
 }
 
-/* Wrapper principal flexible; desktop define la medida exacta de Figma mas abajo. */
+.vc-exam-summary-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
 .vc-exam-summary-dialog {
   position: relative;
+  z-index: 1;
   justify-self: center;
   width: min(100%, 500px);
   margin: 0;
-  opacity: 1;
-  overflow-y: auto;
   padding: 0;
+  overflow-y: auto;
   box-sizing: border-box;
   text-align: center;
 }
 
-/* Card blanca del resumen; mantiene padding uniforme de 30px alrededor del contenido. */
-.vc-exam-summary-dialog .vc-exam-summary-section--content {
+.vc-exam-summary-section--content {
   display: grid;
   gap: 0;
-  opacity: 1;
-  background: #ffffff;
   padding: 30px;
-  border-radius: var(--vc-flashcards-surface-radius);
-  border-width: 1.67px;
+  border: 1.67px solid transparent;
+  border-radius: var(--vc-exam-surface-radius);
+  background: #FFFFFF;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
   box-sizing: border-box;
 }
 
-/* Desktop: respeta las medidas objetivo de Figma sin imponerlas a pantallas pequenas. */
-@media (min-width: 769px) {
-  /* Desktop Figma: fija el ancho visual del modal solo cuando hay espacio suficiente. */
-  .vc-exam-summary-dialog {
-    width: 424px;
-  }
-
-  /* Desktop Figma: usa altura minima para igualar la composicion sin cortar contenido. */
-  .vc-exam-summary-dialog .vc-exam-summary-section--content {
-    min-height: 525px;
-  }
-}
-
-/* Titulo fijo del modal de resultado, independiente del estado aprobado/reprobado. */
-.vc-exam-summary-dialog .vc-exam-summary-title {
+.vc-exam-summary-title {
   margin: 0 0 28px;
   color: #0F172A;
-  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.31px;
-  text-align: center;
 }
 
-/* Header del resultado: centra badge/titulos y deja 16px antes de las metricas. */
-.vc-exam-summary-dialog .vc-exam-result-header {
+.vc-exam-result-header {
   display: grid;
   justify-items: center;
   margin-bottom: 16px;
 }
 
-/* Separacion precisa entre las metricas y el mensaje de cierre. */
-.vc-exam-summary-dialog .vc-flashcards-summary-top {
+.vc-exam-result-badge {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  padding: 20px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  color: #FFFFFF;
+  box-sizing: border-box;
+  transition: background 0.3s ease;
+}
+
+.vc-exam-result-badge--passed {
+  background: #F0FDF4;
+}
+
+.vc-exam-result-badge--failed {
+  background: #FFE2E2;
+}
+
+.vc-exam-summary-kicker {
+  margin: 0 0 10px;
+  color: var(--vc-exam-text);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.vc-exam-result-requirement {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.vc-exam-summary-metrics {
+  display: grid;
   margin-bottom: 24px;
 }
 
-/* Mensaje final del mock test, alineado con el tono visual de Flashcards. */
-.vc-exam-summary-dialog .vc-exam-summary-message {
-  margin: 0 0 28px;
-  color: #666666;
+.vc-exam-summary-results {
+  display: flex;
+  gap: 10px;
+}
+
+.vc-exam-summary-result-card {
+  flex: 1 1 0;
+  display: flex;
+  min-height: 76px;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px 17px;
+  border: 1px solid var(--vc-exam-border);
+  border-radius: 8px;
+}
+
+.vc-exam-summary-result-card--correct {
+  border-color: #B9F8CF;
+  background: #F0FDF4;
+}
+
+.vc-exam-summary-result-card--incorrect {
+  border-color: #FFC9C9;
+  background: #FEF2F2;
+}
+
+.vc-exam-summary-count {
+  margin: 0;
   font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: 0.4px;
+  text-align: center;
+  order: 1;
+}
+
+.vc-exam-summary-count--correct {
+  color: #008236;
+}
+
+.vc-exam-summary-count--incorrect {
+  color: #C10007;
+}
+
+.vc-exam-summary-result-card h3 {
+  margin: 0;
+  letter-spacing: 0;
+  order: 2;
+}
+
+.vc-exam-summary-result-card span {
+  order: 2;
+}
+
+.vc-exam-summary-result-card--correct h3 {
+  color: #0D542B;
+}
+
+.vc-exam-summary-result-card--incorrect h3 {
+  color: #C10007;
+}
+
+.vc-exam-summary-message {
+  margin: 0 0 28px;
+  color: var(--vc-exam-muted);
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
-  text-align: center;
 }
 
-/* Separacion entre las cards superiores del resumen. */
-.vc-exam-summary-dialog .vc-flashcards-summary-results {
-  gap: 10px;
-}
-
-/* Texto auxiliar debajo del titulo de aprobado/reprobado. */
-.vc-exam-summary-dialog .vc-exam-result-requirement {
-  margin: 0;
-  letter-spacing: 0;
-}
-
-/* Mini-card usada para Correct / Incorrect; replica padding 10px vertical y 17px lateral. */
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 0;
-  padding: 10px 17px;
-}
-
-/* Numero grande dentro de cada mini-card del resumen. */
-.vc-exam-summary-dialog .vc-flashcards-summary-count {
-  margin: 0;
-  font-weight: 400;
-  font-size: 40px;
-  line-height: 53.33px;
-  letter-spacing: 0.37px;
-}
-
-/* Label debajo del numero de cada mini-card del resumen. */
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3 {
-  margin: 0;
-  letter-spacing: 0;
-}
-
-/* Botonera vertical del resumen, como el modal final de Flashcards. */
-.vc-exam-summary-dialog .vc-flashcards-summary-actions {
+.vc-exam-summary-actions {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -831,141 +959,107 @@
   margin-top: 0;
 }
 
-
-/* Coloca restart antes de back en el orden visual. */
-.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
-  order: 1;
-}
-
-/* Coloca back despues de restart en el orden visual. */
-.vc-exam-summary-dialog .vc-flashcards-summary-action--back {
-  order: 2;
-}
-
-/* Tamano y tipografia compartidos por ambos botones del resumen. */
-.vc-exam-summary-dialog .vc-flashcards-summary-action--back,
-.vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
-  border-width: 1.67px;
-}
-
-
-/* ── Summary / Results ────────────────────────────────────────────────────── */
-
-/* Badge circular del resultado final: check o X. */
-.vc-exam-result-badge {
-  width: 80px;
-  height: 80px;
-  padding: 20px;
-  border-radius: 50%;
-  display: flex;
+.vc-exam-summary-action {
+  width: 100%;
+  min-height: 42px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 36px;
-  font-weight: 700;
-  color: #ffffff;
-  background: #e2e8f0; /* estado neutro por defecto */
-  transition: background 0.3s ease;
-  box-sizing: border-box;
-}
-
-/* Color del badge cuando el resultado es aprobado. */
-.vc-exam-result-badge--passed {
-  background: #F0FDF4;
-}
-
-/* Color del badge cuando el resultado es reprobado. */
-.vc-exam-result-badge--failed {
-  background: #FFE2E2;
-}
-
-/* Titulo principal del resultado, como "Not approved". */
-.vc-exam-summary-dialog .vc-flashcards-summary-kicker {
-  margin-bottom: 10px;
-  color: #212121;
-  font-weight: 400;
-  font-size: 22px;
+  gap: 8px;
+  padding: 7px 0;
+  border-radius: var(--vc-exam-control-radius);
+  font-weight: 500;
+  font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.31px;
+  text-align: center;
 }
 
-/* El contenido del resumen cambia por JS segun el resultado del examen. */
+.vc-exam-summary-action--back,
+.vc-exam-summary-action--back:hover,
+.vc-exam-summary-action--back:focus,
+.vc-exam-summary-action--back:focus-visible,
+.vc-exam-summary-action--back:active {
+  border: 1.67px solid var(--vc-exam-blue);
+  background: var(--vc-exam-blue);
+  color: #FFFFFF;
+  box-shadow: none;
+}
+
+.vc-exam-summary-action--restart,
+.vc-exam-summary-action--restart:hover,
+.vc-exam-summary-action--restart:focus,
+.vc-exam-summary-action--restart:focus-visible,
+.vc-exam-summary-action--restart:active {
+  border: 1.67px solid var(--vc-exam-blue);
+  background: #FFFFFF;
+  color: var(--vc-exam-blue);
+  box-shadow: none;
+}
+
+.vc-exam-summary-action-icon,
+.vc-exam-summary-action-icon img {
+  width: 16px;
+  height: 16px;
+}
+
+.vc-exam-summary-action-icon img {
+  display: block;
+}
+
+@media (min-width: 769px) {
+  .vc-exam-summary-dialog {
+    width: 424px;
+  }
+
+  .vc-exam-summary-section--content {
+    min-height: 525px;
+  }
+}
 
 /* ==========================================================================
    Responsive
-   Ajustes compactos del simulador de examen.
    ========================================================================== */
 
-/* Base desktop */
-
-/* ===== Ajustes responsive ===== */
-
 @media (max-width: 1180px) {
-  /* Exam badges compact desktop: reduce separacion antes de tablet sin cambiar estructura. */
   .vc-exam-intro-badges {
     gap: 16px;
   }
 }
 
 @media (max-width: 960px) {
-  /* Exam badges tablet: mantiene tres columnas usando badges internos estables. */
-  .vc-exam-intro-badges {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  /* Exam category mock tablet: mantiene tres cards por fila en 960px. */
-  .vc-exam-app .vc-flashcards-category-grid--mock {
+  .vc-exam-intro-badges,
+  .vc-exam-category-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
-  /* Exam badges tablet small: muestra dos badges por fila antes del mobile real. */
-  .vc-exam-intro-badges {
+  .vc-exam-intro-badges,
+  .vc-exam-category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  /* Exam category mock tablet small: mantiene tres cards por fila. */
-  .vc-exam-app .vc-flashcards-category-grid--mock {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 680px) {
-  /* Reordena los bloques principales para mantener legibilidad en mobile. */
-  /* En pantallas pequenas, apila los badges superiores en una sola columna. */
   .vc-exam-intro-badges {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  /* En mobile, historial y test details pasan a una sola columna. */
   .vc-exam-history {
     grid-template-columns: 1fr;
   }
 
-  /* Permite que cada fila del historial se apile en vertical. */
-  .vc-exam-history-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  /* Alinea a la izquierda el bloque de score cuando la fila se apila. */
-  .vc-exam-history-item-score {
-    justify-content: flex-start;
-  }
-
-  /* Alinea a la izquierda el texto del score en mobile. */
-  .vc-exam-history-item-score-copy {
-    justify-items: start;
-  }
-
-  /* Permite que el header de la sesion haga wrap en mobile. */
   .vc-exam-session-header {
-    flex-wrap: wrap;
+    gap: 10px;
   }
 
-  /* Ajusta un poco el cronometro para mejorar legibilidad en mobile. */
+  .vc-exam-session-header-copy,
+  .vc-exam-session-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .vc-exam-timer {
     font-size: 16px;
     padding: 4px 10px;
@@ -973,18 +1067,129 @@
 }
 
 @media (max-width: 480px) {
-  /* Exam badges mobile: mantiene los 3 badges en una sola fila de 480px. */
+  /* Mobile exam session: conserva el comportamiento compacto existente en 480px. */
+  .vc-exam-session .vc-exam-session-title,
+  .vc-exam-session .vc-exam-session-header-copy,
+  .vc-exam-session .vc-exam-session-bar {
+    display: none;
+  }
+
+  .vc-exam-timer {
+    width: 80px;
+    height: 32px;
+    min-width: 80px;
+    min-height: 32px;
+    justify-content: center;
+    padding: 0 8px;
+    border-radius: var(--vc-exam-control-radius);
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .vc-exam-session-header {
+    min-height: 72px;
+    padding: 20px 16px;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    gap: 12px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .vc-exam-session-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .vc-exam-finish-btn {
+    flex: 0 0 80px;
+    width: 110px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 8px;
+    box-sizing: border-box;
+  }
+
+  .vc-exam-question-topic,
+  .vc-exam-question-subtopic {
+    margin: 0;
+    padding: 5px 10px;
+    border: 1px solid var(--vc-exam-border);
+    border-radius: 6px;
+    color: var(--vc-exam-muted);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .vc-exam-card [data-vc-exam-question] {
+    margin: 0 0 18px;
+    color: #212121;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: -0.15px;
+  }
+
+  .vc-exam-card {
+    /* Mobile exam card: reemplaza el padding del panel para que el borde externo sea visible. */
+    margin: 16px 16px 33px;
+    padding: 26px 17px;
+  }
+
+  .vc-exam-session-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .vc-exam-action {
+    min-height: 46px;
+    height: 46px;
+  }
+
+  .vc-exam-summary {
+    padding: 19px;
+  }
+
+  .vc-exam-question-context {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .vc-exam-answer {
+    padding: 13px 14px;
+  }
+
   .vc-exam-intro-badges {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
-  /* Exam badge mobile: compacta cada card para que entren 3 en la misma fila. */
   .vc-exam-badge {
-    padding: 8px 6px;
+    padding: 12px;
   }
 
-  /* Exam badge content mobile: apila icono y texto dentro de cada badge compacto. */
+  .vc-exam-intro {
+    margin-bottom: 20px;
+  }
+
+  .vc-exam-category-card {
+    gap: 12px;
+    padding: 17px;
+  }
+
+  .vc-exam-category-grid {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .vc-exam-history {
+    gap: 20px;
+  }
+
   .vc-exam-badge-content {
     grid-template-columns: 1fr;
     justify-items: center;
@@ -992,58 +1197,57 @@
     text-align: center;
   }
 
-  /* Exam badge icon mobile: reduce el icono para conservar ancho util. */
   .vc-exam-badge-icon {
-    width: 32px;
-    height: 32px;
-    padding: 7px;
+    width: 40px;
+    height: 40px;
+    padding: 10px;
   }
 
-  /* Exam badge icon media mobile: ajusta svg e imagen al contenedor compacto. */
   .vc-exam-badge-icon svg,
   .vc-exam-badge-icon img {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
-  /* Exam badge copy mobile: evita alturas grandes en badges de una sola fila. */
   .vc-exam-badge-copy {
     min-height: 0;
     width: 100%;
   }
 
-  /* Exam badge value mobile: reduce el valor para que no desborde en 3 columnas. */
   .vc-exam-badge-copy strong {
-    font-size: 18px;
-    line-height: 24px;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: -0.45px;
   }
 
-  /* Exam categories mobile: apila las categorias del mock test una debajo de otra. */
-  .vc-exam-app .vc-flashcards-category-grid--mock {
-    grid-template-columns: 1fr;
+  .vc-exam-badge-copy small {
+    order: 2;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 12px;
+    line-height: 130%;
+    letter-spacing: 0;
   }
 
-  /* Exam history mobile: coloca Test Details debajo de categorias y antes del historial. */
+  .vc-exam-category-grid,
   .vc-exam-history {
     grid-template-columns: 1fr;
   }
 
-  /* Exam test details mobile: sube la card de detalles sobre la lista de historial. */
   .vc-exam-history-test-details {
     order: 1;
   }
 
-  /* Exam history content mobile: deja el historial debajo de Test Details. */
   .vc-exam-history-content {
     order: 2;
+    padding: 25px 17px;
   }
 
-  /* Exam history mobile: muestra solo 3 items en celular. */
   .vc-exam-history-list .vc-exam-history-item:nth-child(n+4) {
     display: none;
   }
 
-  /* Exam history item mobile: mantiene copy y score en la misma linea horizontal. */
   .vc-exam-history-item {
     flex-direction: row;
     align-items: center;
@@ -1051,33 +1255,35 @@
     gap: 10px;
   }
 
-  /* Exam history copy mobile: permite que el texto use el ancho disponible sin romper la fila. */
   .vc-exam-history-item-copy {
     min-width: 0;
     flex: 1 1 auto;
   }
 
-  /* Exam history text mobile: evita desbordes en fechas/duracion largas. */
   .vc-exam-history-item-copy-text {
     min-width: 0;
   }
 
-  /* Exam history score mobile: alinea el resultado al extremo derecho en la misma fila. */
   .vc-exam-history-item-score {
     flex: 0 0 auto;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    gap: 10px;
   }
 
-  /* Exam history score copy mobile: conserva la lectura alineada a la derecha. */
   .vc-exam-history-item-score-copy {
     justify-items: end;
   }
 
-  /* Exam history trend icon mobile: reduce aire vertical del icono de tendencia. */
   .vc-exam-history-item-score-icon {
-    align-self: center;
-    padding: 0;
+    display: none;
   }
+
+  .vc-exam-summary-action--back {
+    order: 1;
+  }
+
+  .vc-exam-summary-action--restart {
+    order: 2;
+  }
+
 }

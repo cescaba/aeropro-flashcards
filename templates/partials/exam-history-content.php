@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 </div>
 
 <?php if (empty($exam_history)): ?>
-  <article class="vc-flashcards-empty">
+  <article class="vc-exam-empty">
   <p><?php esc_html_e('No completed exams yet.', 'vc-flashcards'); ?></p>
   </article>
 <?php else: ?>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 if (!defined('ABSPATH')) {
   exit;
@@ -6,32 +6,36 @@ if (!defined('ABSPATH')) {
 
 class VC_Flashcards_Plugin {
   // Nombre interno del Custom Post Type donde vive cada flashcard.
-  // WordPress guardará estas tarjetas en wp_posts con post_type = vc_flashcard.
+  // WordPress guardarÃ¡ estas tarjetas en wp_posts con post_type = vc_flashcard.
   const POST_TYPE = 'vc_flashcard';
 
-  // Taxonomía jerárquica usada para organizar las tarjetas en topics y subtopics.
-  // En la práctica aquí viven General, Airframe, Powerplant y sus hijos.
+  // TaxonomÃ­a jerÃ¡rquica usada para organizar las tarjetas en topics y subtopics.
+  // En la prÃ¡ctica aquÃ­ viven General, Airframe, Powerplant y sus hijos.
   const TAXONOMY = 'vc_flashcard_topic';
 
-  // Tabla custom donde guardamos una sesión completa de estudio o examen.
-  // Aquí se resume el intento: usuario, score, fecha de inicio, fecha de fin, etc.
+  // Tabla custom donde guardamos una sesiÃ³n completa de estudio o examen.
+  // AquÃ­ se resume el intento: usuario, score, fecha de inicio, fecha de fin, etc.
   const SESSION_TABLE = 'vc_flashcard_sessions';
 
-  // Tabla custom donde guardamos cada respuesta individual de una sesión.
-  // Una sesión puede tener muchas filas en esta tabla: una por pregunta respondida.
+  // Tabla custom donde guardamos cada respuesta individual de una sesiÃ³n.
+  // Una sesiÃ³n puede tener muchas filas en esta tabla: una por pregunta respondida.
   const ATTEMPT_TABLE = 'vc_flashcard_attempts';
+
+  // Immutable card set selected for a session. Server-side scoring reads this table,
+  // so browser payloads cannot change correct answers or inject foreign flashcards.
+  const SESSION_CARD_TABLE = 'vc_flashcard_session_cards';
 
   // Nonce compartido para validar llamadas AJAX del plugin.
   const NONCE_ACTION = 'vc_flashcards_nonce';
 
-  // Puntaje mínimo para considerar aprobado un examen.
+  // Puntaje mÃ­nimo para considerar aprobado un examen.
   const PASSING_SCORE = 70;
 
-  // Cuántos intentos recientes se muestran en historial o métricas resumidas.
+  // CuÃ¡ntos intentos recientes se muestran en historial o mÃ©tricas resumidas.
   const EXAM_HISTORY_LIMIT = 5;
 
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
-  const DB_VERSION = '1.1.0';
+  const DB_VERSION = '1.2.0';
 
   // Orden deseado de topics padre al mostrarlos en frontend.
   // Sirve para que General/Airframe/Powerplant aparezcan siempre en ese orden.
@@ -50,7 +54,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Se ejecuta al activar el plugin desde el admin de WordPress.
-  // Aquí preparamos todo lo mínimo para que el sistema funcione:
+  // AquÃ­ preparamos todo lo mÃ­nimo para que el sistema funcione:
   // 1. registramos CPT y taxonomy
   // 2. creamos tablas propias
   // 3. sembramos topics iniciales
@@ -63,14 +67,14 @@ class VC_Flashcards_Plugin {
     flush_rewrite_rules();
   }
 
-  // En desactivación no borramos datos.
+  // En desactivaciÃ³n no borramos datos.
   // Solo refrescamos rewrite rules para limpiar el registro de endpoints/URLs.
   public static function deactivate(): void {
     flush_rewrite_rules();
   }
 
   // Constructor privado: obliga a usar instance().
-  // Aquí se conectan todas las piezas del plugin con WordPress usando hooks.
+  // AquÃ­ se conectan todas las piezas del plugin con WordPress usando hooks.
   private function __construct() {
     // Registra CPT y taxonomy al arrancar WordPress.
     add_action('init', [__CLASS__, 'register_content_types']);
@@ -78,10 +82,10 @@ class VC_Flashcards_Plugin {
     // Aplica migraciones de tablas/indices para instalaciones donde el plugin ya estaba activo.
     add_action('init', [__CLASS__, 'maybe_upgrade_schema'], 20);
 
-    // Añade páginas/herramientas del admin para importar o gestionar flashcards.
+    // AÃ±ade pÃ¡ginas/herramientas del admin para importar o gestionar flashcards.
     add_action('admin_menu', [$this, 'register_admin_submenus']);
 
-    // Añade metaboxes al editor del CPT.
+    // AÃ±ade metaboxes al editor del CPT.
     add_action('add_meta_boxes', [$this, 'register_meta_boxes']);
 
     // Guarda los metadatos de una flashcard cuando se guarda el post.
@@ -94,7 +98,7 @@ class VC_Flashcards_Plugin {
     // Ajuste visual/comportamental del checklist de terms en el editor.
     add_filter('wp_terms_checklist_args', [$this, 'filter_terms_checklist_args']);
 
-    // Shortcodes del frontend: app normal de flashcards y alias histórico.
+    // Shortcodes del frontend: app normal de flashcards y alias histÃ³rico.
     add_shortcode('vc_flashcards_app', [$this, 'render_flashcards_shortcode']);
     add_shortcode('vc_flashcards', [$this, 'render_flashcards_shortcode']);
 
@@ -110,7 +114,7 @@ class VC_Flashcards_Plugin {
 
   // Registra las dos estructuras principales del contenido:
   // - un Custom Post Type para las tarjetas
-  // - una taxonomía jerárquica para topics/subtopics
+  // - una taxonomÃ­a jerÃ¡rquica para topics/subtopics
   public static function register_content_types(): void {
     register_post_type(self::POST_TYPE, [
       'labels' => [
@@ -129,7 +133,7 @@ class VC_Flashcards_Plugin {
       'rewrite' => false,
     ]);
 
-    // Taxonomía jerárquica = se comporta como categorías.
+    // TaxonomÃ­a jerÃ¡rquica = se comporta como categorÃ­as.
     // Eso permite parent/child y encaja bien con topic > subtopic.
     register_taxonomy(self::TAXONOMY, [self::POST_TYPE], [
       'labels' => [
@@ -145,7 +149,7 @@ class VC_Flashcards_Plugin {
     ]);
   }
 
-  // Crea el submenú "Bulk Import" debajo del CPT de Flashcards en el admin.
+  // Crea el submenÃº "Bulk Import" debajo del CPT de Flashcards en el admin.
   public function register_admin_submenus(): void {
     add_submenu_page(
       'edit.php?post_type=' . self::POST_TYPE,
@@ -157,8 +161,8 @@ class VC_Flashcards_Plugin {
     );
   }
 
-  // Renderiza la pantalla de importación por CSV en el admin.
-  // Aquí solo dibujamos interfaz: instrucciones, sample CSV y formulario de subida.
+  // Renderiza la pantalla de importaciÃ³n por CSV en el admin.
+  // AquÃ­ solo dibujamos interfaz: instrucciones, sample CSV y formulario de subida.
   public function render_bulk_import_page(): void {
     if (!current_user_can('edit_posts')) {
       wp_die(esc_html__('You do not have permission to access this page.', 'vc-flashcards'));
@@ -243,7 +247,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Registra el metabox principal del editor de una flashcard.
-  // El post guarda el título, pero casi toda la data útil vive en meta fields.
+  // El post guarda el tÃ­tulo, pero casi toda la data Ãºtil vive en meta fields.
   public function register_meta_boxes(): void {
     add_meta_box(
       'vc-flashcard-details',
@@ -336,7 +340,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Guarda los metadatos de la flashcard cuando el post se guarda.
-  // También autocompleta el post_title usando la pregunta si el título está vacío.
+  // TambiÃ©n autocompleta el post_title usando la pregunta si el tÃ­tulo estÃ¡ vacÃ­o.
   public function save_flashcard_meta(int $post_id): void {
     if (!isset($_POST['vc_flashcard_meta_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['vc_flashcard_meta_nonce'])), 'vc_flashcard_meta')) {
       return;
@@ -376,7 +380,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Ajuste menor del checklist de terms para que WordPress no suba los seleccionados al tope.
-  // Es más cómodo para admins cuando manejan árboles grandes de topics/subtopics.
+  // Es mÃ¡s cÃ³modo para admins cuando manejan Ã¡rboles grandes de topics/subtopics.
   public function filter_terms_checklist_args(array $args): array {
     if (($args['taxonomy'] ?? '') !== self::TAXONOMY) {
       return $args;
@@ -386,7 +390,7 @@ class VC_Flashcards_Plugin {
     return $args;
   }
 
-  // Descarga un CSV de ejemplo para que el admin vea el formato correcto de importación.
+  // Descarga un CSV de ejemplo para que el admin vea el formato correcto de importaciÃ³n.
   public function handle_download_sample(): void {
     if (!current_user_can('edit_posts')) {
       wp_die(esc_html__('You do not have permission to download this file.', 'vc-flashcards'));
@@ -411,7 +415,7 @@ class VC_Flashcards_Plugin {
     exit;
   }
 
-  // Recibe el CSV del admin, valida permisos/nonce/archivo y delega la importación real.
+  // Recibe el CSV del admin, valida permisos/nonce/archivo y delega la importaciÃ³n real.
   public function handle_import_csv(): void {
     if (!current_user_can('edit_posts')) {
       wp_die(esc_html__('You do not have permission to import flashcards.', 'vc-flashcards'));
@@ -441,7 +445,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Crea o actualiza las tablas SQL propias del plugin usando dbDelta.
-  // No crea una base de datos nueva: usa la misma DB de WordPress y añade dos tablas.
+  // No crea una base de datos nueva: usa la misma DB de WordPress y aÃ±ade dos tablas.
   public static function create_tables(): void {
     global $wpdb;
 
@@ -450,12 +454,13 @@ class VC_Flashcards_Plugin {
     // Obtiene charset/collation actual de WordPress para que las tablas queden compatibles.
     $charset_collate = $wpdb->get_charset_collate();
 
-    // Arma nombres completos usando el prefijo real de la instalación, por ejemplo wp_.
+    // Arma nombres completos usando el prefijo real de la instalaciÃ³n, por ejemplo wp_.
     $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $session_cards_table = $wpdb->prefix . self::SESSION_CARD_TABLE;
 
-    // Tabla resumen de cada sesión.
-    // Una fila = una sesión completa de estudio o examen.
+    // Tabla resumen de cada sesiÃ³n.
+    // Una fila = una sesiÃ³n completa de estudio o examen.
     $sessions_sql = "CREATE TABLE {$sessions_table} (
       id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
       user_id bigint(20) unsigned NOT NULL,
@@ -474,7 +479,7 @@ class VC_Flashcards_Plugin {
     ) {$charset_collate};";
 
     // Tabla detalle de respuestas.
-    // Una fila = una pregunta respondida dentro de una sesión.
+    // Una fila = una pregunta respondida dentro de una sesiÃ³n.
     $attempts_sql = "CREATE TABLE {$attempts_table} (
       id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
       session_id bigint(20) unsigned NOT NULL,
@@ -495,9 +500,29 @@ class VC_Flashcards_Plugin {
       KEY topic_term_id (topic_term_id)
     ) {$charset_collate};";
 
-    // dbDelta crea la tabla si no existe y la ajusta si la estructura cambió.
+    // Snapshot inmutable del set de tarjetas elegido para cada sesion.
+    // La correccion se valida contra esta tabla, no contra datos enviados por el navegador.
+    $session_cards_sql = "CREATE TABLE {$session_cards_table} (
+      id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+      session_id bigint(20) unsigned NOT NULL,
+      user_id bigint(20) unsigned NOT NULL,
+      flashcard_id bigint(20) unsigned NOT NULL,
+      topic_term_id bigint(20) unsigned DEFAULT NULL,
+      correct_answer varchar(1) NOT NULL DEFAULT '',
+      card_position smallint(5) unsigned NOT NULL DEFAULT 0,
+      created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY  (id),
+      UNIQUE KEY session_flashcard (session_id, flashcard_id),
+      KEY session_id (session_id),
+      KEY user_id (user_id),
+      KEY flashcard_id (flashcard_id),
+      KEY topic_term_id (topic_term_id)
+    ) {$charset_collate};";
+
+    // dbDelta crea la tabla si no existe y la ajusta si la estructura cambiÃ³.
     dbDelta($sessions_sql);
     dbDelta($attempts_sql);
+    dbDelta($session_cards_sql);
   }
 
   // Ejecuta dbDelta solo cuando cambia la version del esquema.
@@ -511,8 +536,8 @@ class VC_Flashcards_Plugin {
     update_option('vc_flashcards_db_version', self::DB_VERSION);
   }
 
-  // Si el plugin arranca vacío, crea los topics padre básicos.
-  // Esto deja listo el árbol principal sin obligar al admin a crearlo manualmente.
+  // Si el plugin arranca vacÃ­o, crea los topics padre bÃ¡sicos.
+  // Esto deja listo el Ã¡rbol principal sin obligar al admin a crearlo manualmente.
   public static function seed_default_topics(): void {
     $parents = ['General', 'Airframe', 'Powerplant'];
 
@@ -523,8 +548,8 @@ class VC_Flashcards_Plugin {
     }
   }
 
-  // Redirige de vuelta a la página de import con parámetros de resultado.
-  // Así el admin ve mensajes de éxito o error después del POST.
+  // Redirige de vuelta a la pÃ¡gina de import con parÃ¡metros de resultado.
+  // AsÃ­ el admin ve mensajes de Ã©xito o error despuÃ©s del POST.
   private function redirect_import_page(string $notice, int $created, int $updated, int $errors, string $message = ''): void {
     $args = [
       'post_type' => self::POST_TYPE,
@@ -543,8 +568,8 @@ class VC_Flashcards_Plugin {
     exit;
   }
 
-  // Lee el archivo CSV completo y convierte sus filas en creación/actualización de flashcards.
-  // Esta función coordina validación de columnas, recorrido de filas y reporte final.
+  // Lee el archivo CSV completo y convierte sus filas en creaciÃ³n/actualizaciÃ³n de flashcards.
+  // Esta funciÃ³n coordina validaciÃ³n de columnas, recorrido de filas y reporte final.
   private function import_csv_file(string $file_path): array {
     $handle = fopen($file_path, 'r');
     if ($handle === false) {
@@ -691,7 +716,7 @@ class VC_Flashcards_Plugin {
     return preg_replace('/[^a-z0-9_]/', '', $header) ?: '';
   }
 
-  // Devuelve true si toda la fila está vacía y debe ignorarse.
+  // Devuelve true si toda la fila estÃ¡ vacÃ­a y debe ignorarse.
   private function is_import_row_empty(array $row): bool {
     foreach ($row as $value) {
       if (trim((string) $value) !== '') {
@@ -744,7 +769,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Garantiza que existan topic y subtopic para una fila importada.
-  // Devuelve el term_id final que se asociará con la flashcard.
+  // Devuelve el term_id final que se asociarÃ¡ con la flashcard.
   private function ensure_topic_and_subtopic(string $topic, string $subtopic = ''): int {
     $parent_id = $this->upsert_term_by_name($topic, 0);
     if ($parent_id < 1) {
@@ -816,7 +841,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Renderiza la app principal de flashcards.
-  // Aquí se calculan stats, se encolan assets y se carga el template PHP.
+  // AquÃ­ se calculan stats, se encolan assets y se carga el template PHP.
   public function render_flashcards_shortcode($atts = []): string {
     if (!is_user_logged_in()) {
       return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the flashcards tool.', 'vc-flashcards') . '</div>';
@@ -873,7 +898,7 @@ class VC_Flashcards_Plugin {
     return (string) ob_get_clean();
   }
 
-  // Inicia una sesión de práctica normal y devuelve al frontend las tarjetas seleccionadas.
+  // Inicia una sesiÃ³n de prÃ¡ctica normal y devuelve al frontend las tarjetas seleccionadas.
   public function ajax_start_session(): void {
     check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
@@ -915,13 +940,109 @@ class VC_Flashcards_Plugin {
       ['%d', '%s', '%d', '%d', '%d', '%f', '%s']
     );
 
+    $session_id = (int) $wpdb->insert_id;
+    if ($session_id < 1) {
+      wp_send_json_error(['message' => __('Could not start the session. Please try again.', 'vc-flashcards')], 500);
+    }
+
+    $stored_cards = $this->store_session_card_snapshot($session_id, get_current_user_id(), $cards);
+    if ($stored_cards !== count($cards)) {
+      $wpdb->delete($wpdb->prefix . self::SESSION_TABLE, ['id' => $session_id], ['%d']);
+      $wpdb->delete($wpdb->prefix . self::SESSION_CARD_TABLE, ['session_id' => $session_id], ['%d']);
+      wp_send_json_error(['message' => __('Could not prepare the session. Please try again.', 'vc-flashcards')], 500);
+    }
+
     wp_send_json_success([
-      'sessionId' => (int) $wpdb->insert_id,
+      'sessionId' => $session_id,
       'cards' => $cards,
     ]);
   }
 
-  // Completa una sesión normal, guarda score/resumen y persiste cada intento en la BD.
+  // Guarda el set exacto de tarjetas que conforman una sesion.
+  // Esta tabla es la fuente confiable para validar scoring al completar.
+  private function store_session_card_snapshot(int $session_id, int $user_id, array $cards): int {
+    if ($session_id < 1 || $user_id < 1 || empty($cards)) {
+      return 0;
+    }
+
+    global $wpdb;
+
+    $table = $wpdb->prefix . self::SESSION_CARD_TABLE;
+    $wpdb->delete($table, ['session_id' => $session_id, 'user_id' => $user_id], ['%d', '%d']);
+
+    $stored_count = 0;
+    foreach (array_values($cards) as $index => $card) {
+      $flashcard_id = isset($card['id']) ? absint($card['id']) : 0;
+      $correct_answer = isset($card['correctAnswer']) ? sanitize_key((string) $card['correctAnswer']) : '';
+
+      if ($flashcard_id < 1 || !in_array($correct_answer, ['a', 'b', 'c'], true)) {
+        continue;
+      }
+
+      $inserted = $wpdb->insert(
+        $table,
+        [
+          'session_id' => $session_id,
+          'user_id' => $user_id,
+          'flashcard_id' => $flashcard_id,
+          'topic_term_id' => isset($card['topicTermId']) ? absint($card['topicTermId']) : null,
+          'correct_answer' => $correct_answer,
+          'card_position' => $index,
+        ],
+        ['%d', '%d', '%d', '%d', '%s', '%d']
+      );
+
+      if ($inserted !== false) {
+        $stored_count++;
+      }
+    }
+
+    return $stored_count;
+  }
+
+  // Devuelve el snapshot server-side de tarjetas de una sesion, indexado por flashcard_id.
+  private function get_session_card_snapshot(int $session_id, int $user_id): array {
+    global $wpdb;
+
+    $table = $wpdb->prefix . self::SESSION_CARD_TABLE;
+    $rows = $wpdb->get_results($wpdb->prepare(
+      "SELECT flashcard_id, topic_term_id, correct_answer, card_position
+      FROM {$table}
+      WHERE session_id = %d
+        AND user_id = %d
+      ORDER BY card_position ASC, id ASC",
+      $session_id,
+      $user_id
+    ), ARRAY_A);
+
+    $snapshot = [];
+    foreach ($rows as $row) {
+      $flashcard_id = isset($row['flashcard_id']) ? absint($row['flashcard_id']) : 0;
+      $correct_answer = isset($row['correct_answer']) ? sanitize_key((string) $row['correct_answer']) : '';
+      if ($flashcard_id < 1 || !in_array($correct_answer, ['a', 'b', 'c'], true)) {
+        continue;
+      }
+
+      $snapshot[$flashcard_id] = [
+        'flashcard_id' => $flashcard_id,
+        'topic_term_id' => isset($row['topic_term_id']) ? absint($row['topic_term_id']) : 0,
+        'correct_answer' => $correct_answer,
+        'card_position' => isset($row['card_position']) ? absint($row['card_position']) : 0,
+      ];
+    }
+
+    return $snapshot;
+  }
+
+  // Removes server-only answer keys before sending exam cards to the browser.
+  private function strip_correct_answers_from_cards(array $cards): array {
+    return array_map(static function (array $card): array {
+      unset($card['correctAnswer']);
+      return $card;
+    }, $cards);
+  }
+
+  // Completa una sesion, recalcula score en servidor y persiste cada intento.
   public function ajax_complete_session(): void {
     check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
@@ -948,9 +1069,53 @@ class VC_Flashcards_Plugin {
       wp_send_json_error(['message' => __('Session not found.', 'vc-flashcards')], 404);
     }
 
+    $session_cards = $this->get_session_card_snapshot($session_id, $user_id);
+    if (empty($session_cards)) {
+      wp_send_json_error(['message' => __('This session can no longer be verified. Please start a new one.', 'vc-flashcards')], 409);
+    }
+
+    // Only selected answer and timing are accepted from the browser. Correct answers
+    // and valid flashcard membership always come from the server-side snapshot.
+    $attempts_by_flashcard = [];
+    foreach ($attempts as $attempt) {
+      if (!is_array($attempt)) {
+        continue;
+      }
+
+      $flashcard_id = isset($attempt['flashcardId']) ? absint($attempt['flashcardId']) : 0;
+      if ($flashcard_id < 1 || !isset($session_cards[$flashcard_id])) {
+        continue;
+      }
+
+      $selected_answer = isset($attempt['selectedAnswer']) ? sanitize_key((string) $attempt['selectedAnswer']) : '';
+      if (!in_array($selected_answer, ['a', 'b', 'c'], true)) {
+        $selected_answer = '';
+      }
+
+      $attempts_by_flashcard[$flashcard_id] = [
+        'selected_answer' => $selected_answer,
+        'response_time_ms' => isset($attempt['responseTimeMs']) ? absint($attempt['responseTimeMs']) : 0,
+      ];
+    }
+
+    // Replace the browser payload with a trusted payload built from the session snapshot.
+    // Unanswered snapshot cards are kept with an empty selected answer and count as incorrect.
+    $trusted_attempts = [];
+    foreach ($session_cards as $flashcard_id => $session_card) {
+      $client_attempt = $attempts_by_flashcard[$flashcard_id] ?? [];
+      $trusted_attempts[] = [
+        'flashcardId' => $flashcard_id,
+        'topicTermId' => $session_card['topic_term_id'],
+        'selectedAnswer' => $client_attempt['selected_answer'] ?? '',
+        'correctAnswer' => $session_card['correct_answer'],
+        'responseTimeMs' => $client_attempt['response_time_ms'] ?? 0,
+      ];
+    }
+    $attempts = $trusted_attempts;
+
     $wpdb->delete($attempts_table, ['session_id' => $session_id], ['%d']);
 
-    /* Inicializa los contadores finales de la sesión antes de recorrer los intentos enviados por JS. */
+    /* Inicializa los contadores finales de la sesiÃ³n antes de recorrer los intentos enviados por JS. */
     $correct_answers = 0;
     $total_cards = 0;
 
@@ -966,9 +1131,9 @@ class VC_Flashcards_Plugin {
         continue;
       }
 
-      /* Cada intento válido suma una tarjeta respondida al total de la sesión. */
+      /* Cada intento vÃ¡lido suma una tarjeta respondida al total de la sesiÃ³n. */
       $total_cards++;
-      /* is_correct vale 1 si acertó y 0 si falló, por eso puede acumularse directamente. */
+      /* is_correct vale 1 si acertÃ³ y 0 si fallÃ³, por eso puede acumularse directamente. */
       $correct_answers += $is_correct;
 
       $wpdb->insert(
@@ -988,13 +1153,13 @@ class VC_Flashcards_Plugin {
       );
     }
 
-    /* Calcula el porcentaje final de la sesión usando: respuestas correctas / total de tarjetas válidas * 100. */
-    /* Si no hubo tarjetas válidas respondidas, devuelve 0 para evitar división entre cero. */
+    /* Calcula el porcentaje final de la sesiÃ³n usando: respuestas correctas / total de tarjetas vÃ¡lidas * 100. */
+    /* Si no hubo tarjetas vÃ¡lidas respondidas, devuelve 0 para evitar divisiÃ³n entre cero. */
     $incorrect_answers = max(0, $total_cards - $correct_answers);
     $precision_percent = $total_cards > 0 ? round(($correct_answers / $total_cards) * 100, 2) : 0;
     $score_percent = $total_cards > 0 ? round(($correct_answers / $total_cards) * 100, 2) : 0;
 
-    $wpdb->update(
+    $updated = $wpdb->update(
       $sessions_table,
       [
         'total_cards' => $total_cards,
@@ -1010,7 +1175,11 @@ class VC_Flashcards_Plugin {
       ['%d', '%d']
     );
 
-    /* Devuelve al frontend las métricas finales para pintar el resumen de la sesión. */
+    if ($updated === false) {
+      wp_send_json_error(['message' => __('Could not save the session results. Please try again.', 'vc-flashcards')], 500);
+    }
+
+    /* Devuelve al frontend las mÃ©tricas finales para pintar el resumen de la sesiÃ³n. */
     wp_send_json_success([
       'stats' => $this->get_user_stats($user_id),
       'precisionPercent' => $precision_percent,
@@ -1021,7 +1190,7 @@ class VC_Flashcards_Plugin {
     ]);
   }
 
-  // Reúne el pool base de tarjetas disponibles según el modo de práctica y el term elegido.
+  // ReÃºne el pool base de tarjetas disponibles segÃºn el modo de prÃ¡ctica y el term elegido.
   private function get_flashcards_for_session(string $mode, int $term_id, int $limit): array {
     $pool_cache_key = $this->get_session_cards_pool_cache_key($mode, $term_id);
     $cached_pool = get_transient($pool_cache_key);
@@ -1077,7 +1246,7 @@ class VC_Flashcards_Plugin {
   }
 
   /* Selecciona el subset final sin volver a consultar ni reconstruir el pool base de cards. */
-  // A partir del pool disponible, elige exactamente las tarjetas que usará la sesión.
+  // A partir del pool disponible, elige exactamente las tarjetas que usarÃ¡ la sesiÃ³n.
   private function select_cards_from_pool(array $cards_pool, int $limit, bool $is_random_mode): array {
     if ($is_random_mode) {
       shuffle($cards_pool);
@@ -1132,7 +1301,7 @@ class VC_Flashcards_Plugin {
   }
 
   /* Genera la clave del pool base por modo y termino para reutilizarlo entre distintos limits. */
-  // Genera una clave de caché para reusar pools de tarjetas por modo y term.
+  // Genera una clave de cachÃ© para reusar pools de tarjetas por modo y term.
   private function get_session_cards_pool_cache_key(string $mode, int $term_id): string {
     return 'vc_flashcards_session_cards_pool_' . md5($mode . '|' . $term_id);
   }
@@ -1178,7 +1347,7 @@ class VC_Flashcards_Plugin {
     ];
   }
 
-  // Construye el árbol completo de topics/subtopics usado en el home de flashcards.
+  // Construye el Ã¡rbol completo de topics/subtopics usado en el home de flashcards.
   private function get_topic_tree(): array {
     $parents = get_terms([
       'taxonomy' => self::TAXONOMY,
@@ -1219,7 +1388,7 @@ class VC_Flashcards_Plugin {
     return $tree;
   }
 
-  // Arma las cards de categorías del home con progreso, conteos y metadata del usuario.
+  // Arma las cards de categorÃ­as del home con progreso, conteos y metadata del usuario.
   private function get_category_cards(int $user_id): array {
     $parents = get_terms([
       'taxonomy' => self::TAXONOMY,
@@ -1280,7 +1449,7 @@ class VC_Flashcards_Plugin {
         'subtopicCount' => count($child_items),
         'description' => sprintf(
           /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
-          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
+          __('%1$d subtopics Â· %2$d/%3$d cards mastered', 'vc-flashcards'),
           count($child_items),
           $mastered_count,
           count($card_ids)
@@ -1300,13 +1469,13 @@ class VC_Flashcards_Plugin {
 
     return sprintf(
       /* translators: 1: total cards in subtopic, 2: mastered cards in subtopic */
-      __('%1$d cards · %2$d completed', 'vc-flashcards'),
+      __('%1$d cards Â· %2$d completed', 'vc-flashcards'),
       $safe_total,
       $safe_mastered
     );
   }
 
-  // Calcula todas las métricas del home de flashcards para el usuario actual.
+  // Calcula todas las mÃ©tricas del home de flashcards para el usuario actual.
   private function get_user_stats(int $user_id): array {
     $total_flashcards = $this->get_total_published_flashcard_count();
     $viewed_flashcards = $this->get_viewed_flashcard_count($user_id);
@@ -1537,18 +1706,22 @@ class VC_Flashcards_Plugin {
     return $terms;
   }
 
-  /* ─── Exam Simulator ─────────────────────────────────────────────────── */
+  /* â”€â”€â”€ Exam Simulator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
   // Renderiza el shortcode del simulador de examen.
-  // Aquí se preparan assets, labels y datos iniciales del home del mock test.
+  // AquÃ­ se preparan assets, labels y datos iniciales del home del mock test.
   public function render_exam_shortcode($atts = []): string {
     if (!is_user_logged_in()) {
       return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the exam simulator.', 'vc-flashcards') . '</div>';
     }
 
     $user_id = get_current_user_id();
-    // Separamos stats normales de flashcards y stats propias del home del examen.
-    $stats = $this->get_user_stats($user_id);
+    $exam_config = [
+      'totalQuestions'   => 100,
+      'timeLimitSeconds' => 900,
+      'passingScore'     => self::PASSING_SCORE,
+    ];
+    $exam_time_limit_label = $this->format_exam_time_limit_label($exam_config['timeLimitSeconds']);
     $exam_home_stats = $this->get_exam_home_stats($user_id);
 
     wp_enqueue_style(
@@ -1576,20 +1749,20 @@ class VC_Flashcards_Plugin {
     wp_localize_script('vc-exam-script', 'vcExamData', [
       'ajaxUrl' => admin_url('admin-ajax.php'),
       'nonce'   => wp_create_nonce(self::NONCE_ACTION),
-      'examConfig' => [
-        'totalQuestions'   => 100,
-        'timeLimitSeconds' => 900,
-        'passingScore'     => self::PASSING_SCORE,
-      ],
+      'examConfig' => $exam_config,
       'labels' => [
-        'loading'      => __('Preparing your exam…', 'vc-flashcards'),
+        'loading'      => __('Preparing your examâ€¦', 'vc-flashcards'),
         'noCards'      => __('No questions were found for this category.', 'vc-flashcards'),
         'question'     => __('Question', 'vc-flashcards'),
         'of'           => __('of', 'vc-flashcards'),
+        'answered'     => __('answered', 'vc-flashcards'),
+        'outOf'        => __('out of', 'vc-flashcards'),
         'next'         => __('Next question', 'vc-flashcards'),
         'finish'       => __('Finish exam', 'vc-flashcards'),
         'passed'       => __('Passed!', 'vc-flashcards'),
         'failed'       => __('Failed', 'vc-flashcards'),
+        'approved'     => __('Approved', 'vc-flashcards'),
+        'notApproved'  => __('Not approved', 'vc-flashcards'),
         'timeExpired'  => __('Time expired', 'vc-flashcards'),
         'tryAgain'     => __('Try again', 'vc-flashcards'),
         'backToMenu'   => __('Back to menu', 'vc-flashcards'),
@@ -1601,6 +1774,7 @@ class VC_Flashcards_Plugin {
         'congratulations' => __('Congratulations! You passed the exam.', 'vc-flashcards'),
         'keepStudying'    => __('Keep studying. You need 70% to pass.', 'vc-flashcards'),
         'confirmAbandon'  => __('Are you sure you want to abandon the exam? Your progress will be lost.', 'vc-flashcards'),
+        'saveFailed'      => __('We could not save your exam. Please try again.', 'vc-flashcards'),
       ],
     ]);
 
@@ -1613,7 +1787,7 @@ class VC_Flashcards_Plugin {
     return (string) ob_get_clean();
   }
 
-  // Calcula las métricas que aparecen en el home del examen:
+  // Calcula las mÃ©tricas que aparecen en el home del examen:
   // best score, average y passed attempts de los intentos recientes.
   private function get_exam_home_stats(int $user_id): array {
     global $wpdb;
@@ -1663,7 +1837,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Inicia un examen nuevo.
-  // Crea la sesión, selecciona preguntas del topic elegido y devuelve payload al frontend.
+  // Crea la sesiÃ³n, selecciona preguntas del topic elegido y devuelve payload al frontend.
   public function ajax_start_exam(): void {
     check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
@@ -1699,14 +1873,26 @@ class VC_Flashcards_Plugin {
       ['%d', '%s', '%d', '%d', '%d', '%f', '%s']
     );
 
+    $session_id = (int) $wpdb->insert_id;
+    if ($session_id < 1) {
+      wp_send_json_error(['message' => __('Could not start the exam. Please try again.', 'vc-flashcards')], 500);
+    }
+
+    $stored_cards = $this->store_session_card_snapshot($session_id, get_current_user_id(), $cards);
+    if ($stored_cards !== count($cards)) {
+      $wpdb->delete($wpdb->prefix . self::SESSION_TABLE, ['id' => $session_id], ['%d']);
+      $wpdb->delete($wpdb->prefix . self::SESSION_CARD_TABLE, ['session_id' => $session_id], ['%d']);
+      wp_send_json_error(['message' => __('Could not prepare the exam. Please try again.', 'vc-flashcards')], 500);
+    }
+
     wp_send_json_success([
-      'sessionId'      => (int) $wpdb->insert_id,
-      'cards'          => $cards,
+      'sessionId'      => $session_id,
+      'cards'          => $this->strip_correct_answers_from_cards($cards),
       'totalQuestions' => count($cards),
     ]);
   }
 
-  // Devuelve el HTML del historial del examen por AJAX para refrescarlo sin recargar la página.
+  // Devuelve el HTML del historial del examen por AJAX para refrescarlo sin recargar la pÃ¡gina.
   public function ajax_get_exam_history(): void {
     check_ajax_referer(self::NONCE_ACTION, 'nonce');
 
@@ -1724,7 +1910,7 @@ class VC_Flashcards_Plugin {
   }
 
   /* Builds a pool of up to 100 questions distributed proportionally across subtopics. */
-  // Devuelve las preguntas que formarán parte del examen para un topic padre.
+  // Devuelve las preguntas que formarÃ¡n parte del examen para un topic padre.
   // Intenta llenar hasta el total pedido recorriendo sus subtopics/hijos.
   private function get_exam_cards_for_topic(int $topic_term_id, int $total = 100): array {
     $subtopics = get_terms([
@@ -1775,9 +1961,9 @@ class VC_Flashcards_Plugin {
     }
 
     /* Distribute $total questions across subtopics.
-     * e.g. 2 subtopics → 50 / 50
-     *      3 subtopics → 33 / 33 / 34
-     *      4 subtopics → 25 / 25 / 25 / 25  */
+     * e.g. 2 subtopics â†’ 50 / 50
+     *      3 subtopics â†’ 33 / 33 / 34
+     *      4 subtopics â†’ 25 / 25 / 25 / 25  */
     $subtopics_arr = array_values($subtopics);
     $n             = count($subtopics_arr);
     $base          = intdiv($total, $n);
@@ -1787,6 +1973,7 @@ class VC_Flashcards_Plugin {
     $quotas[$n - 1]  += $remainder;
 
     $all_cards = [];
+    $selected_ids = [];
 
     foreach ($subtopics_arr as $index => $subtopic) {
       $quota = $quotas[$index];
@@ -1812,6 +1999,7 @@ class VC_Flashcards_Plugin {
 
       shuffle($ids);
       $selected = array_slice($ids, 0, $quota);
+      $selected_ids = array_merge($selected_ids, array_map('intval', $selected));
 
       update_meta_cache('post', $selected);
       update_object_term_cache($selected, self::POST_TYPE);
@@ -1824,12 +2012,48 @@ class VC_Flashcards_Plugin {
       }
     }
 
+    // Some subtopics may not have enough cards to fill their proportional quota.
+    // Backfill from the whole parent topic so the exam reaches the configured total when possible.
+    if (count($all_cards) < $total) {
+      $remaining_slots = $total - count($all_cards);
+      $backfill_query = new WP_Query([
+        'post_type'      => self::POST_TYPE,
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'post__not_in'   => array_values(array_unique($selected_ids)),
+        'tax_query'      => [[
+          'taxonomy'         => self::TAXONOMY,
+          'field'            => 'term_id',
+          'terms'            => [$topic_term_id],
+          'include_children' => true,
+        ]],
+      ]);
+
+      $backfill_ids = $backfill_query->posts ?: [];
+      shuffle($backfill_ids);
+      $backfill_ids = array_slice($backfill_ids, 0, $remaining_slots);
+
+      if (!empty($backfill_ids)) {
+        update_meta_cache('post', $backfill_ids);
+        update_object_term_cache($backfill_ids, self::POST_TYPE);
+
+        foreach ($backfill_ids as $post_id) {
+          $card = $this->build_flashcard_payload((int) $post_id);
+          if (!empty($card)) {
+            $all_cards[] = $card;
+          }
+        }
+      }
+    }
+
     shuffle($all_cards);
-    return $all_cards;
+    return array_slice($all_cards, 0, $total);
   }
 
   /* Returns parent topics enriched with subtopic count and total card count for the exam selector. */
-  // Construye las categorías que se muestran en el home del examen:
+  // Construye las categorÃ­as que se muestran en el home del examen:
   // General, Airframe y Powerplant con sus conteos y labels auxiliares.
   private function get_exam_categories(): array {
     $parents = get_terms([
@@ -1951,12 +2175,44 @@ class VC_Flashcards_Plugin {
   }
 
   /* Construye el subtitulo del historial en funcion de cuantos intentos se muestran. */
-  // Genera el subtítulo tipo "Your last 5 attempts" según cuántos intentos se muestran.
+  // Genera el subtÃ­tulo tipo "Your last 5 attempts" segÃºn cuÃ¡ntos intentos se muestran.
   private function get_exam_history_subtitle(int $attempt_count): string {
     return sprintf(
       /* translators: %d: number of exam attempts shown in history */
       __('Your last %d attempts', 'vc-flashcards'),
       $attempt_count
+    );
+  }
+
+  // Formatea el tiempo limite del examen para mantener el copy sincronizado con la config real.
+  private function format_exam_time_limit_label(int $seconds): string {
+    $safe_seconds = max(0, $seconds);
+    $minutes = (int) floor($safe_seconds / 60);
+
+    if ($minutes >= 60) {
+      $hours = intdiv($minutes, 60);
+      $remaining_minutes = $minutes % 60;
+
+      if ($remaining_minutes > 0) {
+        return sprintf(
+          /* translators: 1: hours, 2: minutes */
+          __('%1$d hr %2$d min time limit', 'vc-flashcards'),
+          $hours,
+          $remaining_minutes
+        );
+      }
+
+      return sprintf(
+        /* translators: %d: hours */
+        _n('%d hour time limit', '%d hours time limit', $hours, 'vc-flashcards'),
+        $hours
+      );
+    }
+
+    return sprintf(
+      /* translators: %d: minutes */
+      _n('%d minute time limit', '%d minutes time limit', $minutes, 'vc-flashcards'),
+      $minutes
     );
   }
 }
