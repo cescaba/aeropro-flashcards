@@ -24,7 +24,7 @@
 
     var homeView    = root.querySelector('[data-vc-exam-view="home"]');
     var sessionView = root.querySelector('[data-vc-exam-view="session"]');
-    var summaryView = root.querySelector('[data-vc-exam-view="summary"]');
+    var summaryView = root.querySelector('[data-vc-exam-summary]');
     var feedbackEl  = root.querySelector('[data-vc-exam-feedback]');
     var sessionHeader = root.querySelector('.vc-exam-session-header');
     var finishButton = root.querySelector('.vc-exam-finish-btn');
@@ -76,6 +76,7 @@
     var answerStartedAt    = 0;
     var isSubmitting       = false;
     var lastTopicTermId    = 0;
+    var activeSummaryResults = null;
 
     // Resetea por completo el estado del examen en memoria.
     // Se usa cuando cerramos una sesion, limpiamos progreso o partimos de cero.
@@ -88,6 +89,7 @@
       answeredCurrentCard = false;
       answerStartedAt = 0;
       isSubmitting = false;
+      activeSummaryResults = null;
     }
 
     /* ── Utilities ──────────────────────────────────────────────────────── */
@@ -244,7 +246,7 @@
     }
 
     // Hace scroll al inicio del contenedor real del dashboard.
-    // Se usa al cambiar de vista para que home, session y summary siempre arranquen desde arriba.
+    // Se usa al cambiar entre home y session; el summary es modal y no debe forzar scroll.
     function scrollDashboardContentToTop() {
       if (!dashboardContent) { return; }
       dashboardContent.scrollTo({ top: 0, behavior: 'smooth' });
@@ -256,6 +258,8 @@
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({
           view:                'session',
+          summaryOpen:         summaryView ? !summaryView.hidden : false,
+          summaryResults:      activeSummaryResults,
           sessionId:           sessionId,
           cards:               cards,
           cardIndex:           cardIndex,
@@ -267,14 +271,22 @@
       } catch (e) {}
     }
 
-    // Guarda el resumen final en sessionStorage para poder restaurarlo si la vista se recarga.
-    // Aqui no se guardan las preguntas activas; solo el estado final del summary.
+    // Guarda el resumen final junto con una instantanea de la sesion.
+    // Esto permite restaurar el modal sobre la ultima pregunta si la pagina se recarga.
     function persistSummaryState(results) {
+      activeSummaryResults = results;
       try {
         sessionStorage.setItem(storageKey, JSON.stringify({
-          view:            'summary',
-          lastTopicTermId: lastTopicTermId,
-          summaryResults:  results,
+          view:                'session',
+          summaryOpen:         true,
+          sessionId:           sessionId,
+          cards:               cards,
+          cardIndex:           cardIndex,
+          attempts:            attempts,
+          examStartTime:       examStartTime,
+          answeredCurrentCard: answeredCurrentCard,
+          lastTopicTermId:     lastTopicTermId,
+          summaryResults:      results,
         }));
       } catch (e) {}
     }
@@ -331,10 +343,25 @@
           return false;
         }
 
-        // Si la ultima vista guardada fue el resumen, reconstruimos directamente esa pantalla.
-        if (state.view === 'summary' && state.summaryResults) {
-          resetExamState();
-          lastTopicTermId = state.lastTopicTermId || 0;
+        // Si habia un resultado abierto, restauramos la sesion como fondo
+        // y volvemos a abrir el modal encima, igual que Flashcards.
+        if ((state.view === 'summary' || state.summaryOpen) && state.summaryResults) {
+          sessionId           = state.sessionId || 0;
+          cards               = state.cards || [];
+          cardIndex           = Math.max(0, Math.min(state.cardIndex || 0, Math.max(cards.length - 1, 0)));
+          attempts            = state.attempts || [];
+          examStartTime       = state.examStartTime || 0;
+          answeredCurrentCard = Boolean(state.answeredCurrentCard);
+          lastTopicTermId     = state.lastTopicTermId || 0;
+          activeSummaryResults = state.summaryResults;
+
+          if (cards.length) {
+            renderCard();
+            showView('session');
+          } else {
+            showView('home');
+          }
+
           renderSummary(state.summaryResults);
           return true;
         }
@@ -376,12 +403,20 @@
     function showView(name) {
       homeView.hidden    = (name !== 'home');
       sessionView.hidden = (name !== 'session');
-      if (summaryView) {
-        summaryView.hidden = (name !== 'summary');
-      }
+      setSummaryOpen(false, false);
       // Reubica controles del header y reposiciona el scroll al inicio del panel actual.
       syncSessionHeading(name);
       scrollDashboardContentToTop();
+    }
+
+    // Controla el summary como modal independiente de las vistas home/session.
+    // El parametro shouldPersist evita escrituras intermedias al cambiar vistas base.
+    function setSummaryOpen(isOpen, shouldPersist) {
+      if (!summaryView) { return; }
+      summaryView.hidden = !isOpen;
+      if (shouldPersist !== false) {
+        persistState();
+      }
     }
 
     function setFeedback(message, type) {
@@ -601,6 +636,8 @@
     /* ── Summary rendering ──────────────────────────────────────────────── */
 
     function renderSummary(results) {
+      activeSummaryResults = results;
+
       var passed = results.score >= config.passingScore;
 
       // Badge
@@ -671,8 +708,8 @@
         breakdownPowerplantScore.classList.toggle('is-passing', powerplantPercent >= config.passingScore);
       }
 
-      // Finalmente cambia la interfaz a la vista final del examen.
-      showView('summary');
+      // Abre el resultado como modal para mantener visible la ultima pregunta de fondo.
+      setSummaryOpen(true);
     }
 
     /* ── Start exam ─────────────────────────────────────────────────────── */
@@ -710,6 +747,7 @@
           answeredCurrentCard = false;
           isSubmitting        = false;
           examStartTime       = Date.now();
+          activeSummaryResults = null;
 
           renderCard();
           startTimer();
@@ -792,6 +830,8 @@
     // Keyboard shortcut: press A/B/C to select an answer
     document.addEventListener('keydown', function (event) {
       if (sessionView.hidden) { return; }
+      // Mientras el resultado esta abierto, el teclado no debe operar la sesion del fondo.
+      if (summaryView && !summaryView.hidden) { return; }
       var key = event.key.toLowerCase();
       var answerBtn = answersWrap.querySelector('.vc-flashcards-answer[data-answer-key="' + key + '"]');
       if (answerBtn && !answerBtn.disabled) {

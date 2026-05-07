@@ -30,6 +30,9 @@ class VC_Flashcards_Plugin {
   // Cuántos intentos recientes se muestran en historial o métricas resumidas.
   const EXAM_HISTORY_LIMIT = 5;
 
+  // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
+  const DB_VERSION = '1.1.0';
+
   // Orden deseado de topics padre al mostrarlos en frontend.
   // Sirve para que General/Airframe/Powerplant aparezcan siempre en ese orden.
   const DEFAULT_TOPIC_ORDER = ['General', 'Airframe', 'Powerplant'];
@@ -55,6 +58,7 @@ class VC_Flashcards_Plugin {
   public static function activate(): void {
     self::register_content_types();
     self::create_tables();
+    update_option('vc_flashcards_db_version', self::DB_VERSION);
     self::seed_default_topics();
     flush_rewrite_rules();
   }
@@ -70,6 +74,9 @@ class VC_Flashcards_Plugin {
   private function __construct() {
     // Registra CPT y taxonomy al arrancar WordPress.
     add_action('init', [__CLASS__, 'register_content_types']);
+
+    // Aplica migraciones de tablas/indices para instalaciones donde el plugin ya estaba activo.
+    add_action('init', [__CLASS__, 'maybe_upgrade_schema'], 20);
 
     // Añade páginas/herramientas del admin para importar o gestionar flashcards.
     add_action('admin_menu', [$this, 'register_admin_submenus']);
@@ -484,12 +491,24 @@ class VC_Flashcards_Plugin {
       KEY session_id (session_id),
       KEY user_id (user_id),
       KEY flashcard_id (flashcard_id),
+      KEY user_flashcard_latest (user_id, flashcard_id, id),
       KEY topic_term_id (topic_term_id)
     ) {$charset_collate};";
 
     // dbDelta crea la tabla si no existe y la ajusta si la estructura cambió.
     dbDelta($sessions_sql);
     dbDelta($attempts_sql);
+  }
+
+  // Ejecuta dbDelta solo cuando cambia la version del esquema.
+  // Evita correr migraciones en cada request y mantiene indices existentes al dia.
+  public static function maybe_upgrade_schema(): void {
+    if (get_option('vc_flashcards_db_version') === self::DB_VERSION) {
+      return;
+    }
+
+    self::create_tables();
+    update_option('vc_flashcards_db_version', self::DB_VERSION);
   }
 
   // Si el plugin arranca vacío, crea los topics padre básicos.
@@ -1216,13 +1235,13 @@ class VC_Flashcards_Plugin {
 
     $parents = $this->sort_parent_topics($parents);
 
-    $attempted_ids = $this->get_attempted_flashcard_ids($user_id);
+    $mastered_ids = $this->get_mastered_flashcard_ids($user_id);
     $categories = [];
 
     foreach ($parents as $parent) {
       $card_ids = $this->get_flashcard_ids_for_term((int) $parent->term_id);
-      $reviewed_count = count(array_intersect($card_ids, $attempted_ids));
-      $progress = !empty($card_ids) ? (int) round(($reviewed_count / count($card_ids)) * 100) : 0;
+      $mastered_count = count(array_intersect($card_ids, $mastered_ids));
+      $progress = !empty($card_ids) ? (int) round(($mastered_count / count($card_ids)) * 100) : 0;
       $children = get_terms([
         'taxonomy' => self::TAXONOMY,
         'hide_empty' => false,
@@ -1235,22 +1254,19 @@ class VC_Flashcards_Plugin {
       if (!is_wp_error($children) && !empty($children)) {
         foreach ($children as $child) {
           $child_card_ids = $this->get_flashcard_ids_for_term((int) $child->term_id);
-          $child_reviewed_count = count(array_intersect($child_card_ids, $attempted_ids));
-          $child_progress = !empty($child_card_ids) ? (int) round(($child_reviewed_count / count($child_card_ids)) * 100) : 0;
+          $child_mastered_count = count(array_intersect($child_card_ids, $mastered_ids));
+          $child_progress = !empty($child_card_ids) ? (int) round(($child_mastered_count / count($child_card_ids)) * 100) : 0;
 
           $child_items[] = [
             'id' => (int) $child->term_id,
             'name' => $child->name,
             'totalCards' => count($child_card_ids),
-            'reviewedCards' => $child_reviewed_count,
+            'masteredCards' => $child_mastered_count,
             'progress' => $child_progress,
             'status' => $child_progress >= 100 && !empty($child_card_ids) ? __('Mastered', 'vc-flashcards') : '',
-            'description' => sprintf(
-              /* translators: 1: total cards, 2: reviewed cards */
-              __('%1$d cards · %2$d reviewed', 'vc-flashcards'),
-              count($child_card_ids),
-              $child_reviewed_count
-            ),
+            // Subtopic row metric only.
+            // Do not reuse dashboard metrics here: this text must stay tied to this subtopic's own card totals.
+            'description' => $this->format_subtopic_mastery_description($child_mastered_count, count($child_card_ids)),
           ];
         }
       }
@@ -1259,14 +1275,14 @@ class VC_Flashcards_Plugin {
         'id' => (int) $parent->term_id,
         'name' => $parent->name,
         'totalCards' => count($card_ids),
-        'reviewedCards' => $reviewed_count,
+        'masteredCards' => $mastered_count,
         'progress' => $progress,
         'subtopicCount' => count($child_items),
         'description' => sprintf(
-          /* translators: 1: subtopic count, 2: reviewed cards, 3: total cards */
-          __('%1$d subtopics · %2$d/%3$d cards reviewed', 'vc-flashcards'),
+          /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
           count($child_items),
-          $reviewed_count,
+          $mastered_count,
           count($card_ids)
         ),
         'children' => $child_items,
@@ -1276,157 +1292,209 @@ class VC_Flashcards_Plugin {
     return $categories;
   }
 
+  // Formats the secondary text below a subtopic title.
+  // This belongs only to subtopic rows; dashboard and category cards have separate metric contracts.
+  private function format_subtopic_mastery_description(int $mastered_cards, int $total_cards): string {
+    $safe_total = max(0, $total_cards);
+    $safe_mastered = max(0, min($mastered_cards, $safe_total));
+
+    return sprintf(
+      /* translators: 1: total cards in subtopic, 2: mastered cards in subtopic */
+      __('%1$d cards · %2$d completed', 'vc-flashcards'),
+      $safe_total,
+      $safe_mastered
+    );
+  }
+
   // Calcula todas las métricas del home de flashcards para el usuario actual.
   private function get_user_stats(int $user_id): array {
+    $total_flashcards = $this->get_total_published_flashcard_count();
+    $viewed_flashcards = $this->get_viewed_flashcard_count($user_id);
+    $viewed_flashcards_label = $this->format_progress_count($viewed_flashcards, $total_flashcards);
+    $total_subtopics = $this->get_total_subtopic_count();
+    $viewed_subtopics = $this->get_viewed_subtopic_count($user_id);
+    $viewed_subtopics_label = $this->format_progress_count($viewed_subtopics, $total_subtopics);
+
+    $latest_score = $this->get_latest_flashcards_score($user_id);
+
+    // Dashboard-only metrics.
+    // Keep these separate from category/subtopic card metrics:
+    // - dashboard uses latestSessionScorePercent, totalReviewed, topicsCompleted
+    // - category cards use progress/masteredCards/totalCards
+    // - subtopic rows use their own description built from subtopic totals
+    return [
+      // Header metric: latest session accuracy.
+      // Do not replace this with masteredCards/progress; those belong to category cards.
+      'latestSessionScorePercent' => $latest_score,
+      'totalReviewed' => $viewed_flashcards_label,
+      'topicsCompleted' => $viewed_subtopics_label,
+    ];
+  }
+
+  // Devuelve el porcentaje de la ultima sesion normal completada.
+  // No usa MAX(): si el usuario baja de 100% a 30%, el dashboard debe mostrar 30%.
+  private function get_latest_flashcards_score(int $user_id): int {
     global $wpdb;
 
-    $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
-    // Tabla de sesiones: desde aqui salen los porcentajes finales de cada practica completada.
     $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
-
-    $attempt_summary = $wpdb->get_row($wpdb->prepare(
-      "SELECT
-        COUNT(*) AS attempts_count,
-        COUNT(DISTINCT flashcard_id) AS unique_cards_reviewed
-      FROM {$attempts_table}
-      WHERE user_id = %d",
-      $user_id
-    ), ARRAY_A);
-    $unique_cards_reviewed = isset($attempt_summary['unique_cards_reviewed']) ? (int) $attempt_summary['unique_cards_reviewed'] : 0;
-    $published_flashcards = wp_count_posts(self::POST_TYPE);
-    $total_flashcards = $published_flashcards instanceof stdClass ? (int) $published_flashcards->publish : 0;
-    $reviewed_coverage = $total_flashcards > 0 ? (int) round(($unique_cards_reviewed / $total_flashcards) * 100) : 0;
-
-    // Resume solo sesiones normales de flashcards.
-    // Aqui se calcula el mejor porcentaje historico y el promedio, excluyendo modo exam.
-    $flashcards_summary = $wpdb->get_row($wpdb->prepare(
-      "SELECT
-        MAX(score_percent) AS best_score,
-        AVG(score_percent) AS average_score
-      FROM {$sessions_table}
-      WHERE user_id = %d
-        AND completed_at IS NOT NULL
-        AND mode <> %s",
-      $user_id,
-      'exam'
-    ), ARRAY_A);
-    $best_score = isset($flashcards_summary['best_score']) ? (int) round((float) $flashcards_summary['best_score']) : 0;
-    $average_score = isset($flashcards_summary['average_score']) ? (int) round((float) $flashcards_summary['average_score']) : 0;
-
-    // Toma los ultimos intentos de flashcards para contar cuantos pasaron el umbral minimo.
-    // El formato final se devuelve como x/5 para las cards resumen de la home.
-    $recent_flashcards_scores = $wpdb->get_col($wpdb->prepare(
+    $latest_score = $wpdb->get_var($wpdb->prepare(
       "SELECT score_percent
       FROM {$sessions_table}
       WHERE user_id = %d
         AND completed_at IS NOT NULL
         AND mode <> %s
       ORDER BY completed_at DESC, id DESC
-      LIMIT %d",
+      LIMIT 1",
       $user_id,
-      'exam',
-      self::EXAM_HISTORY_LIMIT
+      'exam'
     ));
-    $passed_attempts = 0;
-    foreach ($recent_flashcards_scores as $score_value) {
-      if ((float) $score_value >= self::PASSING_SCORE) {
-        $passed_attempts++;
-      }
-    }
 
-    // Devuelve todas las metricas que usa la home de flashcards:
-    // racha, cobertura revisada, mejor score, promedio y aprobados recientes.
-    return [
-      'correctStreak' => $this->get_current_correct_streak($user_id),
-      'studyStreak' => $this->get_study_streak($user_id),
-      'reviewedCoverage' => $reviewed_coverage,
-      'reviewedCards' => $unique_cards_reviewed,
-      'totalFlashcards' => $total_flashcards,
-      'bestScore' => $best_score,
-      'averageScore' => $average_score,
-      'passedAttempts' => $passed_attempts . '/' . self::EXAM_HISTORY_LIMIT,
-    ];
+    return $latest_score !== null ? (int) round((float) $latest_score) : 0;
   }
 
-  // Calcula la racha actual de respuestas correctas consecutivas.
-  private function get_current_correct_streak(int $user_id): int {
+  // Cuenta el total actual de flashcards publicadas.
+  // Centralizarlo evita que cada metrica interprete distinto que significa "total".
+  private function get_total_published_flashcard_count(): int {
+    $published_flashcards = wp_count_posts(self::POST_TYPE);
+
+    return $published_flashcards instanceof stdClass ? (int) $published_flashcards->publish : 0;
+  }
+
+  // Cuenta cuantas tarjetas publicadas vio el usuario en sesiones normales.
+  // Una tarjeta vista es cualquier intento guardado, ya sea respondido o revelado.
+  private function get_viewed_flashcard_count(int $user_id): int {
     global $wpdb;
 
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
-    $attempts = $wpdb->get_col($wpdb->prepare(
-      "SELECT is_correct
-      FROM {$attempts_table}
-      WHERE user_id = %d
-      ORDER BY answered_at DESC, id DESC",
-      $user_id
-    ));
-
-    if (empty($attempts)) {
-      return 0;
-    }
-
-    $streak = 0;
-    foreach ($attempts as $is_correct) {
-      if ((int) $is_correct !== 1) {
-        break;
-      }
-
-      $streak++;
-    }
-
-    return $streak;
-  }
-
-  // Calcula la racha de días con actividad del usuario.
-  private function get_study_streak(int $user_id): int {
-    global $wpdb;
-
     $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
-    $dates = $wpdb->get_col($wpdb->prepare(
-      "SELECT DISTINCT DATE(completed_at) AS study_date
-      FROM {$sessions_table}
-      WHERE user_id = %d AND completed_at IS NOT NULL
-      ORDER BY study_date DESC",
+    $posts_table = $wpdb->posts;
+
+    return (int) $wpdb->get_var($wpdb->prepare(
+      "SELECT COUNT(DISTINCT attempt.flashcard_id)
+      FROM {$attempts_table} attempt
+      INNER JOIN {$sessions_table} study_session
+        ON study_session.id = attempt.session_id
+        AND study_session.user_id = attempt.user_id
+        AND study_session.completed_at IS NOT NULL
+        AND study_session.mode <> %s
+      INNER JOIN {$posts_table} flashcard
+        ON flashcard.ID = attempt.flashcard_id
+        AND flashcard.post_type = %s
+        AND flashcard.post_status = %s
+      WHERE attempt.user_id = %d",
+      'exam',
+      self::POST_TYPE,
+      'publish',
       $user_id
     ));
-
-    if (empty($dates)) {
-      return 0;
-    }
-
-    $today = current_time('Y-m-d');
-    $yesterday = gmdate('Y-m-d', strtotime($today . ' -1 day'));
-
-    if ($dates[0] !== $today && $dates[0] !== $yesterday) {
-      return 0;
-    }
-
-    $streak = 0;
-    $expected = $dates[0];
-
-    foreach ($dates as $date) {
-      if ($date !== $expected) {
-        break;
-      }
-
-      $streak++;
-      $expected = gmdate('Y-m-d', strtotime($expected . ' -1 day'));
-    }
-
-    return $streak;
   }
 
-  // Devuelve IDs únicos de tarjetas que el usuario ya respondió alguna vez.
-  private function get_attempted_flashcard_ids(int $user_id): array {
+  // Cuenta los subtopics que tienen al menos una flashcard publicada.
+  // Esto evita mostrar progreso contra subcategorias vacias que el usuario no puede estudiar.
+  private function get_total_subtopic_count(): int {
+    global $wpdb;
+
+    $term_taxonomy_table = $wpdb->term_taxonomy;
+    $term_relationships_table = $wpdb->term_relationships;
+    $posts_table = $wpdb->posts;
+
+    return (int) $wpdb->get_var($wpdb->prepare(
+      "SELECT COUNT(DISTINCT subtopic.term_id)
+      FROM {$term_taxonomy_table} subtopic
+      INNER JOIN {$term_relationships_table} relation
+        ON relation.term_taxonomy_id = subtopic.term_taxonomy_id
+      INNER JOIN {$posts_table} flashcard
+        ON flashcard.ID = relation.object_id
+        AND flashcard.post_type = %s
+        AND flashcard.post_status = %s
+      WHERE subtopic.taxonomy = %s
+        AND subtopic.parent <> 0",
+      self::POST_TYPE,
+      'publish',
+      self::TAXONOMY
+    ));
+  }
+
+  // Cuenta cuantos subtopics distintos vio el usuario en sesiones normales completadas.
+  // Se usa DISTINCT porque volver a estudiar el mismo subtopic no debe inflar el progreso.
+  // Tambien validamos contra posts publicados para ignorar intentos historicos de contenido eliminado.
+  private function get_viewed_subtopic_count(int $user_id): int {
     global $wpdb;
 
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
+    $term_taxonomy_table = $wpdb->term_taxonomy;
+    $posts_table = $wpdb->posts;
+
+    return (int) $wpdb->get_var($wpdb->prepare(
+      "SELECT COUNT(DISTINCT subtopic.term_id)
+      FROM {$attempts_table} attempt
+      INNER JOIN {$sessions_table} study_session
+        ON study_session.id = attempt.session_id
+        AND study_session.user_id = attempt.user_id
+        AND study_session.completed_at IS NOT NULL
+        AND study_session.mode <> %s
+      INNER JOIN {$term_taxonomy_table} subtopic
+        ON subtopic.term_id = attempt.topic_term_id
+        AND subtopic.taxonomy = %s
+        AND subtopic.parent <> 0
+      INNER JOIN {$posts_table} flashcard
+        ON flashcard.ID = attempt.flashcard_id
+        AND flashcard.post_type = %s
+        AND flashcard.post_status = %s
+      WHERE attempt.user_id = %d",
+      'exam',
+      self::TAXONOMY,
+      self::POST_TYPE,
+      'publish',
+      $user_id
+    ));
+  }
+
+  // Formatea conteos tipo "vistas / total" y protege la UI ante datos antiguos o inconsistentes.
+  private function format_progress_count(int $current, int $total): string {
+    $safe_total = max(0, $total);
+    $safe_current = max(0, min($current, $safe_total));
+
+    return $safe_current . '/' . $safe_total;
+  }
+
+  // Devuelve las tarjetas dominadas por el usuario.
+  // Regla de negocio: una tarjeta cuenta como mastered solo si su ultimo intento publicado fue correcto.
+  // La tabla de intentos es append-only, por eso MAX(id) identifica el intento mas reciente por flashcard.
+  private function get_mastered_flashcard_ids(int $user_id): array {
+    global $wpdb;
+
+    static $cache = [];
+    if (isset($cache[$user_id])) {
+      return $cache[$user_id];
+    }
+
+    $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $posts_table = $wpdb->posts;
     $ids = $wpdb->get_col($wpdb->prepare(
-      "SELECT DISTINCT flashcard_id FROM {$attempts_table} WHERE user_id = %d",
+      "SELECT latest_attempt.flashcard_id
+      FROM {$attempts_table} latest_attempt
+      INNER JOIN (
+        SELECT flashcard_id, MAX(id) AS latest_id
+        FROM {$attempts_table}
+        WHERE user_id = %d
+        GROUP BY flashcard_id
+      ) latest ON latest.latest_id = latest_attempt.id
+      INNER JOIN {$posts_table} flashcard
+        ON flashcard.ID = latest_attempt.flashcard_id
+        AND flashcard.post_type = %s
+        AND flashcard.post_status = %s
+      WHERE latest_attempt.user_id = %d
+        AND latest_attempt.is_correct = 1",
+      $user_id,
+      self::POST_TYPE,
+      'publish',
       $user_id
     ));
 
-    return array_map('intval', $ids);
+    $cache[$user_id] = array_map('intval', $ids);
+    return $cache[$user_id];
   }
 
   // Devuelve todos los IDs de flashcards asociados a un term concreto.

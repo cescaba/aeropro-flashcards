@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 
   <?php /* Vista inicial con las categorias disponibles para estudiar. */ ?>
   <section class="vc-flashcards-view vc-flashcards-home" data-vc-flashcards-view="home">
-    <?php /* Resumen rapido de metricas visibles antes de iniciar una sesion. */ ?>
+    <?php /* Dashboard stats. These are independent from category cards and subtopic row metrics. */ ?>
     <section class="vc-flashcards-stats">
       <article class="vc-flashcards-stat-card">
         <div class="vc-flashcards-stat-card-content">
@@ -17,8 +17,9 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Best.svg'); ?>" alt="" width="24" height="24">
           </span>
           <div class="vc-flashcards-stat-card-copy">
-            <small><?php esc_html_e('Best score', 'vc-flashcards'); ?></small>
-            <strong data-vc-flashcards-stat="best-score"><?php echo esc_html((string) ($stats['bestScore'] ?? 0)); ?>%</strong>
+            <small><?php esc_html_e('Cards Mastered', 'vc-flashcards'); ?></small>
+            <?php /* Dashboard metric: latest session score. Category cards below own the 0/3 mastered logic. */ ?>
+            <strong data-vc-flashcards-stat="cards-mastered"><?php echo esc_html((string) ($stats['latestSessionScorePercent'] ?? 0)); ?>%</strong>
           </div>
         </div>
       </article>
@@ -28,8 +29,8 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Average.svg'); ?>" alt="" width="24" height="24">
           </span>
           <div class="vc-flashcards-stat-card-copy">
-            <small><?php esc_html_e('Average', 'vc-flashcards'); ?></small>
-            <strong data-vc-flashcards-stat="average-score"><?php echo esc_html((string) ($stats['averageScore'] ?? 0)); ?>%</strong>
+            <small><?php esc_html_e('Total Reviewed', 'vc-flashcards'); ?></small>
+            <strong data-vc-flashcards-stat="total-reviewed"><?php echo esc_html((string) ($stats['totalReviewed'] ?? '0/0')); ?></strong>
           </div>
         </div>
       </article>
@@ -39,8 +40,8 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Passed.svg'); ?>" alt="" width="24" height="24">
           </span>
           <div class="vc-flashcards-stat-card-copy">
-            <small><?php esc_html_e('Passed attempts', 'vc-flashcards'); ?></small>
-            <strong data-vc-flashcards-stat="passed-attempts"><?php echo esc_html((string) ($stats['passedAttempts'] ?? '0/5')); ?></strong>
+            <small><?php esc_html_e('Topics Completed', 'vc-flashcards'); ?></small>
+            <strong data-vc-flashcards-stat="topics-completed"><?php echo esc_html((string) ($stats['topicsCompleted'] ?? '0/0')); ?></strong>
           </div>
         </div>
       </article>
@@ -55,23 +56,37 @@ if (!defined('ABSPATH')) {
       <?php /* Rejilla principal de categorias disponibles. */ ?>
       <div class="vc-flashcards-category-grid">
         <?php foreach ($categories as $category): ?>
+          <?php
+          $category_total_cards = isset($category['totalCards']) ? (int) $category['totalCards'] : 0;
+          $category_mastered_cards = isset($category['masteredCards']) ? (int) $category['masteredCards'] : 0;
+          $category_subtopic_count = count($category['children'] ?? []);
+          ?>
           <article class="vc-flashcards-category-card">
-            <?php /* Flashcards category mobile: header agrupa titulo y meta para controlar su separacion. */ ?>
-            <div class="vc-flashcards-category-header">
-              <div class="vc-flashcards-category-top">
-                <h3><?php echo esc_html($category['name']); ?></h3>
-              </div>
-              <span class="vc-flashcards-category-meta"><?php echo esc_html(count($category['children'] ?? []) . ' subtopics · ' . $category['progress'] . ' reviewed'); ?></span>
+            <?php /* Titulo directo de la categoria; la meta vive debajo del progreso. */ ?>
+            <div class="vc-flashcards-category-top">
+              <h3><?php echo esc_html($category['name']); ?></h3>
             </div>
             <div class="vc-flashcards-category-progress-block">
               <div class="vc-flashcards-category-progress">
-                <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
+                <span><?php esc_html_e('Cards Mastered', 'vc-flashcards'); ?></span>
                 <strong><?php echo esc_html((string) $category['progress']); ?>%</strong>
               </div>
               <div class="vc-flashcards-topic-bar" aria-hidden="true">
                 <span style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
               </div>
             </div>
+            <?php /* Category metric only: uses this category's masteredCards/totalCards, not dashboard stats. */ ?>
+            <span class="vc-flashcards-category-meta">
+              <?php
+              echo esc_html(sprintf(
+                /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+                __('%1$d subtopics · %2$d/%3$d mastered', 'vc-flashcards'),
+                $category_subtopic_count,
+                $category_mastered_cards,
+                $category_total_cards
+              ));
+              ?>
+            </span>
             <button type="button" class="vc-flashcards-start vc-flashcards-start--full" data-vc-flashcards-open-category="<?php echo esc_attr((string) $category['id']); ?>">
               <span><?php esc_html_e('Study', 'vc-flashcards'); ?></span>
               <span class="vc-flashcards-start-icon" aria-hidden="true">
@@ -137,6 +152,12 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/Icon.svg'); ?>" alt="" width="24" height="24">
           </span>
         </button>
+        <?php /* Icono derecho inline: el color lo controla CSS segun el estado de la card. */ ?>
+        <span class="vc-flashcards-config-card-trailing-icon" aria-hidden="true">
+          <svg class="icono-flecha" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <path d="M1 19L10 10L1 1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </article>
 
       <?php /* Opcion para lanzar una practica aleatoria dentro de la categoria. */ ?>
@@ -150,6 +171,12 @@ if (!defined('ABSPATH')) {
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
           </span>
         </button>
+        <?php /* Icono derecho inline: el color lo controla CSS segun el estado de la card. */ ?>
+        <span class="vc-flashcards-config-card-trailing-icon" aria-hidden="true">
+          <svg class="icono-flecha" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <path d="M1 19L10 10L1 1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </article>
     </div>
 
@@ -200,11 +227,13 @@ if (!defined('ABSPATH')) {
       <div class="vc-flashcards-actions">
         <button type="button" class="vc-flashcards-reveal" data-vc-flashcards-reveal><?php esc_html_e("Don't know the answer? Reveal answer", 'vc-flashcards'); ?></button>
         <button type="button" class="vc-flashcards-session-action vc-flashcards-explanation-toggle" data-vc-flashcards-explanation-toggle hidden>
-          <span class="vc-flashcards-explanation-toggle-icon" aria-hidden="true">
-            <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/libro.svg'); ?>" alt="" width="16" height="16">
-          </span>
           <span class="vc-flashcards-explanation-toggle-label"><?php esc_html_e('View detailed explanation', 'vc-flashcards'); ?></span>
-          <span class="vc-flashcards-next-icon" aria-hidden="true">&gt;</span>
+          <?php /* Icono vectorial reutilizable para el chevron de avance. */ ?>
+          <span class="vc-flashcards-next-icon" aria-hidden="true">
+            <svg class="icono-flecha" viewBox="0 0 5 10" fill="none"  xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 9L4 5L1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </button>
       </div>
       <?php /* Panel expandible donde se inyecta la explicacion de la respuesta. */ ?>
@@ -229,12 +258,12 @@ if (!defined('ABSPATH')) {
       <div class="vc-flashcards-summary-top">
         <div class="vc-flashcards-summary-results">
           <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--correct">
-            <?php /* Contador dinámico de respuestas correctas renderizado al cerrar la sesión. */ ?>
+            <?php /* Contador dinamico de respuestas correctas renderizado al cerrar la sesion. */ ?>
             <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--correct" data-vc-flashcards-correct-count>0</strong>
             <h3><?php esc_html_e('Correct', 'vc-flashcards'); ?></h3>
           </div>
           <div class="vc-flashcards-summary-result-card vc-flashcards-summary-result-card--incorrect">
-            <?php /* Contador dinámico de respuestas incorrectas calculado a partir del total de la sesión. */ ?>
+            <?php /* Contador dinamico de respuestas incorrectas calculado a partir del total de la sesion. */ ?>
             <strong class="vc-flashcards-summary-count vc-flashcards-summary-count--incorrect" data-vc-flashcards-incorrect-count>0</strong>
             <h3><?php esc_html_e('Incorrect', 'vc-flashcards'); ?></h3>
           </div>
@@ -246,18 +275,17 @@ if (!defined('ABSPATH')) {
         </div>
       </div>
       <h3 class="vc-flashcards-summary-message">
-        <span><?php esc_html_e('Keep studying.', 'vc-flashcards'); ?></span>
-        <span><?php esc_html_e('Practice makes perfect.', 'vc-flashcards'); ?></span>
+        <?php esc_html_e('Keep studying.', 'vc-flashcards'); ?>
       </h3>
       <div class="vc-flashcards-summary-actions">
-        <?php /* Variante visual exclusiva del summary para el retorno al menú. */ ?>
+        <?php /* Variante visual exclusiva del summary para el retorno al menu. */ ?>
         <button type="button" class="vc-flashcards-back vc-flashcards-summary-action vc-flashcards-summary-action--back" data-vc-flashcards-summary-back><?php esc_html_e('Back to menu', 'vc-flashcards'); ?></button>
-        <?php /* CTA secundario del summary con icono izquierdo para reiniciar la sesión actual. */ ?>
+        <?php /* CTA secundario del summary con icono izquierdo para reiniciar la sesion actual. */ ?>
         <button type="button" class="vc-flashcards-start vc-flashcards-summary-action vc-flashcards-summary-action--restart" data-vc-flashcards-restart>
           <span class="vc-flashcards-summary-action-icon" aria-hidden="true">
             <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try.svg'); ?>" alt="" width="16" height="16">
           </span>
-          <span><?php esc_html_e('Repeat session', 'vc-flashcards'); ?></span>
+          <span><?php esc_html_e('Repeat Session', 'vc-flashcards'); ?></span>
         </button>
       </div>
     </div>
@@ -270,10 +298,12 @@ if (!defined('ABSPATH')) {
     <?php /* Dialogo principal con titulo, selector de cantidad y acciones finales. */ ?>
     <div class="vc-flashcards-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="vc-flashcards-modal-title">
       <div class="vc-flashcards-modal-header">
+        <?php /* Bloque textual del modal; CSS controla su gap frente al boton de cierre. */ ?>
         <div class="vc-flashcards-modal-heading">
           <h3 id="vc-flashcards-modal-title" data-vc-flashcards-modal-title></h3>
           <p class="vc-flashcards-modal-copy" data-vc-flashcards-modal-copy></p>
         </div>
+        <?php /* Cierre compacto del modal; en 480px CSS lo fija a 26x26. */ ?>
         <button type="button" class="vc-flashcards-close-button vc-flashcards-modal-close" data-vc-flashcards-close aria-label="<?php esc_attr_e('Close', 'vc-flashcards'); ?>">
           <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/cerrar.svg'); ?>" alt="" width="20" height="20">
         </button>

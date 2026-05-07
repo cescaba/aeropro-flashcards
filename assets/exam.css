@@ -47,11 +47,11 @@
   margin-bottom: 24px;
 }
 
-/* Grilla que organiza los 4 badges de resumen en la home del examen. */
+/* Grilla que organiza los 3 badges de resumen en la home del examen. */
 .vc-exam-intro-badges {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -72,7 +72,7 @@
 .vc-exam-session-header [data-vc-exam-progress],
 .vc-exam-summary-dialog .vc-exam-result-requirement,
 .vc-exam-summary-dialog .vc-flashcards-summary-result-card h3,
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
+.vc-exam-summary-dialog .vc-flashcards-summary-result-card h3 {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
@@ -84,24 +84,19 @@
 .vc-exam-history-item-copy-text span,
 .vc-exam-history-item-score-copy small,
 .vc-exam-session-header [data-vc-exam-progress],
-.vc-exam-summary-dialog .vc-exam-result-requirement,
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
+.vc-exam-summary-dialog .vc-exam-result-requirement {
   color: #666666;
 }
 
 /* Tipografia compartida para textos base de contenido del examen. */
-.vc-exam-history-item-copy-text strong,
-.vc-exam-summary-dialog .vc-exam-summary-description,
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy strong {
+.vc-exam-history-item-copy-text strong {
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
 }
 
 /* Tipografia compartida para titulos de seccion del examen. */
-.vc-exam-history-header h2,
-.vc-exam-summary-dialog .vc-exam-summary-eyebrow,
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-title {
+.vc-exam-history-header h2 {
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
@@ -120,9 +115,7 @@
 .vc-exam-history-item-copy,
 .vc-exam-history-item-score-copy,
 .vc-exam-history-item-copy-text,
-.vc-exam-history-test-details-list,
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-list,
-.vc-exam-summary-dialog .vc-exam-summary-intro {
+.vc-exam-history-test-details-list {
   display: grid;
 }
 
@@ -618,20 +611,6 @@
   letter-spacing: -0.15px;
 }
 
-/* Resetea el helper del next-icon cuando se reutiliza como flecha izquierda. */
-.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon {
-  position: static;
-  width: auto;
-  height: auto;
-  font-size: inherit;
-}
-
-/* Elimina pseudo-elementos decorativos del icon helper reutilizado. */
-.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon::before,
-.vc-exam-card .vc-exam-session-prev .vc-flashcards-next-icon::after {
-  content: none;
-}
-
 /* Mantiene Next sin variaciones visuales en hover/focus. */
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):hover,
 .vc-exam-card .vc-flashcards-session-next:not(.vc-exam-session-prev):focus,
@@ -708,18 +687,32 @@
 
 /* ==========================================================================
    Component: Exam Summary
-   Vista final con resultado, cards de conteo, breakdown y acciones.
+   Vista final con resultado, cards de conteo y acciones.
    ========================================================================== */
 
 /* ===== Resumen final del examen ===== */
 
-/* La vista summary funciona como una vista normal del examen, no como overlay. */
-.vc-exam-app > [data-vc-exam-view="summary"] {
-  min-height: 100%;
-  justify-items: center;
+/* Garantiza que el modal de resultado no pinte nada mientras JS lo mantiene cerrado. */
+.vc-exam-summary[hidden] {
+  display: none !important;
 }
 
-/* Wrapper principal con ancho maximo para la pantalla de resumen. */
+/* Overlay del resumen final del examen, alineado con el resumen de flashcards. */
+.vc-exam-summary {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.30);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  box-sizing: border-box;
+}
+
+/* Wrapper principal flexible; desktop define la medida exacta de Figma mas abajo. */
 .vc-exam-summary-dialog {
   position: relative;
   justify-self: center;
@@ -732,32 +725,71 @@
   text-align: center;
 }
 
-/* Franja superior del resumen; queda transparente a proposito. */
-.vc-exam-summary-dialog .vc-exam-summary-section--intro {
-  background: transparent;
-}
-
-/* Card blanca del resumen que envuelve resultados, desglose y acciones. */
+/* Card blanca del resumen; mantiene padding uniforme de 30px alrededor del contenido. */
 .vc-exam-summary-dialog .vc-exam-summary-section--content {
   display: grid;
-  gap: 24px;
+  gap: 0;
   opacity: 1;
   background: #ffffff;
-  padding: 28px 32px 26px;
+  padding: 30px;
   border-radius: var(--vc-flashcards-surface-radius);
   border-width: 1.67px;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
   box-sizing: border-box;
 }
 
-/* Espaciado inferior del bloque superior del resumen. */
+/* Desktop: respeta las medidas objetivo de Figma sin imponerlas a pantallas pequenas. */
+@media (min-width: 769px) {
+  /* Desktop Figma: fija el ancho visual del modal solo cuando hay espacio suficiente. */
+  .vc-exam-summary-dialog {
+    width: 424px;
+  }
+
+  /* Desktop Figma: usa altura minima para igualar la composicion sin cortar contenido. */
+  .vc-exam-summary-dialog .vc-exam-summary-section--content {
+    min-height: 525px;
+  }
+}
+
+/* Titulo fijo del modal de resultado, independiente del estado aprobado/reprobado. */
+.vc-exam-summary-dialog .vc-exam-summary-title {
+  margin: 0 0 28px;
+  color: #0F172A;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+  text-align: center;
+}
+
+/* Header del resultado: centra badge/titulos y deja 16px antes de las metricas. */
+.vc-exam-summary-dialog .vc-exam-result-header {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 16px;
+}
+
+/* Separacion precisa entre las metricas y el mensaje de cierre. */
 .vc-exam-summary-dialog .vc-flashcards-summary-top {
-  margin-bottom: 0;
+  margin-bottom: 24px;
+}
+
+/* Mensaje final del mock test, alineado con el tono visual de Flashcards. */
+.vc-exam-summary-dialog .vc-exam-summary-message {
+  margin: 0 0 28px;
+  color: #666666;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
 }
 
 /* Separacion entre las cards superiores del resumen. */
 .vc-exam-summary-dialog .vc-flashcards-summary-results {
-  gap: 18px;
+  gap: 10px;
 }
 
 /* Texto auxiliar debajo del titulo de aprobado/reprobado. */
@@ -766,23 +798,12 @@
   letter-spacing: 0;
 }
 
-/* Header del resultado: centra badge, titulo y requirement. */
-.vc-exam-summary-dialog .vc-exam-result-header {
-  display: grid;
-  justify-items: center;
-}
-
-/* Mini-card usada para Correct / Incorrect / Unanswered. */
+/* Mini-card usada para Correct / Incorrect; replica padding 10px vertical y 17px lateral. */
 .vc-exam-summary-dialog .vc-flashcards-summary-result-card {
   display: flex;
   flex-direction: column-reverse;
   gap: 0;
-  padding: 16px;
-}
-
-/* Color neutro del valor de Unanswered. */
-.vc-exam-summary-dialog .vc-flashcards-summary-count--unanswered {
-  color: #666666;
+  padding: 10px 17px;
 }
 
 /* Numero grande dentro de cada mini-card del resumen. */
@@ -800,107 +821,16 @@
   letter-spacing: 0;
 }
 
-/* Variante visual especifica para la card de Unanswered. */
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card--unanswered {
-  border-color: #E2E8F0;
-  background: #F8FAFC;
-}
-
-/* Color del label de la card Unanswered. */
-.vc-exam-summary-dialog .vc-flashcards-summary-result-card--unanswered h3 {
-  color: #666666;
-}
-
-/* Seccion de desglose por categoria dentro del resumen. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown {
-  text-align: left;
-}
-
-/* Titulo del bloque de desglose por categoria. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-title {
-  margin: 0 0 12px;
-  color: #212121;
-  letter-spacing: -0.31px;
-}
-
-/* Lista apilada de filas del desglose por categoria. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-list {
-  gap: 7px;
-}
-
-/* Fila individual del desglose para General / Airframe / Powerplant. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 13px 10px;
-  border-radius: var(--vc-exam-inner-surface-radius);
-  background: #F8FAFC;
-}
-
-/* Columna izquierda de texto dentro de cada fila del desglose. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy {
-  display: grid;
-  gap: 2px;
-}
-
-/* Nombre de la categoria dentro de cada fila del desglose. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy strong {
-  color: #212121;
-  letter-spacing: -0.15px;
-}
-
-/* Texto auxiliar como "0 of 78 correct". */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-copy small {
-  letter-spacing: 0;
-}
-
-/* Porcentaje mostrado a la derecha de cada fila del desglose. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-score {
-  color: #ef4444;
-  font-weight: 400;
-  font-size: 30px;
-  line-height: 42px;
-  letter-spacing: 0.4px;
-}
-
-/* Variante de color para porcentajes aprobados. */
-.vc-exam-summary-dialog .vc-exam-summary-breakdown-score.is-passing {
-  color: #00A63E;
-}
-
-/* Fila horizontal de botones al final del resumen. */
+/* Botonera vertical del resumen, como el modal final de Flashcards. */
 .vc-exam-summary-dialog .vc-flashcards-summary-actions {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   margin-top: 0;
 }
 
-
-/* Bloque introductorio arriba de la card blanca del resumen. */
-.vc-exam-summary-dialog .vc-exam-summary-intro {
-  margin-bottom: 24px;
-  text-align: center;
-  justify-items: center;
-}
-
-/* Titulo superior pequeno del resumen. */
-.vc-exam-summary-dialog .vc-exam-summary-eyebrow {
-  margin: 0;
-  color: #0F172A;
-  letter-spacing: -0.31px;
-}
-
-/* Texto secundario debajo del eyebrow del resumen. */
-.vc-exam-summary-dialog .vc-exam-summary-description {
-  margin: 0;
-  color: #4A5565;
-  letter-spacing: -0.15px;
-}
 
 /* Coloca restart antes de back en el orden visual. */
 .vc-exam-summary-dialog .vc-flashcards-summary-action--restart {
@@ -978,9 +908,9 @@
 }
 
 @media (max-width: 960px) {
-  /* Exam badges tablet: mantiene cuatro columnas usando badges internos estables. */
+  /* Exam badges tablet: mantiene tres columnas usando badges internos estables. */
   .vc-exam-intro-badges {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   /* Exam category mock tablet: mantiene tres cards por fila en 960px. */
@@ -1043,5 +973,111 @@
 }
 
 @media (max-width: 480px) {
-  /* Reservado: ajustes finos para celular pequeno. */
+  /* Exam badges mobile: mantiene los 3 badges en una sola fila de 480px. */
+  .vc-exam-intro-badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  /* Exam badge mobile: compacta cada card para que entren 3 en la misma fila. */
+  .vc-exam-badge {
+    padding: 8px 6px;
+  }
+
+  /* Exam badge content mobile: apila icono y texto dentro de cada badge compacto. */
+  .vc-exam-badge-content {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  /* Exam badge icon mobile: reduce el icono para conservar ancho util. */
+  .vc-exam-badge-icon {
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+  }
+
+  /* Exam badge icon media mobile: ajusta svg e imagen al contenedor compacto. */
+  .vc-exam-badge-icon svg,
+  .vc-exam-badge-icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Exam badge copy mobile: evita alturas grandes en badges de una sola fila. */
+  .vc-exam-badge-copy {
+    min-height: 0;
+    width: 100%;
+  }
+
+  /* Exam badge value mobile: reduce el valor para que no desborde en 3 columnas. */
+  .vc-exam-badge-copy strong {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  /* Exam categories mobile: apila las categorias del mock test una debajo de otra. */
+  .vc-exam-app .vc-flashcards-category-grid--mock {
+    grid-template-columns: 1fr;
+  }
+
+  /* Exam history mobile: coloca Test Details debajo de categorias y antes del historial. */
+  .vc-exam-history {
+    grid-template-columns: 1fr;
+  }
+
+  /* Exam test details mobile: sube la card de detalles sobre la lista de historial. */
+  .vc-exam-history-test-details {
+    order: 1;
+  }
+
+  /* Exam history content mobile: deja el historial debajo de Test Details. */
+  .vc-exam-history-content {
+    order: 2;
+  }
+
+  /* Exam history mobile: muestra solo 3 items en celular. */
+  .vc-exam-history-list .vc-exam-history-item:nth-child(n+4) {
+    display: none;
+  }
+
+  /* Exam history item mobile: mantiene copy y score en la misma linea horizontal. */
+  .vc-exam-history-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* Exam history copy mobile: permite que el texto use el ancho disponible sin romper la fila. */
+  .vc-exam-history-item-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* Exam history text mobile: evita desbordes en fechas/duracion largas. */
+  .vc-exam-history-item-copy-text {
+    min-width: 0;
+  }
+
+  /* Exam history score mobile: alinea el resultado al extremo derecho en la misma fila. */
+  .vc-exam-history-item-score {
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* Exam history score copy mobile: conserva la lectura alineada a la derecha. */
+  .vc-exam-history-item-score-copy {
+    justify-items: end;
+  }
+
+  /* Exam history trend icon mobile: reduce aire vertical del icono de tendencia. */
+  .vc-exam-history-item-score-icon {
+    align-self: center;
+    padding: 0;
+  }
 }

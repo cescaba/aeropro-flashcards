@@ -41,7 +41,7 @@
 .vc-flashcards-stats,
 .vc-flashcards-category-grid {
   display: grid;
-  gap: 17px;
+  gap: 16px;
 }
 
 /* Distribuye las tarjetas de estadisticas en tres columnas. */
@@ -237,7 +237,7 @@
 }
 
 .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
-  margin: 0 0 4px;
+  margin: 0;
   font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 16px;
@@ -304,23 +304,6 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
-}
-
-.vc-flashcards-detail-header .vc-flashcards-back {
-  gap: 8px;
-  opacity: 0.8;
-  padding: 7px 11px;
-  border-radius: 6px;
-  border: 1px solid #1447E6;
-}
-
-.vc-flashcards-detail-header .vc-flashcards-back span {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: -0.15px;
-  text-align: center;
-  color: #1447E6;
 }
 
 /* Tarjeta global de practica aleatoria en el home de flashcards. */
@@ -481,7 +464,7 @@
   align-items: center;
   gap: 8px;
   justify-content: center;
-  min-height: 32px;
+  min-height: 34px;
   padding: 7px 11px;
   line-height: 1;
 }
@@ -636,11 +619,9 @@
 /* Espaciado interno de tarjetas y paneles principales. */
 .vc-flashcards-category-card,
 .vc-flashcards-config-card,
-.vc-flashcards-subtopics-card,
-.vc-flashcards-summary-box {
-  padding: 21px 24px ;
+.vc-flashcards-subtopics-card {
+  padding: 21px 24px;
 }
-
 
 .vc-flashcards-empty {
   padding: 0;
@@ -698,18 +679,11 @@
   margin: 0;
 }
 
-.vc-flashcards-category-card .vc-flashcards-category-header,
 .vc-flashcards-category-card .vc-flashcards-category-top,
 .vc-flashcards-category-card .vc-flashcards-category-progress-block,
 .vc-flashcards-category-card .vc-flashcards-category-meta {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-/* Flashcards category: header agrupa titulo y meta sin afectar el layout desktop. */
-.vc-flashcards-category-header {
-  display: grid;
-  gap: 8px;
 }
 
 /* Wrapper semantico del progreso completo de categoria: texto + barra. */
@@ -794,7 +768,6 @@
 .vc-flashcards-session-header > .vc-flashcards-back {
   flex: 0 0 auto;
   justify-content: center;
-  padding: 7px 11px;
   box-sizing: border-box;
 }
 
@@ -840,7 +813,7 @@
 
 /* Separa la barra del header para que el cambio de bloque se sienta mas limpio. */
 .vc-flashcards-session-bar {
-  margin-top: 17px;
+  margin-top: 16px;
 }
 
 /* ==========================================================================
@@ -873,6 +846,31 @@
   align-items: center;
 }
 
+/* Icono derecho de la card alineada: caja estable de 19x20 al extremo final. */
+.vc-flashcards-config-card-trailing-icon {
+  flex: 0 0 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 20px;
+  color: #1447E6;
+  transition: color 180ms ease;
+}
+
+/* SVG inline del extremo derecho: hereda azul/blanco desde el contenedor. */
+.vc-flashcards-config-card-trailing-icon .icono-flecha {
+  display: block;
+  width: 9px;
+  height: 18px;
+}
+
+/* Estado hover/active: el icono inline pasa a blanco sobre el fondo azul. */
+.vc-flashcards-config-card--aligned:hover .vc-flashcards-config-card-trailing-icon,
+.vc-flashcards-config-card--aligned.is-active .vc-flashcards-config-card-trailing-icon {
+  color: #FFFFFF;
+}
+
 /* Hover visual exclusivo de la tarjeta Study full category. */
 .vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:first-child:hover,
 .vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:first-child.is-active {
@@ -892,6 +890,16 @@
 /* Copia descriptiva de la tarjeta de configuracion con ancho flexible. */
 .vc-flashcards-config-copy {
   flex: 1 1 auto;
+}
+
+/* Config card copy: centra titulo/subtitulo contra el boton lateral sin depender de margenes nativos. */
+.vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .vc-flashcards-config-copy,
@@ -924,7 +932,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
-  padding: 16px 44px 23px 16px;
+  padding: 16px 16px 20px;
   border: 0.56px solid #e2e8f0;
   border-radius: var(--vc-flashcards-surface-radius);
   background: #f8fbff;
@@ -954,34 +962,30 @@
   color: #dce6ff;
 }
 
-/* Hace que la flecha lateral acompañe el cambio de color del hover del subtema. */
-.vc-flashcards-subtopics-list .vc-flashcards-subtopic-item:hover .vc-flashcards-subtopic-copy::after {
-  border-top-color: #ffffff;
-  border-right-color: #ffffff;
-}
-
-/* Agrega una flecha visual al lado derecho del card sin depender del contenido renderizado por JS. */
-.vc-flashcards-subtopic-copy::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 0;
-  width: 8px;
-  height: 8px;
-  border-top: 1.5px solid #98a2b3;
-  border-right: 1.5px solid #98a2b3;
-  transform: translateY(-50%) rotate(45deg);
-  pointer-events: none;
-}
-
 /* Bloque de texto interno de cada subtema. */
 .vc-flashcards-subtopic-copy {
-  position: relative;
   display: grid;
   flex: 1 1 auto;
   gap: 8px;
   min-width: 0;
-  padding-right: 28px;
+}
+
+/* Chevron derecho real del subtema: reemplaza el antiguo ::after y no hereda colores de hover. */
+.vc-flashcards-subtopic-chevron {
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #99A1AF;
+}
+
+/* SVG inline del subtopic: mismo patron que config-card-trailing-icon, con tamano 6x13. */
+.vc-flashcards-subtopic-chevron .icono-flecha {
+  display: block;
+  width: 13px;
+  height: 13px;
 }
 
 /* Alinea el titulo del subtema y su badge de estado en una misma fila. */
@@ -1335,7 +1339,7 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 30px;
 }
 
 /* Fila de acciones de la card con ancho estable al expandir contenido. */
@@ -1351,24 +1355,29 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
+  min-height: 46px;
   padding: 18px 0px;
   border: 0;
   border-radius: 6px;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
-/* Boton de explicacion a ancho completo dentro de la fila de acciones. */
+/* Acciones principales de sesion: misma altura visual aunque una tenga borde y la otra no. */
 .vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle {
   width: 100%;
-  padding-top: 11px;
-  padding-bottom: 11px;
+}
+
+.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle,
+.vc-flashcards-card > .vc-flashcards-session-next {
+  min-height: 46px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 /* Boton siguiente ubicado debajo de la explicacion con ancho completo. */
 .vc-flashcards-card > .vc-flashcards-session-next {
   margin-top: 12px;
-  padding-top: 11px;
-  padding-bottom: 11px;
   background: #1447E6;
 }
 
@@ -1378,6 +1387,27 @@
   display: inline-flex;
   align-items: center;
   line-height: 1;
+}
+
+/* Contenedor del chevron: controla caja y alineacion sin tocar el glifo interno. */
+.vc-flashcards-next-icon {
+  flex: 0 0 16px;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #1447E6;
+}
+
+/* SVG inline del chevron principal: contenedor 16x16, vector visible 3x8 y trazo 2.5. */
+.vc-flashcards-next-icon .icono-flecha {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+
+/* Reutiliza el mismo asset para Previous invirtiendo solo el contenedor del icono. */
+.vc-flashcards-next-icon--prev {
+  transform: scaleX(-1);
 }
 
 /* Explanation toggle icon: gira cuando el panel de explicacion esta visible. */
@@ -1450,7 +1480,7 @@
    Overlay final, resultados, accuracy y acciones del resumen.
    ========================================================================== */
 
-/* Overlay del resumen final. */
+/* Overlay del resumen final: replica Figma con negro 30% y blur de fondo 2.5px. */
 .vc-flashcards-summary {
   position: fixed;
   inset: 0;
@@ -1458,8 +1488,9 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(15, 23, 42, 0.30);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
 }
 
 /* Caja principal del resumen. */
@@ -1468,7 +1499,6 @@
   display: grid;
   width: min(100%, 425px);
   margin: 0;
-  opacity: 1;
   padding: 30px;
   border: 0.56px solid #dbe4f0;
   border-radius: var(--vc-flashcards-surface-radius);
@@ -1512,9 +1542,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 112px;
-  height: 112px;
-  margin: 0 auto 18px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
   border-radius: 999px;
   background: #1447E6;
 }
@@ -1536,7 +1566,7 @@
 
 /* Titulo principal del resumen. */
 .vc-flashcards-summary-kicker {
-  margin: 0 0 18px;
+  margin: 0 0 15px;
   color: #111827;
   font-size: 24px;
   font-weight: 600;
@@ -1551,6 +1581,7 @@
 .vc-flashcards-summary-box .vc-flashcards-summary-message {
   font-size: 14px;
   color: #364153;
+  text-align: center;
 }
 
 /* Contenedor de resultados. */
@@ -1590,12 +1621,12 @@
 
 /* Color de respuestas correctas. */
 .vc-flashcards-summary-count--correct {
-  color: #0d542b;
+  color: #008236;
 }
 
 /* Color de respuestas incorrectas. */
 .vc-flashcards-summary-count--incorrect {
-  color: #82181a;
+  color: #C10007;
 }
 
 /* Etiqueta de cada resultado. */
@@ -1611,12 +1642,12 @@
 
 /* Variante de correctas. */
 .vc-flashcards-summary-result-card--correct h3 {
-  color: #0d542b;
+  color: #0D542B;
 }
 
 /* Variante de incorrectas. */
 .vc-flashcards-summary-result-card--incorrect h3 {
-  color: #82181a;
+  color: #C10007;
 }
 
 /* Tarjeta de correctas. */
@@ -1664,18 +1695,26 @@
   gap: 8px;
 }
 
-/* Centrado del contenido de acciones. */
-.vc-flashcards-summary-actions .vc-flashcards-back,
-.vc-flashcards-summary-actions .vc-flashcards-start {
-  justify-content: center;
-  text-align: center;
-}
-
 /* Base de acciones del resumen. */
 .vc-flashcards-summary-action {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  min-height: 48px;
+  min-height: 42px;
+  padding: 7px 0px;
   border-radius: 6px;
+  box-sizing: border-box;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+  transform: none;
+  box-shadow: none;
+  transition: none;
+  text-decoration: none;
 }
 
 /* Accion principal. */
@@ -1688,34 +1727,17 @@
   background: #1447E6;
   color: #ffffff;
   border: 1px solid #1447E6;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.31px;
-  transform: none;
-  box-shadow: none;
-  transition: none;
-  text-decoration: none;
 }
 
 /* Accion secundaria con icono. */
 .vc-flashcards-summary-action--restart,
 .vc-flashcards-summary-action--restart:hover,
 .vc-flashcards-summary-action--restart:focus,
+.vc-flashcards-summary-action--restart:focus-visible,
 .vc-flashcards-summary-action--restart:active {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   background: #ffffff;
   color: #1447E6;
   border: 1px solid #1447E6;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.31px;
-  text-decoration: none;
 }
 
 /* Icono del boton de reinicio. */
@@ -1756,11 +1778,13 @@
   box-sizing: border-box;
 }
 
-/* Fondo oscurecido del modal. */
+/* Fondo oscurecido del modal: comparte el mismo overlay visual que el resumen final. */
 .vc-flashcards-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.30);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
 }
 
 /* Caja principal del modal de configuracion. */
@@ -1780,9 +1804,11 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 20px;
   margin-bottom: 24px;
 }
 
+/* Columna de texto del modal: mantiene titulo y descripcion con separacion propia. */
 .vc-flashcards-modal-heading {
   display: flex;
   flex-direction: column;
@@ -1863,54 +1889,58 @@
 
 /* Slider de cantidad con ancho completo. */
 .vc-flashcards-modal-slider-wrap input[type="range"] {
+  display: block;
   width: 100%;
-  height: 15px;
+  height: 8px;
+  margin: 0;
+  padding: 0;
+  -webkit-appearance: none;
   appearance: none;
+  border: 0;
   border-radius: 999px;
   background: linear-gradient(90deg, #1447E6 0 var(--vc-range-progress, 0%), #d7dce7 var(--vc-range-progress, 0%) 100%);
+  box-shadow: none;
+  outline: 0;
 }
 
 /* Mantiene transparente la pista nativa para que el relleno dinamico lo controle el propio input. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-  height: 15px;
+  height: 8px;
+  border: 0;
   border-radius: 999px;
   background: transparent;
+  box-shadow: none;
 }
 
 /* Deja la bola del slider en blanco sin alterar el resto del control. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  width: 26px;
-  height: 26px;
-  margin-top: -5.5px;
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;
+  -webkit-appearance: none;
   appearance: none;
   border: 2px solid #1447E6;
   border-radius: 50%;
   background: #ffffff;
+  background-color: #ffffff;
   box-shadow: none;
 }
 
-/* Replica la pista del slider para Firefox manteniendo la misma altura. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-track {
-  height: 15px;
+  height: 8px;
   border: 0;
   border-radius: 999px;
-  background: #d7dce7;
+  background: transparent;
+  box-shadow: none;
 }
 
-/* Mantiene el relleno progresivo en Firefox sin volver estatica toda la pista. */
-.vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-progress {
-  height: 15px;
-  border-radius: 999px;
-  background: #1447E6;
-}
-
-/* Replica la bola blanca del slider para Firefox. */
 .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   border: 2px solid #1447E6;
   border-radius: 50%;
   background: #ffffff;
+  background-color: #ffffff;
   box-shadow: none;
 }
 
@@ -1918,26 +1948,55 @@
 .vc-flashcards-modal-options {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 /* Boton individual para una cantidad predefinida. */
 .vc-flashcards-count-option {
-  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 0;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #f3f6fb;
-  color: #667085;
   cursor: pointer;
-  font-size: 14px;
+  box-sizing: border-box;
 }
 
+/* Texto interno de la cantidad: separado del boton para controlar tipografia sin tocar caja. */
+.vc-flashcards-count-option-label {
+  display: block;
+  font-weight: 400;
+  color: #667085;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
+}
 
 /* Estado activo de la cantidad elegida. */
-.vc-flashcards-count-option.is-active {
+.vc-flashcards-count-option.is-active,
+.vc-flashcards-count-option.is-active:hover,
+.vc-flashcards-count-option.is-active:focus,
+.vc-flashcards-count-option.is-active:focus-visible,
+.vc-flashcards-count-option.is-active:active {
   border-color: #1447E6;
+  border-radius: 8px;
   background: #1447E6;
+  box-shadow: none;
+  outline: 0;
+  transform: none;
+}
+
+/* Texto de la cantidad activa. */
+.vc-flashcards-count-option.is-active .vc-flashcards-count-option-label,
+.vc-flashcards-count-option.is-active:hover .vc-flashcards-count-option-label,
+.vc-flashcards-count-option.is-active:focus .vc-flashcards-count-option-label,
+.vc-flashcards-count-option.is-active:focus-visible .vc-flashcards-count-option-label,
+.vc-flashcards-count-option.is-active:active .vc-flashcards-count-option-label {
   color: #ffffff;
 }
 
@@ -1947,15 +2006,20 @@
 .vc-flashcards-count-option:not(.is-active):focus-visible {
   border-color: #e2e8f0;
   background: #f3f6fb;
-  color: #667085;
   box-shadow: none;
+}
+
+.vc-flashcards-count-option:not(.is-active):hover .vc-flashcards-count-option-label,
+.vc-flashcards-count-option:not(.is-active):focus .vc-flashcards-count-option-label,
+.vc-flashcards-count-option:not(.is-active):focus-visible .vc-flashcards-count-option-label {
+  color: #667085;
 }
 
 /* Separacion superior del footer del modal. */
 .vc-flashcards-modal-actions {
   width: 100%;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: 24px;
 }
 
 /* Evita cambios visuales al pasar el cursor por el footer del modal. */
@@ -2117,17 +2181,11 @@
   box-shadow: none;
 }
 
-/* Alinea cada pieza interna para que el icono no quede mas alto ni mas bajo que la etiqueta. */
-.vc-flashcards-explanation-toggle-icon,
+/* Mantiene el label del toggle con la misma caja tipografica de Next question. */
 .vc-flashcards-explanation-toggle-label {
   display: inline-flex;
   align-items: center;
-  line-height: 1;
-}
-
-/* Evita que el SVG se desplace por el comportamiento inline de la imagen. */
-.vc-flashcards-explanation-toggle-icon img {
-  display: block;
+  line-height: 24px;
 }
 
 
@@ -2252,7 +2310,7 @@ body.vc-flashcards-modal-open {
     padding: 16px;
     align-content: center;
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border-bottom: 1px solid #E2E8F0;
   }
 
   /* Flashcards home mobile: recibe el padding que antes tenia el contenedor dashboard. */
@@ -2281,10 +2339,20 @@ body.vc-flashcards-modal-open {
     min-height: calc(100dvh - 80px);
   }
 
+  /* Flashcards cards mobile: reduce aire interno antes de reglas especificas por card. */
   .vc-flashcards-category-card,
-  .vc-flashcards-config-card,
-  .vc-flashcards-summary-box {
+  .vc-flashcards-config-card {
     padding: 10px 16px;
+  }
+
+  /* Flashcards summary mobile: replica el aire lateral del modal en el overlay de resultados. */
+  .vc-flashcards-summary {
+    padding: 19px;
+  }
+
+  /* Flashcards summary box mobile: conserva la caja amplia del resultado en 480px. */
+  .vc-flashcards-summary-box {
+    padding: 30px;
   }
 
   /* Flashcards subtopics mobile: recibe el padding lateral que antes tenia el dashboard. */
@@ -2312,7 +2380,7 @@ body.vc-flashcards-modal-open {
 
   /* Config card mobile: refuerza jerarquia del titulo dentro de cada modo. */
   .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
-    margin: 0 0 4px;
+    margin: 0;
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
@@ -2363,12 +2431,26 @@ body.vc-flashcards-modal-open {
     place-items: center;
     align-items: center;
     justify-items: center;
+    padding: 15px;
+  }
+
+  /* Flashcards modal heading mobile: compacta la distancia entre titulo y descripcion. */
+  .vc-flashcards-modal-heading {
+    gap: 6px;
   }
 
   /* Flashcards modal dialog mobile: elimina el desplazamiento superior heredado en 480px. */
   .vc-flashcards-modal-dialog {
     margin: 0;
     padding: 18px 16px;
+  }
+
+  /* Flashcards modal close mobile: fija el control de cierre en 26x26 solo en 480px. */
+  .vc-flashcards-close-button.vc-flashcards-modal-close {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    padding: 0;
   }
 
   /* Flashcards modal range mobile: mantiene la meta del rango en una sola linea solo en 480px. */
@@ -2414,7 +2496,7 @@ body.vc-flashcards-modal-open {
     margin-bottom: 0;
     padding: 0 16px;
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border-bottom: 1px solid #E2E8F0;
     box-sizing: border-box;
   }
 
@@ -2448,28 +2530,68 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-config-card--aligned {
     flex-direction: row;
     align-items: center;
+    min-height: 80px;
     gap: 12px;
   }
 
   /* Config card aligned mobile: deja el texto a la derecha del CTA en 480px. */
   .vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
     order: 2;
-    min-width: 0;
+    align-self: center;
+    justify-content: center;
+    margin: 0px;
+    gap: 0px;
   }
 
   /* Config card aligned mobile: deja el CTA al lado izquierdo en 480px. */
   .vc-flashcards-config-card--aligned .vc-flashcards-config-card-action {
     order: 1;
-    flex: 0 0 48px;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    align-self: center;
   }
 
-  /* Flashcards category mobile: vuelve a una tarjeta por fila en celular pequeno. */
+  /* Flashcards subtopics title mobile: reduce la altura visual del heading. */
+  .vc-flashcards-subtopics-header h3 {
+    line-height: 16px;
+    letter-spacing: -0.31px;
+  }
+
+  /* Flashcards actions mobile: compacta la fila de apoyo dentro de la sesion. */
+  .vc-flashcards-actions {
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  /* Flashcards explanation mobile: conserva una caja legible debajo de la pregunta. */
+  .vc-flashcards-explanation {
+    margin-top: 10px;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  /* Flashcards session next mobile: reduce el aire antes del CTA final. */
+  .vc-flashcards-card > .vc-flashcards-session-next {
+    margin-top: 10px;
+  }
+
+  /* Config card action mobile: baja el icono para ajustarlo al boton de 40px. */
+  .vc-flashcards-config-card-action-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Config card aligned mobile: mantiene el chevron al extremo derecho. */
+  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-trailing-icon {
+    order: 3;
+    margin-left: auto;
+  }
+
+  /* Flashcards category mobile: vuelve a una tarjeta por fila y reduce el gap en celular pequeno. */
   .vc-flashcards-category-grid {
     grid-template-columns: 1fr;
-  }
-
-  /* Flashcards category mobile: reduce el gap entre categorias en celular pequeno. */
-  .vc-flashcards-category-grid {
     gap: 12px;
   }
 
@@ -2568,14 +2690,9 @@ body.vc-flashcards-modal-open {
     text-align: center;
   }
 
-  /* Flashcards category mobile: ordena la card como header, progreso y CTA. */
-  .vc-flashcards-category-header {
+  /* Flashcards category mobile: mantiene el titulo como primer bloque de la card. */
+  .vc-flashcards-category-top {
     order: 1;
-  }
-
-  /* Flashcards category mobile: controla la separacion entre titulo y meta. */
-  .vc-flashcards-category-header {
-    gap: 8px;
   }
 
   /* Flashcards category mobile: coloca el bloque de progreso antes del CTA. */
@@ -2583,9 +2700,14 @@ body.vc-flashcards-modal-open {
     order: 2;
   }
 
+  /* Flashcards category mobile: coloca la meta justo debajo del progreso. */
+  .vc-flashcards-category-meta {
+    order: 3;
+  }
+
   /* Flashcards category mobile: deja el CTA principal como cierre visual de la card. */
   .vc-flashcards-category-card > .vc-flashcards-start--full {
-    order: 3;
+    order: 4;
   }
 
   /* Flashcards category mobile: aplica la escala tipografica compacta al titulo. */
@@ -2646,28 +2768,22 @@ body.vc-flashcards-modal-open {
   /* Flashcards modal slider mobile: reduce la altura real del control en 480px. */
   .vc-flashcards-modal-slider-wrap input[type="range"] {
     width: 100%;
-    height: 7px;
+    height: 8px;
   }
 
   /* Flashcards modal slider mobile: sincroniza la pista WebKit con la altura del input. */
   .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-    height: 7px;
+    height: 8px;
   }
 
   /* Flashcards modal slider mobile: reduce y recentra el thumb WebKit sobre una pista de 7px. */
   .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
     width: 17px;
     height: 17px;
-    margin-top: -5px;
+    margin-top: -4.5px;
   }
 
-  /* Flashcards modal slider mobile: sincroniza la pista Firefox con la altura del input. */
-  .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-track,
-  .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-progress {
-    height: 7px;
-  }
-
-  /* Flashcards modal slider mobile: reduce el thumb Firefox para acompanarlo con la pista compacta. */
+  /* Flashcards modal slider mobile: sincroniza el thumb de Firefox con WebKit. */
   .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
     width: 17px;
     height: 17px;
@@ -2796,33 +2912,37 @@ body.vc-flashcards-modal-open {
     overflow: hidden;
   }
 
-
+  /* Flashcards session topic mobile: compacta el chip principal dentro de la card. */
   .vc-flashcards-session-topic {
-  padding: 5px 10px;
-  border: 1px solid #E2E8F0;
-  background: #e5e7eb;
-  color: #666666;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0px;
+    padding: 5px 10px;
+    border: 1px solid #E2E8F0;
+    background: #e5e7eb;
+    color: #666666;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
   }
 
+  /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
-  padding: 5px 10px;
-  border: 1px solid #E2E8F0;
-  background: #ffffff;
-  color: #666666;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0px;
-}
+    padding: 5px 10px;
+    border: 1px solid #E2E8F0;
+    background: #ffffff;
+    color: #666666;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+  }
 
-.vc-flashcards-session-context {
-  margin: 0 0 18px;
-  gap: 10px;
-}
+  /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
+  .vc-flashcards-session-context {
+    margin: 0 0 18px;
+    gap: 10px;
+  }
+
+  /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */
   .vc-flashcards-session > .vc-flashcards-card [data-vc-flashcards-question],
   .vc-flashcards-session > .vc-flashcards-card [data-vc-exam-question] {
     max-width: 100%;
@@ -2834,6 +2954,7 @@ body.vc-flashcards-modal-open {
     word-break: normal;
   }
 
+  /* Flashcards answer mobile: adapta cada opcion al ancho de la card en celular. */
   .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer {
     width: 100%;
     min-width: 0;
@@ -2846,6 +2967,7 @@ body.vc-flashcards-modal-open {
     color: #666666;
   }
 
+  /* Flashcards answer text mobile: permite respuestas largas sin romper el layout. */
   .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer strong {
     display: block;
     flex: 1 1 auto;
@@ -2860,6 +2982,7 @@ body.vc-flashcards-modal-open {
     word-break: normal;
   }
 
+  /* Flashcards answer letter mobile: mantiene la capsula de opcion estable y compacta. */
   .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer span {
     width: 28px;
     height: 28px;
@@ -2873,6 +2996,7 @@ body.vc-flashcards-modal-open {
     letter-spacing: -0.15px;
   }
 
+  /* Flashcards reveal mobile: reduce el texto auxiliar para que no compita con las respuestas. */
   .vc-flashcards-reveal {
     font-size: 12px;
     line-height: 140%;

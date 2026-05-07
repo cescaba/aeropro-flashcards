@@ -42,9 +42,10 @@
     const rangeInput = root.querySelector('[data-vc-flashcards-range]');
     const optionsWrap = root.querySelector('[data-vc-flashcards-options]');
     const confirmButton = root.querySelector('[data-vc-flashcards-confirm]');
-    const statBestScore = root.querySelector('[data-vc-flashcards-stat="best-score"]');
-    const statAverageScore = root.querySelector('[data-vc-flashcards-stat="average-score"]');
-    const statPassedAttempts = root.querySelector('[data-vc-flashcards-stat="passed-attempts"]');
+    // Dashboard stat nodes only. Category/subtopic card metrics are rendered from category payloads.
+    const statHeaderCardsMastered = root.querySelector('[data-vc-flashcards-stat="cards-mastered"]');
+    const statTotalReviewed = root.querySelector('[data-vc-flashcards-stat="total-reviewed"]');
+    const statTopicsCompleted = root.querySelector('[data-vc-flashcards-stat="topics-completed"]');
 
     // Estado vivo de la app: categoria activa, sesion, respuestas y modal.
     let currentCategory = null;
@@ -322,19 +323,36 @@
         const heading = document.createElement('div');
         const title = document.createElement('strong');
         const description = document.createElement('span');
+        const chevron = document.createElement('span');
+        const chevronSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
         item.type = 'button';
         item.className = 'vc-flashcards-subtopic-item';
 
         copy.className = 'vc-flashcards-subtopic-copy';
         heading.className = 'vc-flashcards-subtopic-heading';
+        chevron.className = 'vc-flashcards-subtopic-chevron';
+        chevron.setAttribute('aria-hidden', 'true');
+        chevronSvg.setAttribute('class', 'icono-flecha');
+        chevronSvg.setAttribute('viewBox', '0 0 11 20');
+        chevronSvg.setAttribute('fill', 'none');
+        chevronSvg.setAttribute('focusable', 'false');
+        chevronPath.setAttribute('d', 'M1 19L10 10L1 1');
+        chevronPath.setAttribute('stroke', 'currentColor');
+        chevronPath.setAttribute('stroke-width', '2.5');
+        chevronPath.setAttribute('stroke-linecap', 'round');
+        chevronPath.setAttribute('stroke-linejoin', 'round');
         title.textContent = subtopic.name || '';
         description.textContent = subtopic.description || '';
 
+        chevronSvg.appendChild(chevronPath);
+        chevron.appendChild(chevronSvg);
         heading.appendChild(title);
         copy.appendChild(heading);
         copy.appendChild(description);
         item.appendChild(copy);
+        item.appendChild(chevron);
 
         item.addEventListener('click', function () {
           openConfigModal({
@@ -412,10 +430,13 @@
 
       values.forEach(function (value) {
         const button = document.createElement('button');
+        const label = document.createElement('span');
         button.type = 'button';
         button.className = 'vc-flashcards-count-option';
         button.dataset.count = String(value);
-        button.textContent = String(value);
+        label.className = 'vc-flashcards-count-option-label';
+        label.textContent = String(value);
+        button.appendChild(label);
         button.addEventListener('click', function () {
           updateModalSelection(value);
         });
@@ -747,14 +768,14 @@
         return;
       }
 
-      if (statBestScore) {
-        statBestScore.textContent = String(stats.bestScore || 0) + '%';
+      if (statHeaderCardsMastered) {
+        statHeaderCardsMastered.textContent = String(stats.latestSessionScorePercent || 0) + '%';
       }
-      if (statAverageScore) {
-        statAverageScore.textContent = String(stats.averageScore || 0) + '%';
+      if (statTotalReviewed) {
+        statTotalReviewed.textContent = String(stats.totalReviewed || '0/0');
       }
-      if (statPassedAttempts) {
-        statPassedAttempts.textContent = String(stats.passedAttempts || '0/5');
+      if (statTopicsCompleted) {
+        statTopicsCompleted.textContent = String(stats.topicsCompleted || '0/0');
       }
     }
 
