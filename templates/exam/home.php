@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 <section class="vc-exam-view vc-exam-home" data-vc-exam-view="home" aria-labelledby="vc-exam-home-title">
   <header class="vc-exam-page-header">
     <h1 id="vc-exam-home-title"><?php esc_html_e('A&P Mock Test', 'vc-flashcards'); ?></h1>
-    <p><?php esc_html_e('Simulate the FAA exam flow with timed practice and review mode.', 'vc-flashcards'); ?></p>
+    <p><?php esc_html_e('Practice under real exam conditions and track your progress.', 'vc-flashcards'); ?></p>
   </header>
 
   <div class="vc-exam-intro">

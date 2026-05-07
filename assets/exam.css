@@ -641,7 +641,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--vc-exam-blue);
+  background: #999999;
 }
 
 /* ==========================================================================
