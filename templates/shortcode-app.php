@@ -228,11 +228,20 @@ if (!defined('ABSPATH')) {
         <button type="button" class="vc-flashcards-reveal" data-vc-flashcards-reveal><?php esc_html_e("Don't know the answer? Reveal answer", 'vc-flashcards'); ?></button>
         <button type="button" class="vc-flashcards-session-action vc-flashcards-explanation-toggle" data-vc-flashcards-explanation-toggle hidden>
           <span class="vc-flashcards-explanation-toggle-label"><?php esc_html_e('View detailed explanation', 'vc-flashcards'); ?></span>
-          <?php /* Icono vectorial reutilizable para el chevron de avance. */ ?>
           <span class="vc-flashcards-next-icon" aria-hidden="true">
-            <svg class="vc-arrow-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M11 5L16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              class="vc-flashcards-card-arrow-svg"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 3L10 8L6 13"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </span>
         </button>

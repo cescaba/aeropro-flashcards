@@ -1408,7 +1408,8 @@
 }
 
 /* SVG inline de flecha: ocupa la caja completa para alinear prev/next con el texto. */
-.vc-flashcards-next-icon .vc-arrow-icon {
+.vc-flashcards-next-icon .vc-arrow-icon,
+.vc-flashcards-next-icon .vc-flashcards-card-arrow-svg {
   display: block;
   width: 16px;
   height: 16px;
@@ -2316,6 +2317,7 @@ body.vc-flashcards-modal-open {
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="home"]) > .vc-dashboard-heading {
     min-height: 102px;
     margin-bottom: 0;
+    gap: 10px;
     padding: 16px;
     align-content: center;
     background: #FFFFFF;
@@ -2353,10 +2355,19 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-summary-result-card {
     display: flex;
     flex-direction: column;
+    height: 76px;
+    padding: 10px 17px;
   }
+
+  .vc-flashcards-summary-accuracy-card {
+    padding: 8px 17px;
+    min-height:76px ;
+  }
+  
 
   .vc-flashcards-summary-result-card strong {
     order: 1;
+    margin-bottom: 4px;
   }
 
   .vc-flashcards-summary-result-card h3,
@@ -2658,6 +2669,11 @@ body.vc-flashcards-modal-open {
     width: 100%;
   }
 
+  .vc-flashcards-summary-accuracy-title {
+  margin: 0 0 4px;
+
+ }
+
   /* Flashcards global mobile: mantiene el icono como primer elemento visual. */
   .vc-flashcards-global-random-icon {
     width: 56px;
@@ -2864,14 +2880,16 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards stats mobile: reduce la caja del icono para sostener tres cards visibles. */
   .vc-flashcards-stat-card-icon {
-    padding: 8px;
-    border-radius: 7px;
+    padding: 10px;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
   }
 
   /* Flashcards stats mobile: reduce el pictograma para acompanarlo con la caja compacta. */
   .vc-flashcards-stat-card-icon img {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   /* Flashcards stats mobile: ordena valor arriba y etiqueta abajo. */
