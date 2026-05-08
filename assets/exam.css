@@ -1220,6 +1220,7 @@
     margin: 0;
     padding: 4px 10px;
     min-height: 25px;
+    min-width:68px ;
     border: 1px solid var(--vc-exam-border);
     border-radius: 6px;
     color: var(--vc-exam-muted);

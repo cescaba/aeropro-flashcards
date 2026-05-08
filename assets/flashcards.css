@@ -1094,7 +1094,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: 6px;
   font-size: 14px;
   line-height: 1;
 }
@@ -2963,6 +2963,7 @@ body.vc-flashcards-modal-open {
     font-size: 12px;
     line-height: 16px;
     letter-spacing: 0px;
+    border-radius: 6px;
   }
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
@@ -2973,7 +2974,9 @@ body.vc-flashcards-modal-open {
     color: #666666;
     font-weight: 400;
     font-size: 12px;
+    border-radius: 6px;
     line-height: 16px;
+    
     letter-spacing: 0px;
   }
 
