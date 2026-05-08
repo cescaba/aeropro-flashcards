@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
       </span>
       <div class="vc-exam-badge-copy">
         <small><?php esc_html_e('Best score', 'vc-flashcards'); ?></small>
-        <strong><?php echo esc_html((string) ($exam_home_stats['bestScore'] ?? 0)); ?>%</strong>
+        <strong data-vc-exam-best-score><?php echo esc_html((string) ($exam_home_stats['bestScore'] ?? 0)); ?>%</strong>
       </div>
     </div>
   </li>
@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
       </span>
       <div class="vc-exam-badge-copy">
         <small><?php esc_html_e('Average', 'vc-flashcards'); ?></small>
-        <strong><?php echo esc_html((string) ($exam_home_stats['averageScore'] ?? 0)); ?>%</strong>
+        <strong data-vc-exam-average-score><?php echo esc_html((string) ($exam_home_stats['averageScore'] ?? 0)); ?>%</strong>
       </div>
     </div>
   </li>
@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
       </span>
       <div class="vc-exam-badge-copy">
         <small><?php esc_html_e('Passed attempts', 'vc-flashcards'); ?></small>
-        <strong><?php echo esc_html((string) ($exam_home_stats['passedAttempts'] ?? '0/5')); ?></strong>
+        <strong data-vc-exam-passed-attempts><?php echo esc_html((string) ($exam_home_stats['passedAttempts'] ?? '0/5')); ?></strong>
       </div>
     </div>
   </li>

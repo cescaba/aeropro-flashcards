@@ -41,7 +41,7 @@ class VC_Flashcards_Plugin {
   const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
 
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
-  const DB_VERSION = '1.2.0';
+  const DB_VERSION = '1.2.1';
 
   // Orden deseado de topics padre al mostrarlos en frontend.
   // Sirve para que General/Airframe/Powerplant aparezcan siempre en ese orden.
@@ -492,7 +492,8 @@ class VC_Flashcards_Plugin {
       PRIMARY KEY  (id),
       KEY user_id (user_id),
       KEY topic_term_id (topic_term_id),
-      KEY completed_at (completed_at)
+      KEY completed_at (completed_at),
+      KEY user_mode_completed_id (user_id, mode, completed_at, id)
     ) {$charset_collate};";
 
     // Tabla detalle de respuestas.
@@ -1203,6 +1204,7 @@ class VC_Flashcards_Plugin {
     /* Devuelve al frontend las mÃ©tricas finales para pintar el resumen de la sesiÃ³n. */
     wp_send_json_success([
       'stats' => $this->get_user_stats($user_id),
+      'examHomeStats' => $this->get_exam_home_stats($user_id),
       'precisionPercent' => $precision_percent,
       'scorePercent' => $score_percent,
       'correctAnswers' => $correct_answers,

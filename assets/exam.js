@@ -48,6 +48,9 @@
     var correctCount  = root.querySelector('[data-vc-exam-correct-count]');
     var incorrectCount = root.querySelector('[data-vc-exam-incorrect-count]');
     var historyContent = root.querySelector('.vc-exam-history-content');
+    var bestScoreEl = root.querySelector('[data-vc-exam-best-score]');
+    var averageScoreEl = root.querySelector('[data-vc-exam-average-score]');
+    var passedAttemptsEl = root.querySelector('[data-vc-exam-passed-attempts]');
     var startButtons = root.querySelectorAll('[data-vc-exam-start]');
 
     /* ── Mutable state ──────────────────────────────────────────────────── */
@@ -181,6 +184,25 @@
         .catch(function () {
           return null;
         });
+    }
+
+    // Refresca los badges del home del Mock Test con valores recalculados por el servidor.
+    function updateExamHomeBadges(examHomeStats) {
+      if (!examHomeStats) { return; }
+
+      if (bestScoreEl && typeof examHomeStats.bestScore !== 'undefined') {
+        var bestScore = Math.max(0, Math.round(Number(examHomeStats.bestScore || 0)));
+        bestScoreEl.textContent = bestScore + '%';
+      }
+
+      if (averageScoreEl && typeof examHomeStats.averageScore !== 'undefined') {
+        var averageScore = Math.max(0, Math.round(Number(examHomeStats.averageScore || 0)));
+        averageScoreEl.textContent = averageScore + '%';
+      }
+
+      if (passedAttemptsEl && typeof examHomeStats.passedAttempts !== 'undefined') {
+        passedAttemptsEl.textContent = String(examHomeStats.passedAttempts || '0/5');
+      }
     }
 
     // Mock Test scroll: usa el scroller real del dashboard para entrar siempre al inicio del panel.
@@ -580,6 +602,7 @@
         .then(function (r) { return r.json(); })
         .then(function (payload) {
           if (!payload.success) { throw new Error('server'); }
+          updateExamHomeBadges(payload.data && payload.data.examHomeStats);
           var summaryResults = buildServerSummaryResults(payload.data || {}, elapsed, expired);
           persistSummaryState(summaryResults);
           renderSummary(summaryResults);
