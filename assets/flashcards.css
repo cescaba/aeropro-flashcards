@@ -2252,6 +2252,45 @@ body.vc-flashcards-modal-open {
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
     padding: 32px 22px 72px;
   }
+
+  /* Flashcards config tablet: usa columnas fijas para que el CTA no herede la altura del texto. */
+  .vc-flashcards-config-card--aligned {
+    display: grid;
+    grid-template-columns: var(--vc-flashcards-config-action-size, 48px) minmax(0, 1fr) 19px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .vc-flashcards-config-grid .vc-flashcards-config-card {
+    padding: 18px;
+  }
+
+  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-action {
+    grid-column: 1;
+    align-self: center;
+    justify-self: center;
+  }
+
+  .vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
+    grid-column: 2;
+    align-self: center;
+  }
+
+  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-trailing-icon {
+    grid-column: 3;
+    justify-self: end;
+    margin-left: 0;
+  }
+
+  .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
+    font-size: 13px;
+    line-height: 18px;
+  }
 }
 
 /* Ajustes responsive para pantallas tablet pequenas sin cambiar aun a mobile completo. */
@@ -2303,50 +2342,7 @@ body.vc-flashcards-modal-open {
     width: min(100%, 420px);
     padding: 24px 18px 18px;
   }
-}
 
-@media (min-width: 481px) and (max-width: 960px) {
-  /* Flashcards config tablet: usa columnas fijas para que el CTA no herede la altura del texto. */
-  .vc-flashcards-config-card--aligned {
-    display: grid;
-    grid-template-columns: var(--vc-flashcards-config-action-size, 48px) minmax(0, 1fr) 19px;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .vc-flashcards-config-grid .vc-flashcards-config-card {
-    padding: 18px;
-  }
-
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-action {
-    grid-column: 1;
-    align-self: center;
-    justify-self: center;
-  }
-
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
-    grid-column: 2;
-    align-self: center;
-  }
-
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-trailing-icon {
-    grid-column: 3;
-    justify-self: end;
-    margin-left: 0;
-  }
-
-  .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
-    font-size: 15px;
-    line-height: 20px;
-  }
-
-  .vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
-    font-size: 13px;
-    line-height: 18px;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 720px) {
   /* Flashcards config small tablet: baja la presion del texto antes del breakpoint movil. */
   .vc-flashcards-config-grid .vc-flashcards-config-card {
     padding: 16px;
@@ -2647,6 +2643,7 @@ body.vc-flashcards-modal-open {
   /* Config card aligned mobile: aplica la fila compacta solo en 480px. */
   .vc-flashcards-config-card--aligned {
     --vc-flashcards-config-action-size: 40px;
+    display: flex;
     flex-direction: row;
     align-items: center;
     min-height: 80px;
