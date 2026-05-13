@@ -8,6 +8,7 @@
    ========================================================================== */
 
 .vc-exam-app {
+  --vc-exam-font: "Poppins", sans-serif;
   --vc-exam-surface-radius: 12px;
   --vc-exam-control-radius: 6px;
   --vc-exam-border: #E2E8F0;
@@ -18,8 +19,15 @@
   gap: 24px;
   min-height: 100%;
   color: var(--vc-exam-text);
-  font-family: Poppins, sans-serif;
+  font-family: var(--vc-exam-font);
   position: relative;
+}
+
+.vc-exam-app button,
+.vc-exam-app input,
+.vc-exam-app select,
+.vc-exam-app textarea {
+  font-family: inherit;
 }
 
 .vc-exam-app.is-booting {
@@ -105,7 +113,6 @@
 .vc-exam-page-header h1 {
   margin: 0;
   color: var(--vc-exam-text);
-  font-family: Poppins, sans-serif;
   font-weight: 500;
   font-size: 24px;
   line-height: 24px;
@@ -115,7 +122,6 @@
 .vc-exam-page-header p {
   margin: 0;
   color: var(--vc-exam-muted);
-  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
@@ -281,7 +287,6 @@
 .vc-exam-finish-btn {
   border: 0;
   cursor: pointer;
-  font-family: Poppins, sans-serif;
   text-decoration: none;
   box-sizing: border-box;
 }
@@ -538,7 +543,6 @@
 .vc-exam-session .vc-exam-session-title {
   margin: 0;
   color: #212121;
-  font-family: Poppins, sans-serif;
   font-weight: 500;
   font-style: normal;
   font-size: 24px;
@@ -769,7 +773,6 @@
 .vc-exam-reference-image-title,
 .vc-exam-reference-image-subtitle {
   display: block;
-  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -860,7 +863,6 @@
   background: #FFFFFF;
   color: inherit;
   text-align: left;
-  font-family: Poppins, sans-serif;
   cursor: pointer;
   box-sizing: border-box;
   box-shadow: none;
@@ -885,7 +887,7 @@
 .vc-exam-answer[data-state="selected"]:focus,
 .vc-exam-answer[data-state="selected"]:focus-visible,
 .vc-exam-answer[data-state="selected"]:active {
-  border-color: var(--vc-exam-blue);
+  border-color: #325CBA;
   background: #FFFFFF;
 }
 
@@ -905,7 +907,7 @@
 }
 
 .vc-exam-answer[data-state="selected"] span {
-  background: var(--vc-exam-blue);
+  background: #325CBA;
   color: #FFFFFF;
 }
 
@@ -942,9 +944,9 @@
   border-radius: var(--vc-exam-control-radius);
   opacity: 1;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 20px;
-  letter-spacing: -0.15px;
+  letter-spacing: -0.3px;
   text-align: center;
 }
 
@@ -1123,7 +1125,6 @@
 
 .vc-exam-summary-count {
   margin: 0;
-  font-family: Poppins, sans-serif;
   font-weight: 400;
   font-size: 30px;
   line-height: 36px;
@@ -1335,7 +1336,7 @@
   }
 
   .vc-exam-session-header {
-    min-height: 72px;
+    height: 72px;
     padding: 20px 16px;
     border-bottom: 1px solid #E2E8F0;
     background: #FFFFFF;
