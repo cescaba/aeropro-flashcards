@@ -7,10 +7,6 @@ if (!defined('ABSPATH')) {
   <div class="vc-mock-test-exam-shell">
     <?php include VC_FLASHCARDS_DIR . 'templates/exam/session-header.php'; ?>
 
-    <div class="vc-exam-session-bar" aria-hidden="true">
-      <span data-vc-exam-bar-fill style="width: 0%;"></span>
-    </div>
-
     <article class="vc-exam-card">
       <div class="vc-exam-question-context">
         <p class="vc-exam-question-topic" data-vc-exam-topic-label></p>
@@ -74,6 +70,12 @@ if (!defined('ABSPATH')) {
           </span>
         </button>
       </div>
+
+      <div class="vc-exam-session-actions-divider" aria-hidden="true"></div>
+
+      <button type="button" class="vc-exam-finish-btn vc-exam-finish-btn--mobile">
+        <span><?php esc_html_e('Finish exam', 'vc-flashcards'); ?></span>
+      </button>
     </article>
   </div>
 </section>

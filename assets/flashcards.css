@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    Base
    Estructura raiz, herencia tipografica y vistas principales del modulo.
@@ -13,11 +14,11 @@
   --vc-flashcards-surface-radius: 12px;
 }
 
-.vc-flashcards-app button,
-.vc-flashcards-app input,
-.vc-flashcards-app select,
-.vc-flashcards-app textarea {
-  --vc-flashcards-font: "Poppins", sans-serif;
+.vc-flashcards-app,
+.vc-flashcards-app *,
+.vc-flashcards-app *::before,
+.vc-flashcards-app *::after {
+  font-family: var(--vc-flashcards-font);
 }
 
 
@@ -104,7 +105,7 @@
   opacity: 1;
   padding: 12px 20px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: 10px;
   background: #F1F5F9;
 }
 
@@ -112,7 +113,7 @@
   display: grid;
   gap: 16px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: 12px;
   background: #FFFFFF;
 }
 
@@ -970,6 +971,14 @@
   margin-top: 16px;
 }
 
+/* Header de sesion con layout propio para no forzar el centrado vertical del boton Back. */
+.vc-flashcards-session-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 /* ==========================================================================
    Component: Configuration And Subtopics
    Cards de configuracion, listado de subtemas y feedback del detail view.
@@ -1363,11 +1372,6 @@
   color: #4A5565;
 }
 
-/* Neutraliza el efecto del enlace de ayuda solo dentro de la tarjeta principal. */
-.vc-flashcards-card .vc-flashcards-reveal:hover {
-  transform: none;
-}
-
 /* Evita la elevacion de cualquier accion dentro de la card principal sin repetir selectores. */
 .vc-flashcards-card .vc-flashcards-actions > :hover {
   transform: none;
@@ -1404,19 +1408,6 @@
   box-shadow: inset 0 0 0 1px #00c950;
 }
 
-/* Mantiene el badge de la opcion correcta en verde sin alterar el texto principal. */
-.vc-flashcards-answer[data-state="correct"] span {
-  background: #00a63e;
-  color: #ffffff;
-}
-
-/* Evita que el hover azul cambie el badge de una respuesta ya correcta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:hover span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:focus-visible span {
-  background: #00a63e;
-  color: #ffffff;
-}
-
 /* Coloca el check en el extremo derecho para separar el estado del badge de letra. */
 .vc-flashcards-answer[data-state="correct"]::after {
   content: "";
@@ -1444,19 +1435,6 @@
   color: #1f2430;
   border-color: #fb2c36;
   box-shadow: inset 0 0 0 1px #fb2c36;
-}
-
-/* Mantiene el badge de la opcion incorrecta en rojo sin alterar el texto principal. */
-.vc-flashcards-answer[data-state="incorrect"] span {
-  background: #e2101b;
-  color: #ffffff;
-}
-
-/* Evita que el hover azul cambie el badge de una respuesta ya incorrecta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:hover span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:focus-visible span {
-  background: #e2101b;
-  color: #ffffff;
 }
 
 /* Coloca una x roja al extremo derecho para reforzar el estado de error. */
@@ -1534,7 +1512,7 @@
 
 .vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle,
 .vc-flashcards-card > .vc-flashcards-session-next {
-  min-height: 44px;
+  min-height: 46px;
 }
 
 /* Boton siguiente ubicado debajo de la explicacion con ancho completo. */
@@ -2111,9 +2089,9 @@
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 7px 0;
+  padding: 7px 0px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #f3f6fb;
   cursor: pointer;
   box-sizing: border-box;
@@ -2208,26 +2186,6 @@
   border: 0;
 }
 
-.vc-flashcards-modal-cancel:hover,
-.vc-flashcards-modal-cancel:focus,
-.vc-flashcards-modal-cancel:focus-visible,
-.vc-flashcards-modal-cancel:active {
-  background: transparent;
-  color: #1447E6;
-  border-color: #1447E6;
-  box-shadow: none;
-}
-
-.vc-flashcards-modal-confirm:hover,
-.vc-flashcards-modal-confirm:focus,
-.vc-flashcards-modal-confirm:focus-visible,
-.vc-flashcards-modal-confirm:active {
-  background: #1447E6;
-  color: #ffffff;
-  border: 0;
-  box-shadow: none;
-}
-
 .vc-flashcards-modal-dialog .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:hover,
 .vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus,
@@ -2261,10 +2219,10 @@
 }
 
 /* Mantiene estable el boton opuesto aunque el otro este en hover, foco o clic. */
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:hover) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus-visible) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:active) .vc-flashcards-modal-confirm {
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:hover) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus-visible) .vc-flashcards-modal-confirm,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:active) .vc-flashcards-modal-confirm {
   background: #1447E6;
   color: #ffffff;
   border: 0;
@@ -2275,10 +2233,10 @@
   transform: none;
 }
 
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:hover) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus-visible) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:active) .vc-flashcards-modal-cancel {
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:hover) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus-visible) .vc-flashcards-modal-cancel,
+.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:active) .vc-flashcards-modal-cancel {
   background: transparent;
   color: #1447E6;
   border-color: #1447E6;
@@ -2351,12 +2309,20 @@ body.vc-flashcards-modal-open {
 
 /* ==========================================================================
    Responsive
-   Breakpoints sincronizados con dashboard.css y exam.css.
+   Desktop base vive fuera de media query.
+   Objetivo: 1180px, 960px, 720px y 480px.
    ========================================================================== */
 
 /* Base desktop */
 
 @media (max-width: 1180px) {
+  /* --------------------------------------------------------------------------
+     1180px: desktop compacto.
+     Ajusta paddings del dashboard host para vistas internas.
+     -------------------------------------------------------------------------- */
+
+  /* 1180 Dashboard host */
+
   /* Flashcards dashboard compact desktop: suaviza el salto antes del layout tablet. */
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
     padding: 44px 32px 56px;
@@ -2367,17 +2333,17 @@ body.vc-flashcards-modal-open {
   }
 }
 
-/* Ajustes responsive para pasar a dos columnas en pantallas medias. */
-@media (max-width: 1100px) {
+@media (max-width: 960px) {
+  /* --------------------------------------------------------------------------
+     960px: tablet/flashcards flow.
+     Ajusta grillas y cards sin asumir el diseno de 480px.
+     -------------------------------------------------------------------------- */
+
+  /* 960 Category and config grids */
+
+  /* Flashcards category/config tablet: mantiene dos tarjetas por fila horizontal en 960px. */
   .vc-flashcards-category-grid,
   .vc-flashcards-config-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 960px) {
-  /* Flashcards category tablet: mantiene dos tarjetas por fila horizontal en 960px. */
-  .vc-flashcards-category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2389,6 +2355,8 @@ body.vc-flashcards-modal-open {
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
     padding: 32px 22px 72px;
   }
+
+  /* 960 Config card alignment */
 
   /* Flashcards config tablet: usa columnas fijas para que el CTA no herede la altura del texto. */
   .vc-flashcards-config-card--aligned {
@@ -2432,6 +2400,13 @@ body.vc-flashcards-modal-open {
 
 /* Ajustes responsive para pantallas tablet pequenas sin cambiar aun a mobile completo. */
 @media (max-width: 720px) {
+  /* --------------------------------------------------------------------------
+     720px: layout de una columna y paddings compactos.
+     Mantiene tablet pequena sin absorber el diseno propio de 480px.
+     -------------------------------------------------------------------------- */
+
+  /* 720 Dashboard host */
+
   /* Flashcards dashboard mobile: mantiene paddings controlados en vistas internas. */
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
     padding: 24px 18px 44px;
@@ -2451,6 +2426,8 @@ body.vc-flashcards-modal-open {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
+
+  /* 720 Modal and summary */
 
   /* Flashcards stats responsive: reduce solo el aire interno sin cambiar el layout base. */
   .vc-flashcards-stat-card {
@@ -2496,15 +2473,14 @@ body.vc-flashcards-modal-open {
   }
 }
 
-/* Header de sesion con layout propio para no forzar el centrado vertical del boton Back. */
-.vc-flashcards-session-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
 @media (max-width: 480px) {
+  /* --------------------------------------------------------------------------
+     480px: diseno mobile propio.
+     Esta capa puede cambiar estructura y espaciados por vista.
+     -------------------------------------------------------------------------- */
+
+  /* 480 Home */
+
   /* Flashcards home mobile: el contenido del dashboard no aporta aire externo en 480px. */
   .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="home"]) {
     padding: 0;
@@ -2525,6 +2501,8 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-view.vc-flashcards-home {
     padding: 16px 16px 33px;
   }
+
+  /* 480 Shared actions and summary */
 
   /* Flashcards mobile: apila encabezados y acciones solo en el breakpoint realmente movil. */
   .vc-flashcards-category-top,
@@ -2610,15 +2588,11 @@ body.vc-flashcards-modal-open {
   /* Flashcards modal options mobile: reparte las cantidades en una fila proporcional solo en 480px. */
   .vc-flashcards-modal-options {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 11px;
+    gap: 8px;
   }
 
   /* Flashcards modal option mobile: evita que el contenido fuerce una columna debajo de otra. */
-  .vc-flashcards-count-option {
-    min-width: 0;
-    padding-right: 0;
-    padding-left: 0;
-  }
+   
 
   /* Config card mobile: refuerza jerarquia del titulo dentro de cada modo. */
   .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
@@ -3138,7 +3112,12 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards session mobile: fija el Back al extremo izquierdo sin crecer. */
   .vc-flashcards-session-header > .vc-flashcards-back {
-    flex: 0 0 auto;
+  gap: 5px;
+  height: 32px;
+  width: 80px;
+  padding: 7px 11px;
+  
+
   }
 
   /* Flashcards session mobile: fija el contador de progreso al extremo derecho. */
@@ -3160,6 +3139,8 @@ body.vc-flashcards-modal-open {
   /* Flashcards session topic mobile: compacta el chip principal dentro de la card. */
   .vc-flashcards-session-topic {
     padding: 5px 10px;
+    height: 25px;
+    width: 68px;
     border: 1px solid #E2E8F0;
     background: #e5e7eb;
     color: #666666;
@@ -3169,6 +3150,15 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0px;
     border-radius: 6px;
   }
+  .vc-flashcards-reference-image:not(.is-expanded) {
+  height: 71px;
+}
+
+.vc-flashcards-reference-image {
+  min-height: 72px;
+  margin: 0 0 18px;
+  padding: 12px;
+}
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
@@ -3260,6 +3250,11 @@ body.vc-flashcards-modal-open {
   
   
 }
+
+/* ==========================================================================
+   Post-responsive State Locks
+   Estados que deben quedar al final para ganar sobre overrides mobile y theme.css.
+   ========================================================================== */
 
 /* Flashcards answer state: mantiene el badge verde en cualquier resolucion cuando la opcion es correcta. */
 .vc-flashcards-card .vc-flashcards-answer[data-state="correct"] span,

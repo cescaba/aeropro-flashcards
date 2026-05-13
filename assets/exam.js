@@ -34,7 +34,7 @@
     var sessionView = root.querySelector('[data-vc-exam-view="session"]');
     var summaryView = root.querySelector('[data-vc-exam-summary]');
     var feedbackEl  = root.querySelector('[data-vc-exam-feedback]');
-    var finishButton = root.querySelector('.vc-exam-finish-btn');
+    var finishButtons = root.querySelectorAll('.vc-exam-finish-btn');
     var dashboardContent = root.closest ? root.closest('.vc-dashboard-content--mock-test') : null;
 
     // Session
@@ -822,11 +822,11 @@
       });
     });
 
-    if (finishButton) {
+    finishButtons.forEach(function (finishButton) {
       finishButton.addEventListener('click', function () {
         finishExam(false);
       });
-    }
+    });
 
     // Summary: back to menu (also acts as close button)
     root.querySelectorAll('[data-vc-exam-summary-back]').forEach(function (btn) {

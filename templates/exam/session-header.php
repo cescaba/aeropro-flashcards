@@ -28,4 +28,8 @@ if (!defined('ABSPATH')) {
     <p class="vc-exam-progress-label"><?php esc_html_e('Progress', 'vc-flashcards'); ?></p>
     <strong data-vc-exam-progress><?php esc_html_e('Question 1 of 100', 'vc-flashcards'); ?></strong>
   </div>
+
+  <div class="vc-exam-session-bar" aria-hidden="true">
+    <span data-vc-exam-bar-fill style="width: 0%;"></span>
+  </div>
 </div>
