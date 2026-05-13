@@ -17,7 +17,7 @@
 .vc-flashcards-app input,
 .vc-flashcards-app select,
 .vc-flashcards-app textarea {
-  font-family: inherit;
+  --vc-flashcards-font: "Poppins", sans-serif;
 }
 
 
@@ -903,7 +903,7 @@
 /* Barra visual del progreso total de la categoria. */
 .vc-flashcards-topic-bar {
   width: 100%;
-  height: 10px;
+  height: 8px;
   margin: 12px 0 0;
   border-radius: 999px;
   background: #d7dce7;
@@ -2583,7 +2583,6 @@ body.vc-flashcards-modal-open {
   }
 
   /* Flashcards cards mobile: reduce aire interno antes de reglas especificas por card. */
-  .vc-flashcards-category-card,
   .vc-flashcards-config-card {
     padding: 10px 16px;
   }
@@ -2845,7 +2844,26 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards category mobile: controla el padding interno de cada card en 480px. */
   .vc-flashcards-category-card {
-    padding: 16px;
+    padding: 17px;
+    min-height: 185px ;
+    gap:8px;
+  }
+
+  /* Flashcards category mobile: ordena los elementos para 480px. */
+  .vc-flashcards-category-card .vc-flashcards-category-top {
+    order: 1;
+  }
+
+  .vc-flashcards-category-card .vc-flashcards-category-meta {
+    order: 2;
+  }
+
+  .vc-flashcards-category-card .vc-flashcards-category-progress-block {
+    order: 3;
+  }
+
+  .vc-flashcards-category-card .vc-flashcards-start.vc-flashcards-start--full {
+    order: 4;
   }
 
   /* Flashcards global mobile: usa el mismo aire interno de category card sin cambiar su posicion. */
