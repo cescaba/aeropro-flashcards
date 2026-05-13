@@ -1,8 +1,14 @@
 (function () {
   'use strict';
 
+  /*
+   * Exam simulator controller.
+   * Owns the mock-test views, timer, answer selection, summary and persistence.
+   */
+
   /* ── Constants ─────────────────────────────────────────────────────────── */
 
+  // Default runtime limits used when PHP does not provide a specific config.
   var DEFAULT_CONFIG = {
     totalQuestions:   100,
     timeLimitSeconds: 900,
@@ -11,7 +17,9 @@
 
   /* ── Bootstrap ─────────────────────────────────────────────────────────── */
 
+  // Boots one exam app instance from the shortcode root element.
   function initExamApp(root) {
+    // Server-provided payload: config, labels and AJAX credentials.
     var data      = window.vcExamData    || {};
     var config    = Object.assign({}, DEFAULT_CONFIG, data.examConfig || {});
     var labels    = data.labels          || {};

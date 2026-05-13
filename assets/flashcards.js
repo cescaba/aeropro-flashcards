@@ -1,5 +1,10 @@
 ﻿(function () {
   
+  /*
+   * Flashcards practice controller.
+   * Manages category selection, configurable sessions, answer review, summaries
+   * and lightweight session restoration for the flashcards shortcode.
+   */
   function initFlashcardsApp(root) {
     // Datos iniciales entregados por PHP y valores por defecto del modulo.
     const categories = parseCategories(root.dataset.categories);

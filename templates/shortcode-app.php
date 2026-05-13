@@ -68,7 +68,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="vc-flashcards-category-progress-block">
               <div class="vc-flashcards-category-progress">
-                <span><?php esc_html_e('Cards Mastered', 'vc-flashcards'); ?></span>
+                <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
                 <strong><?php echo esc_html((string) $category['progress']); ?>%</strong>
               </div>
               <div class="vc-flashcards-topic-bar" aria-hidden="true">

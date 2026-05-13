@@ -169,7 +169,6 @@
 .vc-flashcards-subtopics-header p,
 .vc-flashcards-subtopic-copy span,
 .vc-flashcards-feedback,
-.vc-flashcards-summary-copy,
 .vc-flashcards-modal-count span,
 .vc-flashcards-subtopics-empty {
   color: #666666;
@@ -1567,11 +1566,6 @@
   display: block;
   width: 16px;
   height: 16px;
-}
-
-/* Reutiliza el mismo asset para Previous invirtiendo solo el contenedor del icono. */
-.vc-flashcards-next-icon--prev {
-  transform: scaleX(-1);
 }
 
 /* Explanation toggle icon: gira cuando el panel de explicacion esta visible. */
@@ -3035,7 +3029,7 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-category-card .vc-flashcards-start--full {
     min-height: 0;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 6px;
     opacity: 1;
   }
 
