@@ -258,10 +258,155 @@
 
 /* Titulo principal de la pregunta dentro de la card. */
 .vc-flashcards-card [data-vc-flashcards-question] {
+  margin-bottom: 30px;
   font-weight: 400;
   font-size: 18px;
   line-height: 130%;
   color: #212121;
+}
+
+/* Reference image trigger: bloque dedicado para abrir la imagen asociada a la pregunta. */
+.vc-flashcards-reference-image {
+  width: 100%;
+  min-height: 80px;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 0;
+  margin: 0 0 30px;
+  padding: 18px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--vc-flashcards-surface-radius);
+  background: #F8FAFC;
+  color: #212121;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.vc-flashcards-reference-image-control {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.vc-flashcards-reference-image:hover,
+.vc-flashcards-reference-image:focus,
+.vc-flashcards-reference-image:focus-visible {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+  color: #212121;
+  outline: none;
+  box-shadow: none;
+}
+
+.vc-flashcards-reference-image[hidden] {
+  display: none !important;
+}
+
+.vc-flashcards-reference-image:not(.is-expanded) {
+  height: 80px;
+}
+
+.vc-flashcards-reference-image.is-expanded {
+  height: auto;
+}
+
+.vc-flashcards-reference-image-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 30px;
+  background: #CAD5E2;
+  color: #212121;
+  display: grid;
+  place-items: center;
+}
+
+.vc-flashcards-reference-image-icon-wrap .image-icon {
+  display: block;
+  width: 25px;
+  height: 25px;
+}
+
+.vc-flashcards-reference-image-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.vc-flashcards-reference-image-title,
+.vc-flashcards-reference-image-subtitle {
+  display: block;
+  font-family: Poppins, sans-serif;
+}
+
+.vc-flashcards-reference-image-title {
+  color: #212121;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -0.3px;
+}
+
+.vc-flashcards-reference-image-subtitle {
+  color: #666666;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -0.15px;
+}
+
+.vc-flashcards-reference-image-chevron {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: #212121;
+  transition: transform .18s ease;
+}
+
+.vc-flashcards-reference-image-chevron .chevron-right-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-chevron {
+  transform: rotate(90deg);
+}
+
+.vc-flashcards-reference-image-preview[hidden] {
+  display: none !important;
+}
+
+.vc-flashcards-reference-image-preview {
+  display: block;
+  width: 100%;
+  height: 240px;
+  margin-top: 11px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #FFFFFF;
+}
+
+.vc-flashcards-reference-image-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview {
+  height: auto;
+}
+
+.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview img {
+  height: auto;
+  max-height: none;
 }
 
 /* Titulo principal del modal con tipografia aislada del theme. */
@@ -1134,6 +1279,10 @@
 /* Separacion superior del listado de respuestas. */
 .vc-flashcards-answers {
   margin-top: 20px;
+}
+
+.vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answers {
+  margin-top: 0;
 }
 
 /* Tarjeta de respuesta individual dentro de la sesion. */
@@ -3103,6 +3252,15 @@ body.vc-flashcards-modal-open {
     line-height: 140%;
     letter-spacing: 0px;
   }
+  .vc-flashcards-reference-image-title {
+  font-size: 14px;
+}
+.vc-flashcards-reference-image-subtitle {
+  font-size: 12px;
+
+}
+
+  
   
 }
 

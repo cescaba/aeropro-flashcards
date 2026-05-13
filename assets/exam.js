@@ -35,6 +35,9 @@
     var timerValueEl  = root.querySelector('[data-vc-exam-timer-value]');
     var barFill       = root.querySelector('[data-vc-exam-bar-fill]');
     var questionEl    = root.querySelector('[data-vc-exam-question]');
+    var referenceImageButton = root.querySelector('[data-vc-exam-reference-image]');
+    var referenceImageInline = root.querySelector('[data-vc-exam-reference-image-inline]');
+    var referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-exam-reference-image-preview') : null;
     var answersWrap   = root.querySelector('[data-vc-exam-answers]');
     var prevButton    = root.querySelector('[data-vc-exam-prev]');
     var nextButton    = root.querySelector('[data-vc-exam-next]');
@@ -457,6 +460,7 @@
 
       // Reset answer area
       answersWrap.innerHTML = '';
+      resetReferenceImage();
       if (nextButton) {
         nextButton.hidden   = false;
         nextButton.disabled = false;
@@ -502,6 +506,7 @@
 
       // Question text
       if (questionEl) { questionEl.textContent = card.question; }
+      syncReferenceImage(card);
 
       // Answer buttons
       Object.keys(card.answers).forEach(function (key) {
@@ -522,6 +527,56 @@
       }
 
       persistState();
+    }
+
+    function getReferenceImageUrl(card) {
+      if (card && card.questionImageUrl) {
+        return String(card.questionImageUrl);
+      }
+
+      return referenceImageButton ? String(referenceImageButton.dataset.vcExamReferenceImageFallback || '') : '';
+    }
+
+    function resetReferenceImage() {
+      if (referenceImageButton) {
+        referenceImageButton.hidden = true;
+        referenceImageButton.classList.remove('is-expanded');
+        referenceImageButton.setAttribute('aria-expanded', 'false');
+      }
+      if (referenceImageInlineWrap) {
+        referenceImageInlineWrap.hidden = true;
+      }
+      if (referenceImageInline) {
+        referenceImageInline.removeAttribute('src');
+      }
+    }
+
+    function syncReferenceImage(card) {
+      if (!referenceImageButton) {
+        return;
+      }
+
+      referenceImageButton.hidden = !getReferenceImageUrl(card);
+    }
+
+    function toggleReferenceImageInline() {
+      var card = cards[cardIndex];
+      var imageUrl = getReferenceImageUrl(card);
+
+      if (!imageUrl || !referenceImageButton || !referenceImageInline || !referenceImageInlineWrap) {
+        return;
+      }
+
+      var isExpanded = referenceImageButton.classList.toggle('is-expanded');
+      referenceImageButton.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+
+      if (isExpanded) {
+        referenceImageInline.src = imageUrl;
+        referenceImageInlineWrap.hidden = false;
+      } else {
+        referenceImageInlineWrap.hidden = true;
+        referenceImageInline.removeAttribute('src');
+      }
     }
 
     function escapeHtml(str) {
@@ -721,6 +776,10 @@
         startExam(Number(btn.dataset.vcExamStart));
       });
     });
+
+    if (referenceImageButton) {
+      referenceImageButton.addEventListener('click', toggleReferenceImageInline);
+    }
 
     // Next / Finish
     if (nextButton) {

@@ -226,6 +226,7 @@ class VC_Flashcards_Plugin {
             <tbody>
               <tr><td><code>id</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('Existing flashcard post ID for updates.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>question</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Main question text.', 'vc-flashcards'); ?></td></tr>
+              <tr><td><code>question_image_url</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('Temporary column name for the question reference image URL. Change this in the importer if the final Excel uses another header.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>answer_a</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Option A.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>answer_b</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Option B.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>answer_c</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Option C.', 'vc-flashcards'); ?></td></tr>
@@ -278,6 +279,7 @@ class VC_Flashcards_Plugin {
     $correct_answer = (string) get_post_meta($post->ID, '_vc_flashcard_correct_answer', true);
     $explanation = (string) get_post_meta($post->ID, '_vc_flashcard_explanation', true);
     $references = (string) get_post_meta($post->ID, '_vc_flashcard_references', true);
+    $question_image_url = (string) get_post_meta($post->ID, '_vc_flashcard_question_image_url', true);
     ?>
     <style>
       .vc-flashcards-admin-grid {
@@ -290,6 +292,7 @@ class VC_Flashcards_Plugin {
         font-weight: 600;
       }
       .vc-flashcards-admin-grid input[type="text"],
+      .vc-flashcards-admin-grid input[type="url"],
       .vc-flashcards-admin-grid textarea,
       .vc-flashcards-admin-grid select {
         width: 100%;
@@ -306,6 +309,11 @@ class VC_Flashcards_Plugin {
       <div>
         <label for="vc_flashcard_question"><?php esc_html_e('Question', 'vc-flashcards'); ?></label>
         <textarea id="vc_flashcard_question" name="vc_flashcard_question" rows="4"><?php echo esc_textarea($question); ?></textarea>
+      </div>
+
+      <div>
+        <label for="vc_flashcard_question_image_url"><?php esc_html_e('Question Image URL', 'vc-flashcards'); ?></label>
+        <input id="vc_flashcard_question_image_url" type="url" name="vc_flashcard_question_image_url" value="<?php echo esc_url($question_image_url); ?>">
       </div>
 
       <div class="vc-flashcards-admin-inline">
@@ -369,6 +377,7 @@ class VC_Flashcards_Plugin {
       '_vc_flashcard_correct_answer' => isset($_POST['vc_flashcard_correct_answer']) ? sanitize_key(wp_unslash($_POST['vc_flashcard_correct_answer'])) : '',
       '_vc_flashcard_explanation' => isset($_POST['vc_flashcard_explanation']) ? wp_kses_post(wp_unslash($_POST['vc_flashcard_explanation'])) : '',
       '_vc_flashcard_references' => isset($_POST['vc_flashcard_references']) ? sanitize_textarea_field(wp_unslash($_POST['vc_flashcard_references'])) : '',
+      '_vc_flashcard_question_image_url' => isset($_POST['vc_flashcard_question_image_url']) ? esc_url_raw(wp_unslash($_POST['vc_flashcard_question_image_url'])) : '',
     ];
 
     foreach ($map as $meta_key => $value) {
@@ -424,9 +433,9 @@ class VC_Flashcards_Plugin {
       exit;
     }
 
-    fputcsv($output, ['id', 'question', 'answer_a', 'answer_b', 'answer_c', 'correct_answer', 'explanation', 'references', 'topic', 'subtopic']);
-    fputcsv($output, ['', 'What document is used to record maintenance entries?', 'Aircraft logbook', 'Pilot headset', 'Weight and balance sheet', 'a', 'Maintenance actions must be recorded in the aircraft maintenance records.', '14 CFR 43.9|FAA-H-8083-31A Chapter 2', 'General', 'Maintenance Records']);
-    fputcsv($output, ['', 'What is the purpose of a rib in a wing structure?', 'Transmit engine torque', 'Maintain the airfoil shape', 'Supply hydraulic pressure', 'b', 'Ribs support the skin and keep the wing profile in the intended aerodynamic shape.', 'FAA-H-8083-31A Chapter 3', 'Airframe', 'Structures']);
+    fputcsv($output, ['id', 'question', 'question_image_url', 'answer_a', 'answer_b', 'answer_c', 'correct_answer', 'explanation', 'references', 'topic', 'subtopic']);
+    fputcsv($output, ['', 'What document is used to record maintenance entries?', '', 'Aircraft logbook', 'Pilot headset', 'Weight and balance sheet', 'a', 'Maintenance actions must be recorded in the aircraft maintenance records.', '14 CFR 43.9|FAA-H-8083-31A Chapter 2', 'General', 'Maintenance Records']);
+    fputcsv($output, ['', 'What is the purpose of a rib in a wing structure?', 'https://example.com/reference-image.jpg', 'Transmit engine torque', 'Maintain the airfoil shape', 'Supply hydraulic pressure', 'b', 'Ribs support the skin and keep the wing profile in the intended aerodynamic shape.', 'FAA-H-8083-31A Chapter 3', 'Airframe', 'Structures']);
 
     fclose($output);
     exit;
@@ -654,6 +663,8 @@ class VC_Flashcards_Plugin {
       $correct_answer = strtolower($data['correct_answer'] ?? '');
       $topic = $data['topic'] ?? '';
       $subtopic = $data['subtopic'] ?? '';
+      // TODO: Cambiar este nombre si el Excel final usa otra columna para la imagen.
+      $question_image_url = $data['question_image_url'] ?? '';
 
       if ($question === '' || $answer_a === '' || $answer_b === '' || $answer_c === '' || $topic === '') {
         $errors[] = sprintf(__('Row %d: required fields are missing.', 'vc-flashcards'), $row_number);
@@ -677,6 +688,7 @@ class VC_Flashcards_Plugin {
         'correct_answer' => $correct_answer,
         'explanation' => $data['explanation'] ?? '',
         'references' => $this->normalize_import_references($data['references'] ?? ''),
+        'question_image_url' => $question_image_url,
       ]);
 
       if ($post_id < 1) {
@@ -786,6 +798,7 @@ class VC_Flashcards_Plugin {
     update_post_meta($post_id, '_vc_flashcard_correct_answer', sanitize_key((string) $data['correct_answer']));
     update_post_meta($post_id, '_vc_flashcard_explanation', wp_kses_post((string) $data['explanation']));
     update_post_meta($post_id, '_vc_flashcard_references', sanitize_textarea_field((string) $data['references']));
+    update_post_meta($post_id, '_vc_flashcard_question_image_url', esc_url_raw((string) $data['question_image_url']));
 
     return (int) $post_id;
   }
@@ -1289,6 +1302,7 @@ class VC_Flashcards_Plugin {
     $correct_answer = $this->get_first_meta_value($meta, '_vc_flashcard_correct_answer');
     $explanation = $this->get_first_meta_value($meta, '_vc_flashcard_explanation');
     $references = $this->get_first_meta_value($meta, '_vc_flashcard_references');
+    $question_image_url = $this->get_first_meta_value($meta, '_vc_flashcard_question_image_url');
 
     if ($question === '' || $answer_a === '' || $answer_b === '' || $answer_c === '' || !in_array($correct_answer, ['a', 'b', 'c'], true)) {
       return [];
@@ -1299,6 +1313,7 @@ class VC_Flashcards_Plugin {
     return [
       'id' => $post_id,
       'question' => wp_strip_all_tags($question),
+      'questionImageUrl' => esc_url_raw($question_image_url),
       'answers' => [
         'a' => $answer_a,
         'b' => $answer_b,

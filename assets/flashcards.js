@@ -25,6 +25,9 @@
     const summaryBackButton = root.querySelector('[data-vc-flashcards-summary-back]');
     const answersWrap = root.querySelector('[data-vc-flashcards-answers]');
     const questionEl = root.querySelector('[data-vc-flashcards-question]');
+    const referenceImageButton = root.querySelector('[data-vc-flashcards-reference-image]');
+    const referenceImageInline = root.querySelector('[data-vc-flashcards-reference-image-inline]');
+    const referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-flashcards-reference-image-preview') : null;
     const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
     const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
     const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
@@ -498,6 +501,28 @@
       persistState();
     }
 
+    // Session: expande o contrae la imagen dentro de la tarjeta actual.
+    function toggleReferenceImageInline() {
+      const card = cards[cardIndex];
+      const fallbackUrl = referenceImageButton ? String(referenceImageButton.dataset.vcFlashcardsReferenceImageFallback || '') : '';
+      const imageUrl = card && card.questionImageUrl ? String(card.questionImageUrl) : fallbackUrl;
+
+      if (!imageUrl || !referenceImageButton || !referenceImageInline || !referenceImageInlineWrap) {
+        return;
+      }
+
+      const isExpanded = referenceImageButton.classList.toggle('is-expanded');
+      referenceImageButton.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+
+      if (isExpanded) {
+        referenceImageInline.src = imageUrl;
+        referenceImageInlineWrap.hidden = false;
+      } else {
+        referenceImageInlineWrap.hidden = true;
+        referenceImageInline.removeAttribute('src');
+      }
+    }
+
     // Modal: bloquea el CTA mientras se crea la sesion por AJAX.
     function setSessionStartLoading(isLoading) {
       isStartingSession = isLoading;
@@ -532,6 +557,17 @@
     // Session: limpia pregunta, respuestas y explicacion antes de pintar una nueva tarjeta.
     function resetSessionUi() {
       answersWrap.innerHTML = '';
+      if (referenceImageButton) {
+        referenceImageButton.hidden = true;
+        referenceImageButton.classList.remove('is-expanded');
+        referenceImageButton.setAttribute('aria-expanded', 'false');
+      }
+      if (referenceImageInlineWrap) {
+        referenceImageInlineWrap.hidden = true;
+      }
+      if (referenceImageInline) {
+        referenceImageInline.removeAttribute('src');
+      }
       explanationEl.hidden = true;
       explanationEl.innerHTML = '';
       currentExplanationHtml = '';
@@ -673,6 +709,9 @@
         nextButtonLabel.textContent = cardIndex === cards.length - 1 ? 'Finish' : 'Next question';
       }
       questionEl.textContent = card.question;
+      if (referenceImageButton) {
+        referenceImageButton.hidden = !(card.questionImageUrl || referenceImageButton.dataset.vcFlashcardsReferenceImageFallback);
+      }
       renderSessionKicker(card.topicLabel, card.subtopicLabel);
 
       Object.keys(card.answers).forEach(function (key) {
@@ -950,6 +989,10 @@
     root.querySelectorAll('[data-vc-flashcards-close]').forEach(function (button) {
       button.addEventListener('click', closeConfigModal);
     });
+
+    if (referenceImageButton) {
+      referenceImageButton.addEventListener('click', toggleReferenceImageInline);
+    }
 
     rangeInput.addEventListener('input', function () {
       updateModalSelection(Number(rangeInput.value));
