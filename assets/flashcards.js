@@ -715,7 +715,8 @@
       }
       questionEl.textContent = card.question;
       if (referenceImageButton) {
-        referenceImageButton.hidden = !(card.questionImageUrl || referenceImageButton.dataset.vcFlashcardsReferenceImageFallback);
+        // Solo mostrar el botón si la tarjeta tiene una imagen real (no usar fallback para la decisión de visibilidad)
+        referenceImageButton.hidden = !card.questionImageUrl;
       }
       renderSessionKicker(card.topicLabel, card.subtopicLabel);
 

@@ -226,7 +226,7 @@ class VC_Flashcards_Plugin {
             <tbody>
               <tr><td><code>id</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('Existing flashcard post ID for updates.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>question</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Main question text.', 'vc-flashcards'); ?></td></tr>
-              <tr><td><code>question_image_url</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('Temporary column name for the question reference image URL. Change this in the importer if the final Excel uses another header.', 'vc-flashcards'); ?></td></tr>
+              <tr><td><code>question_image_url</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('Filename of the image already uploaded to the Media Library (e.g., ELE-1.png). The importer will look up the file in your Media Library and use its actual URL. Can also be a full URL if the image is hosted externally.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>acs_code</code></td><td><?php esc_html_e('No', 'vc-flashcards'); ?></td><td><?php esc_html_e('ACS code associated with this question.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>answer_a</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Option A.', 'vc-flashcards'); ?></td></tr>
               <tr><td><code>answer_b</code></td><td><?php esc_html_e('Yes', 'vc-flashcards'); ?></td><td><?php esc_html_e('Option B.', 'vc-flashcards'); ?></td></tr>
@@ -697,7 +697,7 @@ class VC_Flashcards_Plugin {
         'correct_answer' => $correct_answer,
         'explanation' => $data['explanation'] ?? '',
         'references' => $this->normalize_import_references($data['references'] ?? ''),
-        'question_image_url' => $question_image_url,
+        'question_image_url' => $this->get_media_url_by_filename($question_image_url),
         'acs_code' => $acs_code,
       ]);
 
@@ -776,6 +776,39 @@ class VC_Flashcards_Plugin {
     $items = preg_split('/\s*\|\s*|\r\n|\r|\n/', $references);
     $items = is_array($items) ? array_filter(array_map('trim', $items)) : [];
     return implode("\n", $items);
+  }
+
+  // Busca un archivo en la biblioteca de medios por nombre y retorna su URL.
+  // Si no lo encuentra, retorna una string vacia.
+  private function get_media_url_by_filename(string $filename): string {
+    if (empty($filename)) {
+      return '';
+    }
+
+    // Si ya es una URL completa, devolverla como está
+    if (filter_var($filename, FILTER_VALIDATE_URL)) {
+      return esc_url_raw($filename);
+    }
+
+    global $wpdb;
+
+    // Remover extensión para buscar por nombre base
+    $name_without_ext = pathinfo($filename, PATHINFO_FILENAME);
+    $name_without_ext_lower = strtolower($name_without_ext);
+
+    // Buscar directamente en la base de datos por post_title (nombre del archivo)
+    $query = $wpdb->prepare(
+      "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND LOWER(post_title) = %s LIMIT 1",
+      $name_without_ext_lower
+    );
+
+    $attachment_id = $wpdb->get_var($query);
+    if ($attachment_id) {
+      $url = wp_get_attachment_url($attachment_id);
+      return $url ? esc_url_raw($url) : '';
+    }
+
+    return '';
   }
 
   // Hace "upsert" de una flashcard importada:

@@ -564,7 +564,8 @@
         return;
       }
 
-      referenceImageButton.hidden = !getReferenceImageUrl(card);
+      // Solo mostrar el botón si la tarjeta tiene una imagen real (no usar fallback para la decisión de visibilidad)
+      referenceImageButton.hidden = !card || !card.questionImageUrl;
     }
 
     function toggleReferenceImageInline() {
