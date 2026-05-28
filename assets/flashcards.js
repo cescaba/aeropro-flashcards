@@ -241,15 +241,17 @@
       kicker.textContent = '';
 
       if (topicLabel) {
-        const topicChip = document.createElement('span');
-        topicChip.className = 'vc-flashcards-session-kicker-part vc-flashcards-session-kicker-part--topic';
+        const topicChip = document.createElement('p');
+        // Fix: conserva la clase original del diseño mientras el texto se pinta dinamicamente.
+        topicChip.className = 'vc-flashcards-session-topic';
         topicChip.textContent = topicLabel;
         kicker.appendChild(topicChip);
       }
 
       if (subtopicLabel) {
-        const subtopicChip = document.createElement('span');
-        subtopicChip.className = 'vc-flashcards-session-kicker-part vc-flashcards-session-kicker-part--subtopic';
+        const subtopicChip = document.createElement('p');
+        // Fix: conserva la clase original del diseño mientras el subtopic viene desde la tarjeta actual.
+        subtopicChip.className = 'vc-flashcards-session-subtopic';
         subtopicChip.textContent = subtopicLabel;
         kicker.appendChild(subtopicChip);
       }

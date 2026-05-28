@@ -217,10 +217,8 @@ if (!defined('ABSPATH')) {
 
     <?php /* Tarjeta principal con pregunta, respuestas y acciones de apoyo. */ ?>
     <article class="vc-flashcards-card">
-      <div class="vc-flashcards-session-context">
-        <p class="vc-flashcards-session-topic">General</p>
-        <p class="vc-flashcards-session-subtopic">Hand tools</p>
-      </div>
+      <?php /* Fix: este contenedor debe tener data-vc-flashcards-kicker para que flashcards.js pinte el topic/subtopic real de cada tarjeta. */ ?>
+      <div class="vc-flashcards-session-context" data-vc-flashcards-kicker aria-label="<?php esc_attr_e('Flashcard topic context', 'vc-flashcards'); ?>"></div>
       <h4 data-vc-flashcards-question></h4>
       <button type="button" class="vc-flashcards-reference-image reference_image" data-vc-flashcards-reference-image data-vc-flashcards-reference-image-fallback="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/referencia.png'); ?>" hidden>
         <span class="vc-flashcards-reference-image-control">

@@ -508,9 +508,8 @@
 
       // Topic breadcrumb
       if (topicLabelEl)    { topicLabelEl.textContent    = card.topicLabel    || ''; }
-      if (subtopicLabelEl) {
-        subtopicLabelEl.textContent = (labels.question || 'Question') + ' ' + (cardIndex + 1);
-      }
+      // Fix: mostrar el subtopic real de la tarjeta; antes se reemplazaba por "Question N".
+      if (subtopicLabelEl) { subtopicLabelEl.textContent = card.subtopicLabel || ''; }
 
       // Question text
       if (questionEl) { questionEl.textContent = card.question; }
