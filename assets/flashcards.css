@@ -1626,6 +1626,8 @@
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
+  /* Fix: suaviza la aparicion del popup de resultados sin cambiar el flujo JS. */
+  animation: vc-flashcards-summary-fade-in 180ms ease-out both;
 }
 
 /* Caja principal del resumen. */
@@ -1640,6 +1642,40 @@
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
+  /* Fix: entrada suave con fade, escala leve y desplazamiento ascendente. */
+  animation: vc-flashcards-summary-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Fix: animacion del overlay final; corre cada vez que se remueve hidden. */
+@keyframes vc-flashcards-summary-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fix: animacion del dialogo final para evitar una aparicion brusca. */
+@keyframes vc-flashcards-summary-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Fix: respeta usuarios con reduccion de movimiento sin tocar el comportamiento del popup. */
+  .vc-flashcards-summary,
+  .vc-flashcards-summary-box {
+    animation: none;
+  }
 }
 
 /* Base compartida del boton de cierre del modal. */
