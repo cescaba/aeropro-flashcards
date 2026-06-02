@@ -661,7 +661,8 @@ class VC_Flashcards_Plugin {
 
       $data = [];
       foreach ($normalized_headers as $index => $header) {
-        $data[$header] = isset($row[$index]) ? trim((string) $row[$index]) : '';
+        // CSV import text normalization: repara caracteres mojibake comunes antes de guardar preguntas/respuestas.
+        $data[$header] = isset($row[$index]) ? $this->normalize_import_text_value((string) $row[$index]) : '';
       }
 
       $question = $data['question'] ?? '';
@@ -771,6 +772,59 @@ class VC_Flashcards_Plugin {
     return true;
   }
 
+  // Normaliza texto importado desde CSV para preservar ortografia, acentos y signos especiales.
+  private function normalize_import_text_value(string $value): string {
+    $value = trim($value);
+    $value = preg_replace('/^\xEF\xBB\xBF/', '', $value);
+    $value = is_string($value) ? $value : '';
+
+    if (function_exists('wp_check_invalid_utf8')) {
+      $value = wp_check_invalid_utf8($value, true);
+    }
+
+    return $this->repair_common_mojibake($value);
+  }
+
+  // Repara secuencias mojibake frecuentes con un mapa cacheado y seguro para el encoding del editor.
+  private function repair_common_mojibake(string $value): string {
+    if ($value === '') {
+      return '';
+    }
+
+    static $replacements = null;
+
+    if ($replacements === null) {
+      // CSV import mojibake map: entidades ASCII evitan guardar caracteres corruptos dentro del codigo.
+      $replacements = [
+        html_entity_decode('&#226;&#8364;&#8221;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8212;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#8220;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8211;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#710;&#8217;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8722;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#710;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8216;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#8482;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8217;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#339;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8220;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#157;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8221;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#226;&#8364;&#166;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#8230;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#194;&#160;', ENT_QUOTES, 'UTF-8') => ' ',
+        html_entity_decode('&#194;&#176;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#176;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#194;&#177;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#177;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#161;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#225;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#169;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#233;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#173;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#237;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#179;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#243;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#186;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#250;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#177;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#241;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#129;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#193;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#8240;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#201;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#141;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#205;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#8220;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#211;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#352;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#218;', ENT_QUOTES, 'UTF-8'),
+        html_entity_decode('&#195;&#8216;', ENT_QUOTES, 'UTF-8') => html_entity_decode('&#209;', ENT_QUOTES, 'UTF-8'),
+      ];
+    }
+
+    return str_replace(array_keys($replacements), array_values($replacements), $value);
+  }
+
   // Convierte referencias del CSV al formato de texto que usa el plugin internamente.
   private function normalize_import_references(string $references): string {
     $items = preg_split('/\s*\|\s*|\r\n|\r|\n/', $references);
@@ -785,7 +839,7 @@ class VC_Flashcards_Plugin {
       return '';
     }
 
-    // Si ya es una URL completa, devolverla como está
+    // Si ya es una URL completa, devolverla tal cual.
     if (filter_var($filename, FILTER_VALIDATE_URL)) {
       return esc_url_raw($filename);
     }

@@ -79,9 +79,10 @@ if (!defined('ABSPATH')) {
             <span class="vc-flashcards-category-meta">
               <?php
               echo esc_html(sprintf(
-                /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
-                __('%1$d subtopics · %2$d/%3$d mastered', 'vc-flashcards'),
+                /* translators: 1: subtopic count, 2: separator dot, 3: mastered cards, 4: total cards */
+                __('%1$d subtopics %2$s %3$d/%4$d mastered', 'vc-flashcards'),
                 $category_subtopic_count,
+                html_entity_decode('&middot;', ENT_QUOTES, 'UTF-8'),
                 $category_mastered_cards,
                 $category_total_cards
               ));
@@ -282,6 +283,13 @@ if (!defined('ABSPATH')) {
       <?php /* CTA final para avanzar despues de resolver o revelar la respuesta. */ ?>
       <button type="button" class="vc-flashcards-session-action vc-flashcards-session-next" data-vc-flashcards-next hidden disabled>
         <span class="vc-flashcards-next-label"><?php esc_html_e('Next question', 'vc-flashcards'); ?></span>
+        <?php /* Flashcards next icon: replica la flecha usada por Mock Test para mantener consistencia visual. */ ?>
+        <span class="vc-flashcards-next-icon" aria-hidden="true">
+          <svg class="vc-arrow-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <path d="M3 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M11 5L16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </button>
     </article>
   </section>
@@ -372,6 +380,31 @@ if (!defined('ABSPATH')) {
       <div class="vc-flashcards-modal-actions">
         <button type="button" class="vc-flashcards-modal-cancel" data-vc-flashcards-close><?php esc_html_e('Cancel', 'vc-flashcards'); ?></button>
         <button type="button" class="vc-flashcards-modal-confirm" data-vc-flashcards-confirm><?php esc_html_e('Start', 'vc-flashcards'); ?></button>
+      </div>
+    </div>
+  </div>
+
+  <?php /* Reference image modal: desktop muestra la imagen grande sin empujar la card de sesion. */ ?>
+  <div class="vc-flashcards-reference-modal" data-vc-flashcards-reference-modal hidden>
+    <button type="button" class="vc-flashcards-reference-modal-backdrop" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>"></button>
+    <div class="vc-flashcards-reference-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
+      <?php /* Reference image modal controls: acciones integradas dentro del dialogo desktop. */ ?>
+      <div class="vc-flashcards-reference-modal-controls">
+        <button type="button" class="vc-flashcards-reference-modal-zoom" data-vc-flashcards-reference-modal-zoom aria-pressed="false" aria-label="<?php esc_attr_e('Zoom reference image', 'vc-flashcards'); ?>">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M8.5 14.5C11.8137 14.5 14.5 11.8137 14.5 8.5C14.5 5.18629 11.8137 2.5 8.5 2.5C5.18629 2.5 2.5 5.18629 2.5 8.5C2.5 11.8137 5.18629 14.5 8.5 14.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 13L17.5 17.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8.5 6V11M6 8.5H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="vc-flashcards-reference-modal-close" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M5 5L15 15M15 5L5 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="vc-flashcards-reference-modal-frame">
+        <img class="vc-flashcards-reference-modal-image" data-vc-flashcards-reference-modal-image alt="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
       </div>
     </div>
   </div>

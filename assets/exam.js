@@ -575,15 +575,37 @@
         return;
       }
 
-      var isExpanded = referenceImageButton.classList.toggle('is-expanded');
+      var isExpanded = !referenceImageButton.classList.contains('is-expanded');
+      var isMobileDropdown = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
       referenceImageButton.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
 
       if (isExpanded) {
         referenceImageInline.src = imageUrl;
         referenceImageInlineWrap.hidden = false;
+
+        if (isMobileDropdown) {
+          // Reference image mobile dropdown: el preview se muestra antes de expandir para que CSS pueda animar.
+          window.requestAnimationFrame(function () {
+            referenceImageButton.classList.add('is-expanded');
+          });
+        } else {
+          referenceImageButton.classList.add('is-expanded');
+        }
       } else {
-        referenceImageInlineWrap.hidden = true;
-        referenceImageInline.removeAttribute('src');
+        referenceImageButton.classList.remove('is-expanded');
+
+        if (isMobileDropdown) {
+          // Reference image mobile dropdown: retrasa hidden/src hasta que termina el colapso y evita parpadeo.
+          window.setTimeout(function () {
+            if (!referenceImageButton.classList.contains('is-expanded')) {
+              referenceImageInlineWrap.hidden = true;
+              referenceImageInline.removeAttribute('src');
+            }
+          }, 240);
+        } else {
+          referenceImageInlineWrap.hidden = true;
+          referenceImageInline.removeAttribute('src');
+        }
       }
     }
 

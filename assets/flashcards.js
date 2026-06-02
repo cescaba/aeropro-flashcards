@@ -33,6 +33,9 @@
     const referenceImageButton = root.querySelector('[data-vc-flashcards-reference-image]');
     const referenceImageInline = root.querySelector('[data-vc-flashcards-reference-image-inline]');
     const referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-flashcards-reference-image-preview') : null;
+    const referenceImageModal = root.querySelector('[data-vc-flashcards-reference-modal]');
+    const referenceImageModalImage = root.querySelector('[data-vc-flashcards-reference-modal-image]');
+    const referenceImageModalZoom = root.querySelector('[data-vc-flashcards-reference-modal-zoom]');
     const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
     const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
     const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
@@ -508,13 +511,102 @@
       persistState();
     }
 
+    // Session reference image: desktop usa modal; mobile conserva el dropdown inline.
+    function shouldUseReferenceImageModal() {
+      return window.matchMedia && window.matchMedia('(min-width: 481px)').matches;
+    }
+
+    // Session reference image: obtiene la URL real de la imagen o fallback disponible.
+    function getReferenceImageUrl(card) {
+      const fallbackUrl = referenceImageButton ? String(referenceImageButton.dataset.vcFlashcardsReferenceImageFallback || '') : '';
+      return card && card.questionImageUrl ? String(card.questionImageUrl) : fallbackUrl;
+    }
+
+    // Session reference image: lee el porcentaje configurable del CSS y lo mantiene en un rango usable.
+    function getReferenceImageModalZoomPercent() {
+      if (!referenceImageModal || !window.getComputedStyle) {
+        return 145;
+      }
+
+      const configuredPercent = Number(window.getComputedStyle(referenceImageModal).getPropertyValue('--vc-flashcards-reference-modal-zoom-percent'));
+
+      if (!Number.isFinite(configuredPercent)) {
+        return 145;
+      }
+
+      return Math.min(Math.max(configuredPercent, 70), 220);
+    }
+
+    // Session reference image: calcula el ancho de zoom desde el tamano real y el porcentaje configurable.
+    function syncReferenceImageModalSize() {
+      if (!referenceImageModal || !referenceImageModalImage || !referenceImageModalImage.naturalWidth) {
+        return;
+      }
+
+      const zoomPercent = getReferenceImageModalZoomPercent();
+
+      referenceImageModal.style.setProperty(
+        '--vc-flashcards-reference-modal-zoom-width',
+        String(Math.round(referenceImageModalImage.naturalWidth * (zoomPercent / 100))) + 'px'
+      );
+    }
+
+    // Session reference image: centraliza el estado de zoom para sincronizar clase y aria-pressed.
+    function setReferenceImageModalZoom(isZoomed) {
+      if (!referenceImageModal) {
+        return;
+      }
+
+      referenceImageModal.classList.toggle('is-zoomed', Boolean(isZoomed));
+
+      if (referenceImageModalZoom) {
+        referenceImageModalZoom.setAttribute('aria-pressed', isZoomed ? 'true' : 'false');
+      }
+    }
+
+    // Session reference image: abre la imagen en modal desktop sin alterar la card.
+    function openReferenceImageModal(imageUrl) {
+      if (!referenceImageModal || !referenceImageModalImage || !imageUrl) {
+        return;
+      }
+
+      setReferenceImageModalZoom(false);
+      referenceImageModalImage.src = imageUrl;
+      referenceImageModal.hidden = false;
+      syncReferenceImageModalSize();
+      document.body.classList.add('vc-flashcards-modal-open');
+      if (referenceImageButton) {
+        referenceImageButton.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // Session reference image: cierra el modal desktop y limpia la imagen cargada.
+    function closeReferenceImageModal() {
+      if (!referenceImageModal || !referenceImageModalImage) {
+        return;
+      }
+
+      referenceImageModal.hidden = true;
+      setReferenceImageModalZoom(false);
+      referenceImageModalImage.removeAttribute('src');
+      referenceImageModal.style.removeProperty('--vc-flashcards-reference-modal-zoom-width');
+      document.body.classList.remove('vc-flashcards-modal-open');
+      if (referenceImageButton) {
+        referenceImageButton.setAttribute('aria-expanded', 'false');
+      }
+    }
+
     // Session: expande o contrae la imagen dentro de la tarjeta actual.
     function toggleReferenceImageInline() {
       const card = cards[cardIndex];
-      const fallbackUrl = referenceImageButton ? String(referenceImageButton.dataset.vcFlashcardsReferenceImageFallback || '') : '';
-      const imageUrl = card && card.questionImageUrl ? String(card.questionImageUrl) : fallbackUrl;
+      const imageUrl = getReferenceImageUrl(card);
 
       if (!imageUrl || !referenceImageButton || !referenceImageInline || !referenceImageInlineWrap) {
+        return;
+      }
+
+      if (shouldUseReferenceImageModal()) {
+        openReferenceImageModal(imageUrl);
         return;
       }
 
@@ -575,6 +667,7 @@
       if (referenceImageInline) {
         referenceImageInline.removeAttribute('src');
       }
+      closeReferenceImageModal();
       explanationEl.hidden = true;
       explanationEl.innerHTML = '';
       currentExplanationHtml = '';
@@ -998,9 +1091,39 @@
       button.addEventListener('click', closeConfigModal);
     });
 
+    root.querySelectorAll('[data-vc-flashcards-reference-modal-close]').forEach(function (button) {
+      button.addEventListener('click', closeReferenceImageModal);
+    });
+
+    if (referenceImageModalZoom) {
+      referenceImageModalZoom.addEventListener('click', function () {
+        // Session reference image: el zoom se alterna desde el control integrado del modal desktop.
+        setReferenceImageModalZoom(!referenceImageModal.classList.contains('is-zoomed'));
+      });
+    }
+
+    if (referenceImageModalImage) {
+      referenceImageModalImage.addEventListener('load', syncReferenceImageModalSize);
+
+      referenceImageModalImage.addEventListener('click', function () {
+        if (!referenceImageModal || referenceImageModal.hidden) {
+          return;
+        }
+
+        // Session reference image: permite hacer zoom directo sobre la imagen sin agregar controles extra.
+        setReferenceImageModalZoom(!referenceImageModal.classList.contains('is-zoomed'));
+      });
+    }
+
     if (referenceImageButton) {
       referenceImageButton.addEventListener('click', toggleReferenceImageInline);
     }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && referenceImageModal && !referenceImageModal.hidden) {
+        closeReferenceImageModal();
+      }
+    });
 
     rangeInput.addEventListener('input', function () {
       updateModalSelection(Number(rangeInput.value));

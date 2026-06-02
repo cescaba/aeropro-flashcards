@@ -289,6 +289,7 @@
   box-sizing: border-box;
 }
 
+/* CTA principal de categoria: iguala Study en peso, tamano y aire sin mezclar arquitectura Flashcards/Mock Test. */
 .vc-exam-start {
   width: 100%;
   min-height: 40px;
@@ -296,13 +297,13 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: var(--vc-exam-control-radius);
   background: var(--vc-exam-blue);
   color: #FFFFFF;
   font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .vc-exam-start:hover,
@@ -670,6 +671,7 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 30px;
+  min-width: 0;
 }
 
 .vc-exam-question-topic,
@@ -684,14 +686,22 @@
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
+  box-sizing: border-box;
 }
 
 .vc-exam-question-topic {
+  flex: 0 0 auto;
   background: #E5E7EB;
 }
 
 .vc-exam-question-subtopic {
+  min-width: 0;
+  max-width: 100%;
   background: #FFFFFF;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-align: left;
 }
 
 .vc-exam-card [data-vc-exam-question] {
@@ -970,7 +980,8 @@
 .vc-exam-session-prev:focus-visible,
 .vc-exam-session-prev:active,
 .vc-exam-session-prev:disabled {
-  border: 2px solid var(--vc-exam-blue);
+  /* Prev button border: estandariza este boton a 1px como Figma sin tocar botones con bordes distintos. */
+  border: 1px solid var(--vc-exam-blue);
   background: #FFFFFF;
   color: var(--vc-exam-blue);
   box-shadow: none;
@@ -1391,6 +1402,7 @@
   }
 
   .vc-exam-badge {
+    min-height: 115px;
     padding: 12px;
   }
 
@@ -1568,6 +1580,9 @@
 
   /* Card mobile */
   .vc-exam-question-context {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
     gap: 10px;
     margin-bottom: 18px;
   }
@@ -1587,6 +1602,15 @@
     letter-spacing: -0.15px;
   }
 
+  /* Exam context mobile: permite subtopics largos en dos lineas sin romper la card. */
+  .vc-exam-question-subtopic {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
   .vc-exam-card [data-vc-exam-question] {
     margin-bottom: 18px;
     color: #212121;
@@ -1601,6 +1625,46 @@
     /* Mobile exam card: reemplaza el padding del panel para que el borde externo sea visible. */
     margin: 16px 16px 33px;
     padding: 16px 16px;
+  }
+
+  /* Reference image mobile dropdown: solo en 480px usa expansion suave para evitar apertura brusca/parpadeo. */
+  .vc-exam-reference-image {
+    grid-template-rows: auto 0fr;
+    transition:
+      grid-template-rows 0.22s ease,
+      height 0.22s ease;
+  }
+
+  /* Reference image mobile dropdown: al estar expandido abre la fila del preview como dropdown. */
+  .vc-exam-reference-image.is-expanded {
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Reference image mobile dropdown: mantiene el preview colapsado hasta que is-expanded lo revele. */
+  .vc-exam-reference-image-preview {
+    display: grid;
+    height: auto;
+    min-height: 0;
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    transition:
+      max-height 0.22s ease,
+      margin-top 0.22s ease,
+      opacity 0.18s ease;
+  }
+
+  /* Reference image mobile dropdown: muestra la imagen con aire controlado durante la expansion. */
+  .vc-exam-reference-image.is-expanded .vc-exam-reference-image-preview {
+    max-height: 420px;
+    margin-top: 11px;
+    opacity: 1;
+  }
+
+  /* Reference image mobile dropdown: permite que la imagen ajuste su alto real dentro del preview animado. */
+  .vc-exam-reference-image-preview img {
+    height: auto;
+    min-height: 0;
   }
 
   .vc-exam-answers {

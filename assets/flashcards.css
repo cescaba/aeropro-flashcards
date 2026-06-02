@@ -7,6 +7,16 @@
 /* Contenedor principal de la app de flashcards. */
 .vc-flashcards-app {
   --vc-flashcards-font: "Poppins", sans-serif;
+  /* Flashcards buttons: tamano visual base tomado de Global Random Practice. */
+  --vc-flashcards-button-height: 40px;
+  --vc-flashcards-button-height-mobile: 40px;
+  --vc-flashcards-button-font-weight: 500;
+  --vc-flashcards-button-font-size: 16px;
+  --vc-flashcards-button-line-height: 100%;
+  --vc-flashcards-button-letter-spacing: -0.3px;
+  --vc-flashcards-button-font-size-mobile: 14px;
+  --vc-flashcards-button-line-height-mobile: 20px;
+  --vc-flashcards-button-letter-spacing-mobile: -0.15px;
   display: grid;
   gap: 24px;
   color: #212121;
@@ -288,6 +298,7 @@
   align-items: center;
   gap: 16px;
   width: 100%;
+  height: 100%;
 }
 
 .vc-flashcards-reference-image:hover,
@@ -315,6 +326,7 @@
 .vc-flashcards-reference-image-icon-wrap {
   width: 48px;
   height: 48px;
+  align-self: center;
   border-radius: 30px;
   background: #CAD5E2;
   color: #212121;
@@ -331,6 +343,7 @@
 .vc-flashcards-reference-image-copy {
   min-width: 0;
   display: grid;
+  align-self: center;
   gap: 5px;
 }
 
@@ -360,6 +373,7 @@
 .vc-flashcards-reference-image-chevron {
   width: 24px;
   height: 24px;
+  align-self: center;
   display: grid;
   place-items: center;
   color: #212121;
@@ -404,6 +418,204 @@
 .vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview img {
   height: auto;
   max-height: none;
+}
+
+/* Reference image modal: overlay desktop premium para inspeccionar imagen sin cambiar el layout de la pregunta. */
+.vc-flashcards-reference-modal[hidden] {
+  display: none;
+}
+
+.vc-flashcards-reference-modal {
+  /* Reference image modal zoom config: cambia este porcentaje para controlar el zoom desktop. */
+  --vc-flashcards-reference-modal-zoom-percent: 145;
+  --vc-flashcards-reference-modal-zoom-width: 132vw;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  animation: vc-flashcards-reference-modal-fade .18s ease-out both;
+}
+
+/* Reference image modal backdrop: fondo clicable con blur para separar el foco visual del dashboard. */
+.vc-flashcards-reference-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+/* Reference image modal backdrop hover patch: evita que el button:hover global pinte el overlay de #c36. */
+.vc-flashcards-app .vc-flashcards-reference-modal-backdrop:hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-backdrop:focus,
+.vc-flashcards-app .vc-flashcards-reference-modal-backdrop:active {
+  background: rgba(15, 23, 42, 0.48) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Reference image modal dialog: se adapta al tamano real de la imagen dentro de limites del viewport. */
+.vc-flashcards-reference-modal-dialog {
+  position: relative;
+  width: fit-content;
+  max-width: min(92vw, 1180px);
+  max-height: 86vh;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 34px 110px rgba(15, 23, 42, 0.34), 0 8px 28px rgba(15, 23, 42, 0.18);
+  box-sizing: border-box;
+  animation: vc-flashcards-reference-modal-scale .2s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* Reference image modal controls: acciones integradas dentro del dialogo para evitar botones flotando fuera. */
+.vc-flashcards-reference-modal-controls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: inline-flex;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Reference image modal buttons: mismo tamano para cerrar y zoom, con foco accesible. */
+.vc-flashcards-reference-modal-close,
+.vc-flashcards-reference-modal-zoom {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #212121;
+  cursor: pointer;
+  transition: background-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+/* Reference image modal buttons hover patch: evita que Elementor/theme pinte #c36 u otros colores globales. */
+.vc-flashcards-app .vc-flashcards-reference-modal-close:hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-close:active,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+/* Reference image modal buttons focus: conserva accesibilidad sin activar colores de hover del theme. */
+.vc-flashcards-app .vc-flashcards-reference-modal-close:focus-visible,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:focus-visible {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+  outline: 2px solid #CBD5E1;
+  outline-offset: 2px;
+}
+
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom[aria-pressed="true"] {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom[aria-pressed="true"]:hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom[aria-pressed="true"]:active {
+  background: #E2E8F0 !important;
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.vc-flashcards-reference-modal-close svg,
+.vc-flashcards-reference-modal-zoom svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* Reference image modal frame: mantiene la imagen contenida y permite scroll cuando se activa zoom. */
+.vc-flashcards-reference-modal-frame {
+  display: grid;
+  place-items: center;
+  max-width: min(88vw, 1120px);
+  max-height: 82vh;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+/* Reference image modal image: muestra la imagen completa sin recorte y permite activar zoom. */
+.vc-flashcards-reference-modal-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+  cursor: zoom-in;
+  transform-origin: center;
+  transition: transform .2s ease;
+}
+
+/* Reference image modal zoom: amplifica la imagen dentro del frame sin cambiar a mobile. */
+.vc-flashcards-reference-modal.is-zoomed .vc-flashcards-reference-modal-frame {
+  display: block;
+  max-width: min(92vw, 1180px);
+  max-height: 86vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.vc-flashcards-reference-modal.is-zoomed .vc-flashcards-reference-modal-image {
+  width: min(var(--vc-flashcards-reference-modal-zoom-width), 1680px);
+  max-width: none;
+  max-height: none;
+  cursor: zoom-out;
+}
+
+/* Reference image modal animation: entrada suave con fade y scale. */
+@keyframes vc-flashcards-reference-modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vc-flashcards-reference-modal-scale {
+  from {
+    opacity: 0;
+    transform: scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Titulo principal del modal con tipografia aislada del theme. */
@@ -525,7 +737,7 @@
 /* Boton exclusivo del bloque global random. */
 .vc-flashcards-start.vc-flashcards-global-random-start {
   display: inline-flex;
-  min-height: 45px;
+  min-height: var(--vc-flashcards-button-height);
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -537,16 +749,16 @@
   padding: 8px 13px;
   border-radius: 6px;
   box-sizing: border-box;
-  font-size: 16px;
+  font-size: var(--vc-flashcards-button-font-size);
   white-space: nowrap;
 }
 
 .vc-flashcards-start.vc-flashcards-global-random-start > span {
   display: block;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 100%;
-  letter-spacing: -0.3px;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   text-align: center;
   color: #1447E6;
 }
@@ -576,9 +788,9 @@
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.31px;
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   text-decoration: none;
 }
 
@@ -710,17 +922,21 @@
 }
 
 
-/* Boton principal de categoria a ancho completo. */
+/* Boton principal de categoria: iguala altura al patron Global Random Practice. */
 .vc-flashcards-start--full {
   width: 100%;
-  min-height: 40px;
-  height: 40px;
+  min-height: var(--vc-flashcards-button-height);
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 0 16px;
+  padding: 8px 16px;
   border-radius: 5px;
+  box-sizing: border-box;
 }
 /* Wrapper del icono del boton Study: queda centrado con el texto del CTA. */
 .vc-flashcards-start-icon {
@@ -1206,6 +1422,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .vc-flashcards-card .vc-flashcards-session-kicker {
@@ -1252,9 +1469,11 @@
   border-radius: 6px;
   font-size: 14px;
   line-height: 1;
+  box-sizing: border-box;
 }
 
 .vc-flashcards-session-topic {
+  flex: 0 0 auto;
   gap: 4px;
   opacity: 1;
   padding: 8px 16px;
@@ -1268,6 +1487,8 @@
 }
 
 .vc-flashcards-session-subtopic {
+  min-width: 0;
+  max-width: 100%;
   gap: 4px;
   opacity: 1;
   padding: 8px 16px;
@@ -1278,6 +1499,10 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-align: left;
 }
 
 /* Separacion superior del listado de respuestas. */
@@ -1487,22 +1712,23 @@
 
 /* Base visual compartida entre el toggle de explicacion y el CTA siguiente de la sesion. */
 .vc-flashcards-session-action {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   width: 100%;
-  min-height: 44px;
+  height: var(--vc-flashcards-button-height);
+  min-height: var(--vc-flashcards-button-height);
   padding: 10px 12px;
   border: 0;
   border-radius: 6px;
   color: #ffffff;
   box-sizing: border-box;
   opacity: 1;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: -0.3px;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
 }
 
 /* Acciones principales de sesion: misma altura visual aunque una tenga borde y la otra no. */
@@ -1512,13 +1738,15 @@
 
 .vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle,
 .vc-flashcards-card > .vc-flashcards-session-next {
-  min-height: 46px;
+  min-height: var(--vc-flashcards-button-height);
 }
 
-/* Boton siguiente ubicado debajo de la explicacion con ancho completo. */
+/* Boton siguiente ubicado debajo de la explicacion con el mismo estilo que Mock Test. */
 .vc-flashcards-card > .vc-flashcards-session-next {
   margin-top: 12px;
   background: #1447E6;
+  color: #FFFFFF;
+  box-shadow: none;
 }
 
 /* Alinea el texto y el simbolo del CTA siguiente en el mismo eje vertical. */
@@ -1535,7 +1763,7 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  color: #1447E6;
+  color: currentColor;
 }
 
 /* SVG inline de flecha: ocupa la caja completa para alinear prev/next con el texto. */
@@ -1558,10 +1786,10 @@
 /* Tipografia compartida de las acciones principales dentro de la sesion. */
 .vc-flashcards-explanation-toggle-label,
 .vc-flashcards-next-label {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  letter-spacing: -0.3px;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   text-align: center;
 }
 
@@ -1870,14 +2098,14 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  min-height: 42px;
+  min-height: var(--vc-flashcards-button-height);
   padding: 7px 0px;
   border-radius: 6px;
   box-sizing: border-box;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.31px;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   transform: none;
   box-shadow: none;
   transition: none;
@@ -2202,11 +2430,16 @@
 .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-confirm {
   flex: 1 1 0;
+  min-height: var(--vc-flashcards-button-height);
   padding: 9px 0;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-size: var(--vc-flashcards-button-font-size);
+  line-height: var(--vc-flashcards-button-line-height);
+  letter-spacing: var(--vc-flashcards-button-letter-spacing);
   cursor: pointer;
 }
 
@@ -2332,7 +2565,7 @@
 .vc-flashcards-explanation-toggle-label {
   display: inline-flex;
   align-items: center;
-  line-height: 24px;
+  line-height: var(--vc-flashcards-button-line-height);
 }
 
 
@@ -2552,13 +2785,25 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards summary buttons mobile: aplica medidas y tipografia de Figma solo en 480px. */
   .vc-flashcards-summary-action {
-    min-height: 42px;
+    min-height: var(--vc-flashcards-button-height-mobile);
     gap: 8px;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: -0.31px;
+    font-weight: var(--vc-flashcards-button-font-weight);
+    font-size: var(--vc-flashcards-button-font-size-mobile);
+    line-height: var(--vc-flashcards-button-line-height-mobile);
+    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
     text-align: center;
+  }
+
+  /* Flashcards text buttons mobile: iguala altura a Global Random Practice en 480px. */
+  .vc-flashcards-session-action,
+  .vc-flashcards-modal-cancel,
+  .vc-flashcards-modal-confirm {
+    height: var(--vc-flashcards-button-height-mobile);
+    min-height: var(--vc-flashcards-button-height-mobile);
+    font-weight: var(--vc-flashcards-button-font-weight);
+    font-size: var(--vc-flashcards-button-font-size-mobile);
+    line-height: var(--vc-flashcards-button-line-height-mobile);
+    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
   }
 
   /* Flashcards summary results mobile: fuerza numero arriba y etiqueta debajo. */
@@ -2825,7 +3070,7 @@ body.vc-flashcards-modal-open {
   /* Flashcards explanation mobile: conserva una caja legible debajo de la pregunta. */
   .vc-flashcards-explanation {
     margin-top: 10px;
-    padding: 20px;
+    padding: 12px 20px 20px 20px;
     border-radius: 12px;
   }
 
@@ -2856,7 +3101,7 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-category-card {
     padding: 17px;
     min-height: 185px ;
-    gap:8px;
+    gap: 8px;
   }
 
   /* Flashcards category mobile: ordena los elementos para 480px. */
@@ -2870,10 +3115,14 @@ body.vc-flashcards-modal-open {
 
   .vc-flashcards-category-card .vc-flashcards-category-progress-block {
     order: 3;
+    /* Flashcards category mobile spacing: gap 8px + margin 8px = separacion visual de 16px desde meta. */
+    margin-top: 8px;
   }
 
   .vc-flashcards-category-card .vc-flashcards-start.vc-flashcards-start--full {
     order: 4;
+    /* Flashcards category mobile spacing: mantiene 16px entre progreso y boton sin cambiar el gap global. */
+    margin-top: 8px;
   }
 
   /* Flashcards global mobile: usa el mismo aire interno de category card sin cambiar su posicion. */
@@ -2951,7 +3200,7 @@ body.vc-flashcards-modal-open {
     grid-column: 1 / -1;
     grid-row: 2;
     min-height: 0;
-    height: 40px;
+    height: var(--vc-flashcards-button-height-mobile);
     width: 100%;
     max-width: none;
     border-radius: 10px;
@@ -2960,11 +3209,11 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards global mobile: ajusta solo el texto del CTA global sin tocar su posicion. */
   .vc-flashcards-start.vc-flashcards-global-random-start > span {
-    font-weight: 500;
+    font-weight: var(--vc-flashcards-button-font-weight);
     font-style: normal;
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: -0.15px;
+    font-size: var(--vc-flashcards-button-font-size-mobile);
+    line-height: var(--vc-flashcards-button-line-height-mobile);
+    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
     text-align: center;
   }
 
@@ -3056,18 +3305,18 @@ body.vc-flashcards-modal-open {
   /* Flashcards category mobile: define altura y radio del CTA full de categoria. */
   .vc-flashcards-category-card .vc-flashcards-start--full {
     min-height: 0;
-    height: 40px;
+    height: var(--vc-flashcards-button-height-mobile);
     border-radius: 6px;
     opacity: 1;
   }
 
   /* Flashcards category mobile: ajusta el texto del CTA full de categoria. */
   .vc-flashcards-category-card .vc-flashcards-start--full > span:first-child {
-    font-weight: 500;
+    font-weight: var(--vc-flashcards-button-font-weight);
     font-style: normal;
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: -0.15px;
+    font-size: var(--vc-flashcards-button-font-size-mobile);
+    line-height: var(--vc-flashcards-button-line-height-mobile);
+    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
     text-align: center;
   }
 
@@ -3079,8 +3328,8 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards stats mobile: compacta cada card para que entren tres columnas en 480px. */
   .vc-flashcards-stat-card {
-    min-width: 0;
-    padding: 10px 6px;
+    min-height: 115px;
+    padding: 12px 6px;
   }
 
   /* Flashcards stats mobile: apila icono arriba y textos debajo dentro de cada card. */
@@ -3187,17 +3436,24 @@ body.vc-flashcards-modal-open {
     border-radius: 6px;
   }
   .vc-flashcards-reference-image:not(.is-expanded) {
-  height: 71px;
-}
+    height: 71px;
+  }
 
-.vc-flashcards-reference-image {
-  min-height: 72px;
-  margin: 0 0 18px;
-  padding: 12px;
-}
+  .vc-flashcards-reference-image {
+    min-height: 72px;
+    margin: 0 0 18px;
+    padding: 12px;
+  }
+
+  /* Flashcards reference image mobile: ajusta solo el gap; la alineacion vertical vive en la base. */
+  .vc-flashcards-reference-image-control {
+    gap: 12px;
+  }
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
+    min-width: 0;
+    max-width: 100%;
     padding: 5px 10px;
     border: 1px solid #E2E8F0;
     background: #ffffff;
@@ -3208,10 +3464,16 @@ body.vc-flashcards-modal-open {
     line-height: 16px;
     
     letter-spacing: 0px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
   .vc-flashcards-session-context {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
     margin: 0 0 18px;
     gap: 10px;
   }
@@ -3253,6 +3515,19 @@ body.vc-flashcards-modal-open {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: normal;
+  }
+
+  /* Flashcards answer state mobile: reserva espacio para el check/X en 480px. */
+  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="correct"],
+  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] {
+    padding-right: 48px;
+  }
+
+  /* Flashcards answer state text mobile: limita el texto antes del icono de estado. */
+  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="correct"] strong,
+  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] strong {
+    min-width: 0;
+    max-width: 100%;
   }
 
   /* Flashcards answer letter mobile: mantiene la capsula de opcion estable y compacta. */
