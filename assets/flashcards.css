@@ -486,13 +486,14 @@
   z-index: 2;
   display: inline-flex;
   gap: 8px;
-  padding: 4px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Reference modal controls: wrapper transparente para evitar una caja dentro de otra. */
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* Reference image modal buttons: mismo tamano para cerrar y zoom, con foco accesible. */
@@ -561,6 +562,8 @@
 .vc-flashcards-reference-modal-frame {
   display: grid;
   place-items: center;
+  width: fit-content;
+  height: fit-content;
   max-width: min(88vw, 1120px);
   max-height: 82vh;
   overflow: hidden;
@@ -573,7 +576,7 @@
   display: block;
   width: auto;
   height: auto;
-  max-width: 100%;
+  max-width: min(88vw, 1120px);
   max-height: 82vh;
   object-fit: contain;
   cursor: zoom-in;
@@ -1734,8 +1737,8 @@
   justify-content: center;
   gap: 6px;
   width: 100%;
-  height: var(--vc-flashcards-button-height);
-  min-height: var(--vc-flashcards-button-height);
+  height: 46px;
+  min-height: 46px;
   padding: 10px 12px;
   border: 0;
   border-radius: 6px;
@@ -1757,7 +1760,8 @@
 
 .vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle,
 .vc-flashcards-card > .vc-flashcards-session-next {
-  min-height: var(--vc-flashcards-button-height);
+  height: 46px;
+  min-height: 46px;
 }
 
 /* Boton siguiente ubicado debajo de la explicacion con el mismo estilo que Mock Test. */
@@ -2127,7 +2131,8 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  min-height: var(--vc-flashcards-button-height);
+  height: 42px;
+  min-height: 42px;
   padding: 7px 0px;
   border-radius: 6px;
   box-sizing: border-box;
@@ -2461,8 +2466,8 @@
 .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-confirm {
   flex: 1 1 0;
-  height: var(--vc-flashcards-button-height);
-  min-height: var(--vc-flashcards-button-height);
+  height: 42px;
+  min-height: 42px;
   padding: 8px 0;
   border-radius: 6px;
   display: inline-flex;
@@ -2821,7 +2826,8 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards summary buttons mobile: aplica medidas y tipografia de Figma solo en 480px. */
   .vc-flashcards-summary-action {
-    min-height: var(--vc-flashcards-button-height-mobile);
+    height: 42px;
+    min-height: 42px;
     gap: 8px;
     font-weight: var(--vc-flashcards-button-font-weight);
     font-size: var(--vc-flashcards-button-font-size-mobile);
@@ -2834,12 +2840,19 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-session-action,
   .vc-flashcards-modal-cancel,
   .vc-flashcards-modal-confirm {
-    height: var(--vc-flashcards-button-height-mobile);
-    min-height: var(--vc-flashcards-button-height-mobile);
+    height: 46px;
+    min-height: 46px;
     font-weight: var(--vc-flashcards-button-font-weight);
     font-size: var(--vc-flashcards-button-font-size-mobile);
     line-height: var(--vc-flashcards-button-line-height-mobile);
     letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
+  }
+
+  /* Flashcards modal buttons mobile: mantiene Cancel/Start en 42px sin afectar acciones de sesion. */
+  .vc-flashcards-modal-cancel,
+  .vc-flashcards-modal-confirm {
+    height: 42px;
+    min-height: 42px;
   }
 
   /* Flashcards summary results mobile: fuerza numero arriba y etiqueta debajo. */
