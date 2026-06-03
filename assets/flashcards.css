@@ -7,16 +7,16 @@
 /* Contenedor principal de la app de flashcards. */
 .vc-flashcards-app {
   --vc-flashcards-font: "Poppins", sans-serif;
-  /* Flashcards buttons: tamano visual base tomado de Global Random Practice. */
+  /* Flashcards buttons: altura y tipografia unificadas con Cancel del modal. */
   --vc-flashcards-button-height: 40px;
   --vc-flashcards-button-height-mobile: 40px;
   --vc-flashcards-button-font-weight: 500;
   --vc-flashcards-button-font-size: 16px;
-  --vc-flashcards-button-line-height: 100%;
-  --vc-flashcards-button-letter-spacing: -0.3px;
-  --vc-flashcards-button-font-size-mobile: 14px;
-  --vc-flashcards-button-line-height-mobile: 20px;
-  --vc-flashcards-button-letter-spacing-mobile: -0.15px;
+  --vc-flashcards-button-line-height: 24px;
+  --vc-flashcards-button-letter-spacing: -0.31px;
+  --vc-flashcards-button-font-size-mobile: 16px;
+  --vc-flashcards-button-line-height-mobile: 24px;
+  --vc-flashcards-button-letter-spacing-mobile: -0.31px;
   display: grid;
   gap: 24px;
   color: #212121;
@@ -788,9 +788,12 @@
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+  font-weight: var(--vc-flashcards-button-font-weight);
+  font-style: normal;
   font-size: var(--vc-flashcards-button-font-size);
   line-height: var(--vc-flashcards-button-line-height);
   letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  text-align: center;
   text-decoration: none;
 }
 
@@ -1505,6 +1508,20 @@
   text-align: left;
 }
 
+/* Session subtopic full: oculto por defecto; solo mobile lo muestra cuando el chip se trunca. */
+.vc-flashcards-session-subtopic-full {
+  display: none;
+  flex: 1 0 100%;
+  margin: -4px 0 0;
+  color: #666666;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
 /* Separacion superior del listado de respuestas. */
 .vc-flashcards-answers {
   margin-top: 20px;
@@ -1726,9 +1743,11 @@
   box-sizing: border-box;
   opacity: 1;
   font-weight: var(--vc-flashcards-button-font-weight);
+  font-style: normal;
   font-size: var(--vc-flashcards-button-font-size);
   line-height: var(--vc-flashcards-button-line-height);
   letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  text-align: center;
 }
 
 /* Acciones principales de sesion: misma altura visual aunque una tenga borde y la otra no. */
@@ -1862,7 +1881,10 @@
 .vc-flashcards-summary-box {
   position: relative;
   display: grid;
-  width: min(100%, 425px);
+  width: min(100%, 435px);
+  /* Summary modal size: fija el minimo desktop pedido sin cambiar la estructura interna del popup. */
+  min-width: 435px;
+  min-height: 567px;
   margin: 0;
   padding: 30px;
   border: 0.56px solid #dbe4f0;
@@ -1997,22 +2019,23 @@
   border-radius: 8px;
 }
 
-/* Valor principal de cada resultado. */
-.vc-flashcards-summary-count {
+/* Summary cards height: iguala Correct, Incorrect y Accuracy en desktop sin tocar tipografia. */
+.vc-flashcards-summary-result-card,
+.vc-flashcards-summary-accuracy-card {
+  height: 76px;
+  box-sizing: border-box;
+}
+
+/* Valor principal compartido: iguala numeros de correct, incorrect y accuracy. */
+.vc-flashcards-summary-count,
+.vc-flashcards-summary-accuracy-card strong,
+[data-vc-flashcards-summary-precision] {
   display: block;
-  margin-bottom: 6px;
   font-weight: 400;
   font-size: 30px;
   line-height: 36px;
   letter-spacing: 0.4px;
   text-align: center;
-}
-
-[data-vc-flashcards-summary-precision] {
-  font-weight: 400;
-  font-size: 30px;
-  line-height: 36px;
-  letter-spacing: 0.4px;
 }
 
 /* Color de respuestas correctas. */
@@ -2029,7 +2052,7 @@
 .vc-flashcards-summary-result-card h3 {
   margin: 0;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 20px;
   letter-spacing: -0.15px;
   text-align: center;
@@ -2060,8 +2083,12 @@
 /* Tarjeta de accuracy. */
 .vc-flashcards-summary-accuracy-card {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #bedbff;
-  padding: 14px 17px;
+  padding: 10px 17px;
   border-radius: 8px;
   background: #eff6ff;
 }
@@ -2069,17 +2096,19 @@
 /* Titulo de accuracy. */
 .vc-flashcards-summary-accuracy-title {
   display: block;
-  margin: 0 0 6px;
+  margin: 0;
   color: #1447E6;
-  line-height: 1.2;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
 }
 
 /* Valor principal de accuracy. */
 .vc-flashcards-summary-accuracy-card strong {
-  display: block;
+  margin-bottom: 0;
   color: #1447E6;
-  font-size: 30px;
-  line-height: 1;
 }
 
 /* Botonera del resumen. */
@@ -2103,9 +2132,11 @@
   border-radius: 6px;
   box-sizing: border-box;
   font-weight: var(--vc-flashcards-button-font-weight);
+  font-style: normal;
   font-size: var(--vc-flashcards-button-font-size);
   line-height: var(--vc-flashcards-button-line-height);
   letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  text-align: center;
   transform: none;
   box-shadow: none;
   transition: none;
@@ -2430,17 +2461,21 @@
 .vc-flashcards-modal-cancel,
 .vc-flashcards-modal-confirm {
   flex: 1 1 0;
+  height: var(--vc-flashcards-button-height);
   min-height: var(--vc-flashcards-button-height);
-  padding: 9px 0;
+  padding: 8px 0;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: var(--vc-flashcards-button-font-weight);
+  font-style: normal;
   font-size: var(--vc-flashcards-button-font-size);
   line-height: var(--vc-flashcards-button-line-height);
   letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  text-align: center;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .vc-flashcards-modal-cancel {
@@ -2716,13 +2751,14 @@ body.vc-flashcards-modal-open {
     padding: 22px 18px;
   }
 
-  /* Mejora: ajusta el modal de resumen en móvil para conservar aire lateral y legibilidad. */
+  /* Mejora: ajusta el modal de resumen en movil para conservar aire lateral y legibilidad. */
   .vc-flashcards-summary {
     padding: 16px;
   }
 
   .vc-flashcards-summary-box {
     width: min(100%, 420px);
+    min-width: 0;
     padding: 24px 18px 18px;
   }
 
@@ -2816,18 +2852,26 @@ body.vc-flashcards-modal-open {
 
   .vc-flashcards-summary-accuracy-card {
     padding: 8px 17px;
-    min-height:76px ;
+    height: 76px;
   }
   
 
   .vc-flashcards-summary-result-card strong {
     order: 1;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
   }
 
   .vc-flashcards-summary-result-card h3,
   .vc-flashcards-summary-result-card span {
     order: 2;
+  }
+
+  /* Flashcards summary typography mobile: mantiene correct, incorrect y accuracy con el mismo tamano. */
+  .vc-flashcards-summary-result-card h3,
+  .vc-flashcards-summary-accuracy-title {
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: -0.15px;
   }
 
   /* Flashcards detail mobile: el aire externo pasa a las secciones internas. */
@@ -2905,6 +2949,7 @@ body.vc-flashcards-modal-open {
   }
 
   .vc-flashcards-card [data-vc-flashcards-question] {
+    margin-bottom: 18px;
     font-weight: 400;
     font-size: 16px;
     line-height: 22px;
@@ -3141,7 +3186,7 @@ body.vc-flashcards-modal-open {
   }
 
   .vc-flashcards-summary-accuracy-title {
-  margin: 0 0 4px;
+  margin: 0px;
 
  }
 
@@ -3452,8 +3497,11 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
+    display: block;
+    width: 115px;
     min-width: 0;
-    max-width: 100%;
+    max-width: 115px;
+    justify-self: stretch;
     padding: 5px 10px;
     border: 1px solid #E2E8F0;
     background: #ffffff;
@@ -3462,11 +3510,16 @@ body.vc-flashcards-modal-open {
     font-size: 12px;
     border-radius: 6px;
     line-height: 16px;
-    
     letter-spacing: 0px;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Flashcards session subtopic mobile: indica interaccion solo cuando existe texto oculto. */
+  .vc-flashcards-session-context.has-subtopic-overflow .vc-flashcards-session-subtopic {
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
   /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
@@ -3476,6 +3529,20 @@ body.vc-flashcards-modal-open {
     align-items: start;
     margin: 0 0 18px;
     gap: 10px;
+  }
+
+  /* Flashcards session subtopic full mobile: ocupa una fila propia debajo de los chips. */
+  .vc-flashcards-session-subtopic-full {
+    display: none;
+    grid-column: 1 / -1;
+    margin-top: -2px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  /* Flashcards session subtopic full mobile: aparece solo cuando el usuario toca el chip truncado. */
+  .vc-flashcards-session-context.has-subtopic-overflow.is-subtopic-expanded .vc-flashcards-session-subtopic-full {
+    display: block;
   }
 
   /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */

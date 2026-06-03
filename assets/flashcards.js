@@ -256,7 +256,41 @@
         // Fix: conserva la clase original del diseño mientras el subtopic viene desde la tarjeta actual.
         subtopicChip.className = 'vc-flashcards-session-subtopic';
         subtopicChip.textContent = subtopicLabel;
+        subtopicChip.title = subtopicLabel;
         kicker.appendChild(subtopicChip);
+
+        window.requestAnimationFrame(function () {
+          const isMobile = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
+          const hasOverflow = subtopicChip.scrollWidth > subtopicChip.clientWidth;
+
+          if (!isMobile || !hasOverflow || !subtopicChip.parentNode) {
+            return;
+          }
+
+          const subtopicFull = document.createElement('p');
+          // Session subtopic overflow mobile: el chip truncado se expande con tap/click solo si hay overflow real.
+          subtopicFull.className = 'vc-flashcards-session-subtopic-full';
+          subtopicFull.textContent = subtopicLabel;
+          subtopicChip.tabIndex = 0;
+          subtopicChip.setAttribute('role', 'button');
+          subtopicChip.setAttribute('aria-expanded', 'false');
+          kicker.classList.add('has-subtopic-overflow');
+          kicker.appendChild(subtopicFull);
+
+          subtopicChip.addEventListener('click', function () {
+            const isExpanded = kicker.classList.toggle('is-subtopic-expanded');
+            subtopicChip.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+          });
+
+          subtopicChip.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+              return;
+            }
+
+            event.preventDefault();
+            subtopicChip.click();
+          });
+        });
       }
     }
 

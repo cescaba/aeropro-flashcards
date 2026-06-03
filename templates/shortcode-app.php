@@ -318,9 +318,10 @@ if (!defined('ABSPATH')) {
           </div>
         </div>
         <div class="vc-flashcards-summary-accuracy-card">
-          <?php /* Titulo de la tarjeta de precision encima del porcentaje principal. */ ?>
-          <span class="vc-flashcards-summary-accuracy-title"><?php esc_html_e('Accuracy', 'vc-flashcards'); ?></span>
+          <?php /* Porcentaje de precision primero para igualar el orden visual de las tarjetas Correct/Incorrect. */ ?>
           <strong data-vc-flashcards-summary-precision>0%</strong>
+          <?php /* Titulo de la tarjeta de precision debajo del porcentaje principal. */ ?>
+          <span class="vc-flashcards-summary-accuracy-title"><?php esc_html_e('Accuracy', 'vc-flashcards'); ?></span>
         </div>
       </div>
       <h3 class="vc-flashcards-summary-message">
