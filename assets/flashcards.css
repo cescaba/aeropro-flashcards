@@ -409,6 +409,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  cursor: pointer;
 }
 
 .vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview {
@@ -510,7 +511,7 @@
   background: transparent;
   color: #212121;
   cursor: pointer;
-  transition: background-color .16s ease, color .16s ease, transform .16s ease;
+  transition: none;
 }
 
 /* Reference image modal buttons hover patch: evita que Elementor/theme pinte #c36 u otros colores globales. */
@@ -549,6 +550,39 @@
   border-color: transparent !important;
   box-shadow: none !important;
   text-decoration: none !important;
+}
+
+/* Reference image modal zoom hover reset: deja la lupa sin cambios visuales heredados del theme. */
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:focus,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:active,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:visited {
+  border: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:not([aria-pressed="true"]),
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:not([aria-pressed="true"]):hover,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:not([aria-pressed="true"]):focus,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:not([aria-pressed="true"]):active,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:not([aria-pressed="true"]):visited {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+}
+
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom svg,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:hover svg,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:focus svg,
+.vc-flashcards-app .vc-flashcards-reference-modal-zoom:active svg {
+  color: currentColor !important;
+  fill: none !important;
+  stroke: currentColor !important;
 }
 
 .vc-flashcards-reference-modal-close svg,
@@ -598,6 +632,51 @@
   max-width: none;
   max-height: none;
   cursor: zoom-out;
+}
+
+@media (max-width: 480px) {
+  .vc-flashcards-reference-modal {
+    padding: 16px;
+  }
+
+  .vc-flashcards-reference-modal-dialog {
+    width: fit-content;
+    max-width: calc(100vw - 32px);
+    height: auto;
+    max-height: 82vh;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .vc-flashcards-reference-modal-controls {
+    top: 12px;
+    right: 12px;
+  }
+
+  .vc-flashcards-reference-modal.is-touch-modal .vc-flashcards-reference-modal-zoom {
+    display: none;
+  }
+
+  .vc-flashcards-reference-modal.is-touch-modal .vc-flashcards-reference-modal-frame {
+    width: fit-content;
+    height: fit-content;
+    max-width: calc(100vw - 52px);
+    max-height: calc(82vh - 20px);
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .vc-flashcards-reference-modal.is-touch-modal .vc-flashcards-reference-modal-image {
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 52px);
+    max-height: calc(82vh - 20px);
+    cursor: default;
+    transition: none;
+    user-select: none;
+    -webkit-user-select: none;
+    will-change: transform;
+  }
 }
 
 /* Reference image modal animation: entrada suave con fade y scale. */
@@ -1319,7 +1398,7 @@
   justify-content: flex-start;
   gap: 16px;
   padding: 16px 16px 20px;
-  border: 0.56px solid #e2e8f0;
+  border: 1px solid #e2e8f0;
   border-radius: var(--vc-flashcards-surface-radius);
   background: #f8fbff;
   cursor: pointer;
@@ -1483,7 +1562,7 @@
   gap: 4px;
   opacity: 1;
   padding: 8px 16px;
-  border: 0.56px solid #E2E8F0;
+  border: 1px solid #E2E8F0;
   background: #E2E8F0;
   color: #666666;
   font-weight: 500;
@@ -1891,7 +1970,7 @@
   min-height: 567px;
   margin: 0;
   padding: 30px;
-  border: 0.56px solid #dbe4f0;
+  border: 1px solid #dbe4f0;
   border-radius: var(--vc-flashcards-surface-radius);
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
@@ -3510,11 +3589,11 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
-    display: block;
-    width: 115px;
+    display: inline-flex;
+    width: fit-content;
     min-width: 0;
-    max-width: 115px;
-    justify-self: stretch;
+    max-width: 100%;
+    justify-self: start;
     padding: 5px 10px;
     border: 1px solid #E2E8F0;
     background: #ffffff;
@@ -3525,37 +3604,18 @@ body.vc-flashcards-modal-open {
     line-height: 16px;
     letter-spacing: 0px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Flashcards session subtopic mobile: indica interaccion solo cuando existe texto oculto. */
-  .vc-flashcards-session-context.has-subtopic-overflow .vc-flashcards-session-subtopic {
-    cursor: pointer;
-    touch-action: manipulation;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
   .vc-flashcards-session-context {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: max-content;
     align-items: start;
+    justify-items: start;
     margin: 0 0 18px;
     gap: 10px;
-  }
-
-  /* Flashcards session subtopic full mobile: ocupa una fila propia debajo de los chips. */
-  .vc-flashcards-session-subtopic-full {
-    display: none;
-    grid-column: 1 / -1;
-    margin-top: -2px;
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  /* Flashcards session subtopic full mobile: aparece solo cuando el usuario toca el chip truncado. */
-  .vc-flashcards-session-context.has-subtopic-overflow.is-subtopic-expanded .vc-flashcards-session-subtopic-full {
-    display: block;
   }
 
   /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */

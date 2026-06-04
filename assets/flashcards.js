@@ -36,6 +36,7 @@
     const referenceImageModal = root.querySelector('[data-vc-flashcards-reference-modal]');
     const referenceImageModalImage = root.querySelector('[data-vc-flashcards-reference-modal-image]');
     const referenceImageModalZoom = root.querySelector('[data-vc-flashcards-reference-modal-zoom]');
+    const referenceImageModalFrame = root.querySelector('.vc-flashcards-reference-modal-frame');
     const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
     const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
     const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
@@ -72,6 +73,8 @@
     let answeredCurrentCard = false;
     let currentExplanationHtml = '';
     let activeConfigCard = null;
+    let referenceImageTouch = null;
+    let referenceImageTouchTransform = { x: 0, y: 0, scale: 1 };
     const storageKey = 'vcFlashcardsState:' + window.location.pathname;
 
     // Persistencia: limpia el estado cuando el usuario sale de flashcards.
@@ -258,39 +261,6 @@
         subtopicChip.textContent = subtopicLabel;
         subtopicChip.title = subtopicLabel;
         kicker.appendChild(subtopicChip);
-
-        window.requestAnimationFrame(function () {
-          const isMobile = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
-          const hasOverflow = subtopicChip.scrollWidth > subtopicChip.clientWidth;
-
-          if (!isMobile || !hasOverflow || !subtopicChip.parentNode) {
-            return;
-          }
-
-          const subtopicFull = document.createElement('p');
-          // Session subtopic overflow mobile: el chip truncado se expande con tap/click solo si hay overflow real.
-          subtopicFull.className = 'vc-flashcards-session-subtopic-full';
-          subtopicFull.textContent = subtopicLabel;
-          subtopicChip.tabIndex = 0;
-          subtopicChip.setAttribute('role', 'button');
-          subtopicChip.setAttribute('aria-expanded', 'false');
-          kicker.classList.add('has-subtopic-overflow');
-          kicker.appendChild(subtopicFull);
-
-          subtopicChip.addEventListener('click', function () {
-            const isExpanded = kicker.classList.toggle('is-subtopic-expanded');
-            subtopicChip.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-          });
-
-          subtopicChip.addEventListener('keydown', function (event) {
-            if (event.key !== 'Enter' && event.key !== ' ') {
-              return;
-            }
-
-            event.preventDefault();
-            subtopicChip.click();
-          });
-        });
       }
     }
 
@@ -545,7 +515,12 @@
       persistState();
     }
 
-    // Session reference image: desktop usa modal; mobile conserva el dropdown inline.
+    // Session reference image: detecta mobile para usar popup con gestos tactiles.
+    function shouldUseReferenceImageTouchModal() {
+      return window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
+    }
+
+    // Session reference image: desktop abre modal directo; mobile conserva el dropdown inline.
     function shouldUseReferenceImageModal() {
       return window.matchMedia && window.matchMedia('(min-width: 481px)').matches;
     }
@@ -585,6 +560,54 @@
       );
     }
 
+    // Session reference image mobile: calcula distancia entre dos dedos para pinch zoom.
+    function getReferenceImageTouchDistance(touches) {
+      const deltaX = touches[0].clientX - touches[1].clientX;
+      const deltaY = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(deltaX, deltaY);
+    }
+
+    // Session reference image mobile: mantiene la imagen dentro de limites reales del frame.
+    function clampReferenceImageTouchTransform(transform) {
+      if (!referenceImageModalFrame || !referenceImageModalImage) {
+        return { x: 0, y: 0, scale: 1 };
+      }
+
+      const scale = Math.min(Math.max(transform.scale, 1), 4);
+      const frameWidth = referenceImageModalFrame.clientWidth;
+      const frameHeight = referenceImageModalFrame.clientHeight;
+      const imageWidth = referenceImageModalImage.offsetWidth * scale;
+      const imageHeight = referenceImageModalImage.offsetHeight * scale;
+      const maxX = Math.max(0, (imageWidth - frameWidth) / 2);
+      const maxY = Math.max(0, (imageHeight - frameHeight) / 2);
+
+      return {
+        x: Math.min(Math.max(transform.x, -maxX), maxX),
+        y: Math.min(Math.max(transform.y, -maxY), maxY),
+        scale: scale
+      };
+    }
+
+    // Session reference image mobile: aplica pan y zoom tactil sin usar el boton de lupa.
+    function renderReferenceImageTouchTransform() {
+      if (!referenceImageModalImage) {
+        return;
+      }
+
+      referenceImageTouchTransform = clampReferenceImageTouchTransform(referenceImageTouchTransform);
+      referenceImageModalImage.style.transform = 'translate3d(' + referenceImageTouchTransform.x + 'px, ' + referenceImageTouchTransform.y + 'px, 0) scale(' + referenceImageTouchTransform.scale + ')';
+    }
+
+    // Session reference image mobile: resetea el gesto al abrir/cerrar o cambiar imagen.
+    function resetReferenceImageTouchTransform() {
+      referenceImageTouch = null;
+      referenceImageTouchTransform = { x: 0, y: 0, scale: 1 };
+
+      if (referenceImageModalImage) {
+        referenceImageModalImage.style.removeProperty('transform');
+      }
+    }
+
     // Session reference image: centraliza el estado de zoom para sincronizar clase y aria-pressed.
     function setReferenceImageModalZoom(isZoomed) {
       if (!referenceImageModal) {
@@ -605,6 +628,8 @@
       }
 
       setReferenceImageModalZoom(false);
+      resetReferenceImageTouchTransform();
+      referenceImageModal.classList.toggle('is-touch-modal', shouldUseReferenceImageTouchModal());
       referenceImageModalImage.src = imageUrl;
       referenceImageModal.hidden = false;
       syncReferenceImageModalSize();
@@ -622,11 +647,13 @@
 
       referenceImageModal.hidden = true;
       setReferenceImageModalZoom(false);
+      resetReferenceImageTouchTransform();
       referenceImageModalImage.removeAttribute('src');
       referenceImageModal.style.removeProperty('--vc-flashcards-reference-modal-zoom-width');
+      referenceImageModal.classList.remove('is-touch-modal');
       document.body.classList.remove('vc-flashcards-modal-open');
       if (referenceImageButton) {
-        referenceImageButton.setAttribute('aria-expanded', 'false');
+        referenceImageButton.setAttribute('aria-expanded', referenceImageButton.classList.contains('is-expanded') ? 'true' : 'false');
       }
     }
 
@@ -635,12 +662,16 @@
       const card = cards[cardIndex];
       const imageUrl = getReferenceImageUrl(card);
 
-      if (!imageUrl || !referenceImageButton || !referenceImageInline || !referenceImageInlineWrap) {
+      if (!imageUrl || !referenceImageButton) {
         return;
       }
 
       if (shouldUseReferenceImageModal()) {
         openReferenceImageModal(imageUrl);
+        return;
+      }
+
+      if (!referenceImageInline || !referenceImageInlineWrap) {
         return;
       }
 
@@ -1136,11 +1167,87 @@
       });
     }
 
+    if (referenceImageModalFrame) {
+      referenceImageModalFrame.addEventListener('touchstart', function (event) {
+        if (!referenceImageModal || !referenceImageModal.classList.contains('is-touch-modal')) {
+          return;
+        }
+
+        if (event.touches.length === 1) {
+          referenceImageTouch = {
+            mode: 'pan',
+            startX: event.touches[0].clientX,
+            startY: event.touches[0].clientY,
+            x: referenceImageTouchTransform.x,
+            y: referenceImageTouchTransform.y,
+            scale: referenceImageTouchTransform.scale
+          };
+        } else if (event.touches.length === 2) {
+          const distance = getReferenceImageTouchDistance(event.touches);
+
+          referenceImageTouch = {
+            mode: 'pinch',
+            distance: distance > 0 ? distance : 1,
+            x: referenceImageTouchTransform.x,
+            y: referenceImageTouchTransform.y,
+            scale: referenceImageTouchTransform.scale
+          };
+        }
+      }, { passive: false });
+
+      referenceImageModalFrame.addEventListener('touchmove', function (event) {
+        if (!referenceImageTouch || !referenceImageModal || !referenceImageModal.classList.contains('is-touch-modal')) {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (referenceImageTouch.mode === 'pan' && event.touches.length === 1) {
+          referenceImageTouchTransform = {
+            x: referenceImageTouch.x + event.touches[0].clientX - referenceImageTouch.startX,
+            y: referenceImageTouch.y + event.touches[0].clientY - referenceImageTouch.startY,
+            scale: referenceImageTouch.scale
+          };
+          renderReferenceImageTouchTransform();
+        } else if (referenceImageTouch.mode === 'pinch' && event.touches.length === 2) {
+          referenceImageTouchTransform = {
+            x: referenceImageTouch.x,
+            y: referenceImageTouch.y,
+            scale: referenceImageTouch.scale * (getReferenceImageTouchDistance(event.touches) / referenceImageTouch.distance)
+          };
+          renderReferenceImageTouchTransform();
+        }
+      }, { passive: false });
+
+      referenceImageModalFrame.addEventListener('touchend', function (event) {
+        if (!referenceImageModal || !referenceImageModal.classList.contains('is-touch-modal')) {
+          return;
+        }
+
+        if (event.touches.length === 0) {
+          referenceImageTouch = null;
+        } else if (event.touches.length === 1) {
+          referenceImageTouch = {
+            mode: 'pan',
+            startX: event.touches[0].clientX,
+            startY: event.touches[0].clientY,
+            x: referenceImageTouchTransform.x,
+            y: referenceImageTouchTransform.y,
+            scale: referenceImageTouchTransform.scale
+          };
+        }
+      }, { passive: false });
+    }
+
     if (referenceImageModalImage) {
       referenceImageModalImage.addEventListener('load', syncReferenceImageModalSize);
 
       referenceImageModalImage.addEventListener('click', function () {
         if (!referenceImageModal || referenceImageModal.hidden) {
+          return;
+        }
+
+        if (referenceImageModal.classList.contains('is-touch-modal')) {
           return;
         }
 
@@ -1151,6 +1258,20 @@
 
     if (referenceImageButton) {
       referenceImageButton.addEventListener('click', toggleReferenceImageInline);
+    }
+
+    if (referenceImageInline) {
+      referenceImageInline.addEventListener('click', function (event) {
+        const card = cards[cardIndex];
+        const imageUrl = getReferenceImageUrl(card);
+
+        if (!imageUrl || shouldUseReferenceImageModal()) {
+          return;
+        }
+
+        event.stopPropagation();
+        openReferenceImageModal(imageUrl);
+      });
     }
 
     document.addEventListener('keydown', function (event) {
