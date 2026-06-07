@@ -1466,14 +1466,14 @@ class VC_Flashcards_Plugin {
     });
 
     $selected = $terms[0];
-    $topic_label = $selected->name;
+    $topic_label = html_entity_decode($selected->name, ENT_QUOTES, 'UTF-8');
     $subtopic_label = '';
 
     if ($selected->parent) {
       $parent_term = get_term($selected->parent, self::TAXONOMY);
       if ($parent_term instanceof WP_Term) {
-        $topic_label = $parent_term->name;
-        $subtopic_label = $selected->name;
+        $topic_label = html_entity_decode($parent_term->name, ENT_QUOTES, 'UTF-8');
+        $subtopic_label = html_entity_decode($selected->name, ENT_QUOTES, 'UTF-8');
       }
     }
 
@@ -1512,11 +1512,11 @@ class VC_Flashcards_Plugin {
 
       $tree[] = [
         'id' => (int) $parent->term_id,
-        'name' => $parent->name,
+        'name' => html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8'),
         'children' => is_wp_error($children) ? [] : array_map(static function (WP_Term $term): array {
           return [
             'id' => (int) $term->term_id,
-            'name' => $term->name,
+            'name' => html_entity_decode($term->name, ENT_QUOTES, 'UTF-8'),
           ];
         }, $children),
       ];
@@ -1565,7 +1565,7 @@ class VC_Flashcards_Plugin {
 
           $child_items[] = [
             'id' => (int) $child->term_id,
-            'name' => $child->name,
+            'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
             'totalCards' => count($child_card_ids),
             'masteredCards' => $child_mastered_count,
             'progress' => $child_progress,
@@ -1579,7 +1579,7 @@ class VC_Flashcards_Plugin {
 
       $categories[] = [
         'id' => (int) $parent->term_id,
-        'name' => $parent->name,
+        'name' => html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8'),
         'totalCards' => count($card_ids),
         'masteredCards' => $mastered_count,
         'progress' => $progress,
@@ -2238,7 +2238,7 @@ class VC_Flashcards_Plugin {
 
       $categories[] = [
         'id'           => (int) $parent->term_id,
-        'name'         => $parent->name,
+        'name'         => html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8'),
         'totalCards'   => $total_cards,
         'subtopicCount' => $subtopic_count,
       ];
