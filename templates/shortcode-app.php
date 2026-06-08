@@ -386,26 +386,27 @@ if (!defined('ABSPATH')) {
   </div>
 
   <?php /* Reference image modal: desktop muestra la imagen grande sin empujar la card de sesion. */ ?>
-  <div class="vc-flashcards-reference-modal" data-vc-flashcards-reference-modal hidden>
-    <button type="button" class="vc-flashcards-reference-modal-backdrop" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>"></button>
-    <div class="vc-flashcards-reference-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
+  <div class="vc-reference-modal vc-flashcards-reference-modal" data-vc-flashcards-reference-modal hidden>
+    <button type="button" class="vc-reference-modal__backdrop vc-flashcards-reference-modal-backdrop" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>"></button>
+    <?php /* Reference modal convention: vc-reference-modal_* is canonical; vc-flashcards-reference-modal-dialog stays for legacy QA/client references. */ ?>
+    <div class="vc-reference-modal__dialog vc-flashcards-reference-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
       <?php /* Reference image modal controls: acciones integradas dentro del dialogo desktop. */ ?>
-      <div class="vc-flashcards-reference-modal-controls">
-        <button type="button" class="vc-flashcards-reference-modal-zoom" data-vc-flashcards-reference-modal-zoom aria-pressed="false" aria-label="<?php esc_attr_e('Zoom reference image', 'vc-flashcards'); ?>">
+      <div class="vc-reference-modal__controls vc-flashcards-reference-modal-controls">
+        <button type="button" class="vc-reference-modal__zoom vc-flashcards-reference-modal-zoom" data-vc-flashcards-reference-modal-zoom aria-pressed="false" aria-label="<?php esc_attr_e('Zoom reference image', 'vc-flashcards'); ?>">
           <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path d="M8.5 14.5C11.8137 14.5 14.5 11.8137 14.5 8.5C14.5 5.18629 11.8137 2.5 8.5 2.5C5.18629 2.5 2.5 5.18629 2.5 8.5C2.5 11.8137 5.18629 14.5 8.5 14.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13 13L17.5 17.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M8.5 6V11M6 8.5H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button type="button" class="vc-flashcards-reference-modal-close" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>">
+        <button type="button" class="vc-reference-modal__close vc-flashcards-reference-modal-close" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>">
           <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path d="M5 5L15 15M15 5L5 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
-      <div class="vc-flashcards-reference-modal-frame">
-        <img class="vc-flashcards-reference-modal-image" data-vc-flashcards-reference-modal-image alt="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
+      <div class="vc-reference-modal__frame vc-flashcards-reference-modal-frame">
+        <img class="vc-reference-modal__image vc-flashcards-reference-modal-image" data-vc-flashcards-reference-modal-image alt="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
       </div>
     </div>
   </div>

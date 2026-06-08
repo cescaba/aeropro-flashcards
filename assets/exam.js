@@ -46,6 +46,16 @@
     var referenceImageButton = root.querySelector('[data-vc-exam-reference-image]');
     var referenceImageInline = root.querySelector('[data-vc-exam-reference-image-inline]');
     var referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-exam-reference-image-preview') : null;
+    var referenceImageModal = window.VCReferenceImageModal ? window.VCReferenceImageModal.create({
+      root: root,
+      trigger: referenceImageButton,
+      expandedClass: 'is-expanded',
+      modalSelector: '[data-vc-exam-reference-modal]',
+      imageSelector: '[data-vc-exam-reference-modal-image]',
+      zoomSelector: '[data-vc-exam-reference-modal-zoom]',
+      frameSelector: '.vc-exam-reference-modal-frame',
+      closeSelector: '[data-vc-exam-reference-modal-close]'
+    }) : null;
     var answersWrap   = root.querySelector('[data-vc-exam-answers]');
     var prevButton    = root.querySelector('[data-vc-exam-prev]');
     var nextButton    = root.querySelector('[data-vc-exam-next]');
@@ -556,6 +566,9 @@
       if (referenceImageInline) {
         referenceImageInline.removeAttribute('src');
       }
+      if (referenceImageModal) {
+        referenceImageModal.close();
+      }
     }
 
     function syncReferenceImage(card) {
@@ -571,7 +584,16 @@
       var card = cards[cardIndex];
       var imageUrl = getReferenceImageUrl(card);
 
-      if (!imageUrl || !referenceImageButton || !referenceImageInline || !referenceImageInlineWrap) {
+      if (!imageUrl || !referenceImageButton) {
+        return;
+      }
+
+      if (referenceImageModal && referenceImageModal.shouldUseModal()) {
+        referenceImageModal.open(imageUrl);
+        return;
+      }
+
+      if (!referenceImageInline || !referenceImageInlineWrap) {
         return;
       }
 
@@ -809,6 +831,22 @@
 
     if (referenceImageButton) {
       referenceImageButton.addEventListener('click', toggleReferenceImageInline);
+    }
+
+    if (referenceImageInline) {
+      referenceImageInline.addEventListener('click', function (event) {
+        var card = cards[cardIndex];
+        var imageUrl = getReferenceImageUrl(card);
+
+        if (!imageUrl || (referenceImageModal && referenceImageModal.shouldUseModal())) {
+          return;
+        }
+
+        event.stopPropagation();
+        if (referenceImageModal) {
+          referenceImageModal.open(imageUrl);
+        }
+      });
     }
 
     // Next / Finish

@@ -1,0 +1,276 @@
+.vc-reference-modal[hidden] {
+  display: none;
+}
+
+.vc-reference-modal {
+  --vc-reference-modal-zoom-percent: 145;
+  --vc-reference-modal-zoom-width: 132vw;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  animation: vc-reference-modal-fade .18s ease-out both;
+}
+
+.vc-reference-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.vc-flashcards-app .vc-reference-modal__backdrop:hover,
+.vc-flashcards-app .vc-reference-modal__backdrop:focus,
+.vc-flashcards-app .vc-reference-modal__backdrop:active,
+.vc-exam-app .vc-reference-modal__backdrop:hover,
+.vc-exam-app .vc-reference-modal__backdrop:focus,
+.vc-exam-app .vc-reference-modal__backdrop:active {
+  background: rgba(15, 23, 42, 0.48) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.vc-reference-modal__dialog {
+  position: relative;
+  width: fit-content;
+  max-width: min(92vw, 1180px);
+  max-height: 86vh;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 34px 110px rgba(15, 23, 42, 0.34), 0 8px 28px rgba(15, 23, 42, 0.18);
+  box-sizing: border-box;
+  animation: vc-reference-modal-scale .2s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.vc-reference-modal__controls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: inline-flex;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.vc-reference-modal__close,
+.vc-reference-modal__zoom {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #212121;
+  cursor: pointer;
+  transition: none;
+}
+
+.vc-flashcards-app .vc-reference-modal__close:hover,
+.vc-flashcards-app .vc-reference-modal__close:active,
+.vc-flashcards-app .vc-reference-modal__zoom:hover,
+.vc-flashcards-app .vc-reference-modal__zoom:active,
+.vc-exam-app .vc-reference-modal__close:hover,
+.vc-exam-app .vc-reference-modal__close:active,
+.vc-exam-app .vc-reference-modal__zoom:hover,
+.vc-exam-app .vc-reference-modal__zoom:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.vc-flashcards-app .vc-reference-modal__close:focus-visible,
+.vc-flashcards-app .vc-reference-modal__zoom:focus-visible,
+.vc-exam-app .vc-reference-modal__close:focus-visible,
+.vc-exam-app .vc-reference-modal__zoom:focus-visible {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+  outline: 2px solid #CBD5E1;
+  outline-offset: 2px;
+}
+
+.vc-reference-modal__zoom[aria-pressed="true"] {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.vc-flashcards-app .vc-reference-modal__zoom[aria-pressed="true"]:hover,
+.vc-flashcards-app .vc-reference-modal__zoom[aria-pressed="true"]:active,
+.vc-exam-app .vc-reference-modal__zoom[aria-pressed="true"]:hover,
+.vc-exam-app .vc-reference-modal__zoom[aria-pressed="true"]:active {
+  background: #E2E8F0 !important;
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.vc-reference-modal__zoom,
+.vc-reference-modal__zoom:hover,
+.vc-reference-modal__zoom:focus,
+.vc-reference-modal__zoom:active,
+.vc-reference-modal__zoom:visited {
+  border: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.vc-reference-modal__zoom:not([aria-pressed="true"]),
+.vc-reference-modal__zoom:not([aria-pressed="true"]):hover,
+.vc-reference-modal__zoom:not([aria-pressed="true"]):focus,
+.vc-reference-modal__zoom:not([aria-pressed="true"]):active,
+.vc-reference-modal__zoom:not([aria-pressed="true"]):visited {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #212121 !important;
+}
+
+.vc-reference-modal__zoom svg,
+.vc-reference-modal__zoom:hover svg,
+.vc-reference-modal__zoom:focus svg,
+.vc-reference-modal__zoom:active svg {
+  color: currentColor !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+.vc-reference-modal__close svg,
+.vc-reference-modal__zoom svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.vc-reference-modal__frame {
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  height: fit-content;
+  max-width: min(88vw, 1120px);
+  max-height: 82vh;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.vc-reference-modal__image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(88vw, 1120px);
+  max-height: 82vh;
+  object-fit: contain;
+  cursor: zoom-in;
+  transform-origin: center;
+  transition: transform .2s ease;
+}
+
+.vc-reference-modal.is-zoomed .vc-reference-modal__frame {
+  display: block;
+  max-width: min(92vw, 1180px);
+  max-height: 86vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.vc-reference-modal.is-zoomed .vc-reference-modal__image {
+  width: min(var(--vc-reference-modal-zoom-width), 1680px);
+  max-width: none;
+  max-height: none;
+  cursor: zoom-out;
+}
+
+@media (max-width: 480px) {
+  .vc-reference-modal {
+    padding: 16px;
+  }
+
+  .vc-reference-modal__dialog {
+    width: fit-content;
+    max-width: calc(100vw - 32px);
+    height: auto;
+    max-height: 82vh;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .vc-reference-modal__controls {
+    top: 12px;
+    right: 12px;
+  }
+
+  .vc-reference-modal.is-touch-modal .vc-reference-modal__zoom {
+    display: none;
+  }
+
+  .vc-reference-modal.is-touch-modal .vc-reference-modal__frame {
+    width: fit-content;
+    height: fit-content;
+    max-width: calc(100vw - 52px);
+    max-height: calc(82vh - 20px);
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .vc-reference-modal.is-touch-modal .vc-reference-modal__image {
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 52px);
+    max-height: calc(82vh - 20px);
+    cursor: default;
+    transition: none;
+    user-select: none;
+    -webkit-user-select: none;
+    will-change: transform;
+  }
+}
+
+@keyframes vc-reference-modal-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vc-reference-modal-scale {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

@@ -980,15 +980,28 @@ class VC_Flashcards_Plugin {
     }
 
     wp_enqueue_style(
+      'vc-reference-modal-style',
+      VC_FLASHCARDS_URL . 'assets/reference-modal.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
+    );
+    wp_enqueue_style(
       'vc-flashcards-style',
       VC_FLASHCARDS_URL . 'assets/flashcards.css',
-      [],
+      ['vc-reference-modal-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
+    );
+    wp_enqueue_script(
+      'vc-reference-modal-script',
+      VC_FLASHCARDS_URL . 'assets/reference-modal.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.js') : '1.0.0',
+      true
     );
     wp_enqueue_script(
       'vc-flashcards-script',
       VC_FLASHCARDS_URL . 'assets/flashcards.js',
-      [],
+      ['vc-reference-modal-script'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.js') : '1.0.0',
       true
     );
@@ -1862,9 +1875,16 @@ class VC_Flashcards_Plugin {
     $exam_home_stats = $this->get_exam_home_stats($user_id);
 
     wp_enqueue_style(
+      'vc-reference-modal-style',
+      VC_FLASHCARDS_URL . 'assets/reference-modal.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
+    );
+
+    wp_enqueue_style(
       'vc-flashcards-style',
       VC_FLASHCARDS_URL . 'assets/flashcards.css',
-      [],
+      ['vc-reference-modal-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
     );
 
@@ -1876,9 +1896,17 @@ class VC_Flashcards_Plugin {
     );
 
     wp_enqueue_script(
+      'vc-reference-modal-script',
+      VC_FLASHCARDS_URL . 'assets/reference-modal.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.js') : '1.0.0',
+      true
+    );
+
+    wp_enqueue_script(
       'vc-exam-script',
       VC_FLASHCARDS_URL . 'assets/exam.js',
-      [],
+      ['vc-reference-modal-script'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/exam.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/exam.js') : '1.0.0',
       true
     );
