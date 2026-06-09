@@ -9,7 +9,7 @@
     // Datos iniciales entregados por PHP y valores por defecto del modulo.
     const categories = parseCategories(root.dataset.categories);
     const labels = (window.vcFlashcardsData && window.vcFlashcardsData.labels) || {};
-    const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30, 40, 50];
+    const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30];
 
     // Referencias DOM principales: vistas, controles, modal y metricas del home.
     const feedback = root.querySelector('[data-vc-flashcards-feedback]');
@@ -392,7 +392,7 @@
 
     // Modal: limita la cantidad seleccionada al rango permitido.
     function normalizeCount(value, maxCards) {
-      const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
+      const safeMax = Math.max(1, Number(maxCards || 1));
       const safeValue = Math.max(1, Math.min(safeMax, Number(value || safeMax)));
       return safeValue;
     }
@@ -404,15 +404,9 @@
         .map(function (value) { return Number(value); })
         .filter(function (value) { return value <= safeMax; });
 
-      if (filtered.length === 0 || filtered[filtered.length - 1] !== safeMax) {
-        filtered.push(safeMax);
-      }
+      const values = filtered.length > 0 ? filtered : [safeMax];
 
-      if (filtered[0] !== 1 && safeMax < filtered[0]) {
-        filtered.unshift(safeMax);
-      }
-
-      return filtered.filter(function (value, index, values) {
+      return values.filter(function (value, index, values) {
         return values.indexOf(value) === index;
       });
     }
@@ -463,6 +457,20 @@
         });
         optionsWrap.appendChild(button);
       });
+
+      const allButton = document.createElement('button');
+      const allLabel = document.createElement('span');
+      const allCount = normalizeCount(maxCards, maxCards);
+      allButton.type = 'button';
+      allButton.className = 'vc-flashcards-count-option vc-flashcards-count-option--all';
+      allButton.dataset.count = String(allCount);
+      allLabel.className = 'vc-flashcards-count-option-label';
+      allLabel.textContent = labels.allQuestions || 'All questions';
+      allButton.appendChild(allLabel);
+      allButton.addEventListener('click', function () {
+        updateModalSelection(allCount);
+      });
+      optionsWrap.appendChild(allButton);
     }
 
     // Detail: marca la tarjeta que disparo el modal de configuracion.
@@ -500,8 +508,8 @@
       modalTitle.textContent = config.title;
       modalCopy.textContent = config.description;
       rangeInput.min = '1';
-      rangeInput.max = String(Math.max(1, Math.min(50, maxCards)));
-      rangeLabel.textContent = '1 - ' + String(Math.max(1, Math.min(50, maxCards)));
+      rangeInput.max = String(Math.max(1, maxCards));
+      rangeLabel.textContent = '1 - ' + String(Math.max(1, maxCards));
 
       renderModalOptions(maxCards);
       updateModalSelection(pendingConfig.selectedCount);
@@ -616,6 +624,7 @@
       }
       nextButton.hidden = true;
       nextButton.disabled = true;
+      nextButton.classList.remove('is-finish');
       setFeedback('', '');
     }
 
@@ -740,8 +749,10 @@
       if (sessionBarFill) {
         sessionBarFill.style.width = String(Math.round(((cardIndex + 1) / cards.length) * 100)) + '%';
       }
+      const isLastCard = cardIndex === cards.length - 1;
+      nextButton.classList.toggle('is-finish', isLastCard);
       if (nextButtonLabel) {
-        nextButtonLabel.textContent = cardIndex === cards.length - 1 ? 'Finish' : 'Next question';
+        nextButtonLabel.textContent = isLastCard ? 'Finish' : 'Next question';
       }
       questionEl.textContent = card.question;
       if (referenceImageButton) {

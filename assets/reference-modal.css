@@ -5,6 +5,8 @@
 .vc-reference-modal {
   --vc-reference-modal-zoom-percent: 145;
   --vc-reference-modal-zoom-width: 132vw;
+  --vc-reference-modal-frame-width: fit-content;
+  --vc-reference-modal-frame-height: fit-content;
   position: fixed;
   inset: 0;
   z-index: 10000;
@@ -169,6 +171,15 @@
   height: 18px;
 }
 
+.vc-reference-modal__zoom .vc-reference-modal__zoom-icon--out,
+.vc-reference-modal__zoom[aria-pressed="true"] .vc-reference-modal__zoom-icon--in {
+  display: none;
+}
+
+.vc-reference-modal__zoom[aria-pressed="true"] .vc-reference-modal__zoom-icon--out {
+  display: block;
+}
+
 .vc-reference-modal__frame {
   display: grid;
   place-items: center;
@@ -195,8 +206,10 @@
 
 .vc-reference-modal.is-zoomed .vc-reference-modal__frame {
   display: block;
-  max-width: min(92vw, 1180px);
-  max-height: 86vh;
+  width: var(--vc-reference-modal-frame-width);
+  height: var(--vc-reference-modal-frame-height);
+  max-width: min(88vw, 1120px);
+  max-height: 82vh;
   overflow: auto;
   overscroll-behavior: contain;
 }

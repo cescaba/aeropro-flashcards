@@ -61,7 +61,6 @@
     var nextButton    = root.querySelector('[data-vc-exam-next]');
     var nextLabel     = root.querySelector('[data-vc-exam-next-label]');
     var topicLabelEl  = root.querySelector('[data-vc-exam-topic-label]');
-    var subtopicLabelEl = root.querySelector('[data-vc-exam-subtopic-label]');
 
     // Summary view
     var resultBadge   = root.querySelector('[data-vc-exam-result-badge]');
@@ -518,8 +517,6 @@
 
       // Topic breadcrumb
       if (topicLabelEl)    { topicLabelEl.textContent    = card.topicLabel    || ''; }
-      // Fix: mostrar el subtopic real de la tarjeta; antes se reemplazaba por "Question N".
-      if (subtopicLabelEl) { subtopicLabelEl.textContent = card.subtopicLabel || ''; }
 
       // Question text
       if (questionEl) { questionEl.textContent = card.question; }

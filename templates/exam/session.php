@@ -10,7 +10,6 @@ if (!defined('ABSPATH')) {
     <article class="vc-exam-card">
       <div class="vc-exam-question-context">
         <p class="vc-exam-question-topic" data-vc-exam-topic-label></p>
-        <p class="vc-exam-question-subtopic" data-vc-exam-subtopic-label></p>
       </div>
 
       <h4 data-vc-exam-question></h4>

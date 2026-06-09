@@ -24,7 +24,8 @@ if (!defined('ABSPATH')) {
     <div class="vc-reference-modal__dialog vc-exam-reference-modal-dialog vc-flashcards-reference-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">
       <div class="vc-reference-modal__controls vc-exam-reference-modal-controls">
         <button type="button" class="vc-reference-modal__zoom vc-exam-reference-modal-zoom" data-vc-exam-reference-modal-zoom aria-pressed="false" aria-label="<?php esc_attr_e('Zoom reference image', 'vc-flashcards'); ?>">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 15l5 5M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13Zm0-9v5M8 10.5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="vc-reference-modal__zoom-icon vc-reference-modal__zoom-icon--in" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 15l5 5M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13Zm0-9v5M8 10.5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="vc-reference-modal__zoom-icon vc-reference-modal__zoom-icon--out" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 15l5 5M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM8 10.5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button type="button" class="vc-reference-modal__close vc-exam-reference-modal-close" data-vc-exam-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

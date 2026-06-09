@@ -393,10 +393,15 @@ if (!defined('ABSPATH')) {
       <?php /* Reference image modal controls: acciones integradas dentro del dialogo desktop. */ ?>
       <div class="vc-reference-modal__controls vc-flashcards-reference-modal-controls">
         <button type="button" class="vc-reference-modal__zoom vc-flashcards-reference-modal-zoom" data-vc-flashcards-reference-modal-zoom aria-pressed="false" aria-label="<?php esc_attr_e('Zoom reference image', 'vc-flashcards'); ?>">
-          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <svg class="vc-reference-modal__zoom-icon vc-reference-modal__zoom-icon--in" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path d="M8.5 14.5C11.8137 14.5 14.5 11.8137 14.5 8.5C14.5 5.18629 11.8137 2.5 8.5 2.5C5.18629 2.5 2.5 5.18629 2.5 8.5C2.5 11.8137 5.18629 14.5 8.5 14.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M13 13L17.5 17.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M8.5 6V11M6 8.5H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="vc-reference-modal__zoom-icon vc-reference-modal__zoom-icon--out" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M8.5 14.5C11.8137 14.5 14.5 11.8137 14.5 8.5C14.5 5.18629 11.8137 2.5 8.5 2.5C5.18629 2.5 2.5 5.18629 2.5 8.5C2.5 11.8137 5.18629 14.5 8.5 14.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 13L17.5 17.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 8.5H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
         <button type="button" class="vc-reference-modal__close vc-flashcards-reference-modal-close" data-vc-flashcards-reference-modal-close aria-label="<?php esc_attr_e('Close reference image', 'vc-flashcards'); ?>">

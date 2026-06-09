@@ -1009,7 +1009,7 @@ class VC_Flashcards_Plugin {
     wp_localize_script('vc-flashcards-script', 'vcFlashcardsData', [
       'ajaxUrl' => admin_url('admin-ajax.php'),
       'nonce' => wp_create_nonce(self::NONCE_ACTION),
-      'cardOptions' => [10, 20, 30, 40, 50],
+      'cardOptions' => [10, 20, 30],
       'labels' => [
         'selectSubtopic' => __('Select a topic or subtopic first.', 'vc-flashcards'),
         'noCards' => __('No flashcards were found for this selection.', 'vc-flashcards'),
@@ -1025,6 +1025,7 @@ class VC_Flashcards_Plugin {
         'cancel' => __('Cancel', 'vc-flashcards'),
         'start' => __('Start', 'vc-flashcards'),
         'study' => __('Study', 'vc-flashcards'),
+        'allQuestions' => __('All questions', 'vc-flashcards'),
         'viewExplanation' => __('View detailed explanation', 'vc-flashcards'),
         'hideExplanation' => __('Hide detailed explanation', 'vc-flashcards'),
         'noSubtopics' => __('No subtopics have been added yet for this category.', 'vc-flashcards'),
@@ -1054,11 +1055,14 @@ class VC_Flashcards_Plugin {
     $mode = isset($_POST['mode']) ? sanitize_key(wp_unslash($_POST['mode'])) : 'random';
     $term_id = isset($_POST['term_id']) ? absint($_POST['term_id']) : 0;
     $card_limit = isset($_POST['card_limit']) ? absint($_POST['card_limit']) : 10;
-    $card_limit = max(1, min(50, $card_limit));
 
     if (!in_array($mode, ['random', 'global-random', 'category', 'subcategory'], true)) {
       $mode = 'random';
     }
+
+    $card_limit = in_array($mode, ['category', 'subcategory'], true)
+      ? max(1, $card_limit)
+      : max(1, min(50, $card_limit));
 
     if (in_array($mode, ['category', 'subcategory'], true) && $term_id < 1) {
       wp_send_json_error(['message' => __('Please select a topic or subtopic.', 'vc-flashcards')], 400);

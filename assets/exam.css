@@ -674,34 +674,23 @@
   min-width: 0;
 }
 
-.vc-exam-question-topic,
-.vc-exam-question-subtopic {
+.vc-exam-question-topic {
   margin: 0px;
-  min-height: 38px;
-  min-width: 100px;
+  height: 38px;
+  width: 100px;
   padding: 9px 22px;
   border: 1px solid var(--vc-exam-border);
   border-radius: 6px;
   color: var(--vc-exam-muted);
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
   box-sizing: border-box;
 }
 
 .vc-exam-question-topic {
   flex: 0 0 auto;
   background: #E5E7EB;
-}
-
-.vc-exam-question-subtopic {
-  min-width: 0;
-  max-width: 100%;
-  background: #FFFFFF;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: normal;
-  text-align: left;
 }
 
 .vc-exam-card [data-vc-exam-question] {
@@ -1580,19 +1569,18 @@
 
   /* Card mobile */
   .vc-exam-question-context {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 10px;
     margin-bottom: 18px;
   }
 
-  .vc-exam-question-topic,
-  .vc-exam-question-subtopic {
+  .vc-exam-question-topic {
     margin: 0;
     padding: 4px 10px;
-    min-height: 25px;
-    min-width: 68px;
+    height: 25px;
+    width: 68px;
     border: 1px solid var(--vc-exam-border);
     border-radius: 6px;
     color: var(--vc-exam-muted);
@@ -1600,15 +1588,6 @@
     font-size: 12px;
     line-height: 16px;
     letter-spacing: -0.15px;
-  }
-
-  /* Exam context mobile: permite subtopics largos en dos lineas sin romper la card. */
-  .vc-exam-question-subtopic {
-    min-width: 0;
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
   }
 
   .vc-exam-card [data-vc-exam-question] {

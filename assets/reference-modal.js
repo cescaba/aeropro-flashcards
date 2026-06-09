@@ -16,6 +16,8 @@
     var bodyClass = options.bodyClass || 'vc-flashcards-modal-open';
     var zoomWidthProperty = options.zoomWidthProperty || '--vc-reference-modal-zoom-width';
     var zoomPercentProperty = options.zoomPercentProperty || '--vc-reference-modal-zoom-percent';
+    var frameWidthProperty = '--vc-reference-modal-frame-width';
+    var frameHeightProperty = '--vc-reference-modal-frame-height';
     var touch = null;
     var touchTransform = { x: 0, y: 0, scale: 1 };
 
@@ -44,6 +46,11 @@
     function syncSize() {
       if (!modal || !image || !image.naturalWidth) {
         return;
+      }
+
+      if (frame && image.offsetWidth && image.offsetHeight) {
+        modal.style.setProperty(frameWidthProperty, String(Math.round(image.offsetWidth)) + 'px');
+        modal.style.setProperty(frameHeightProperty, String(Math.round(image.offsetHeight)) + 'px');
       }
 
       modal.style.setProperty(
@@ -97,6 +104,7 @@
         return;
       }
 
+      syncSize();
       modal.classList.toggle('is-zoomed', Boolean(isZoomed));
 
       if (zoomButton) {
@@ -132,6 +140,8 @@
       resetTouchTransform();
       image.removeAttribute('src');
       modal.style.removeProperty(zoomWidthProperty);
+      modal.style.removeProperty(frameWidthProperty);
+      modal.style.removeProperty(frameHeightProperty);
       modal.classList.remove('is-touch-modal');
       document.body.classList.remove(bodyClass);
 
