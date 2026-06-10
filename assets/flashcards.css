@@ -277,9 +277,8 @@
 .vc-flashcards-reference-image {
   width: 100%;
   min-height: 80px;
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: stretch;
+  display: flex;
+  align-items: center;
   gap: 0;
   margin: 0 0 30px;
   padding: 16px;
@@ -344,7 +343,6 @@
   min-width: 0;
   display: grid;
   align-self: center;
-  gap: 5px;
 }
 
 .vc-flashcards-reference-image-title,
@@ -357,7 +355,7 @@
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
-  line-height: 100%;
+  line-height: 24px;
   letter-spacing: -0.3px;
 }
 
@@ -366,7 +364,7 @@
   font-weight: 400;
   font-style: normal;
   font-size: 14px;
-  line-height: 100%;
+  line-height: 21px;
   letter-spacing: -0.15px;
 }
 
@@ -1235,11 +1233,15 @@
 
 /* Fila de chips de contexto dentro de la tarjeta de pregunta. */
 .vc-flashcards-session-context {
-  margin: 0 0 32px;
+  margin: 0 0 30px;
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.vc-flashcards-session-context-row {
+  display: contents;
 }
 
 .vc-flashcards-card .vc-flashcards-session-kicker {
@@ -1278,6 +1280,7 @@
 }
 
 .vc-flashcards-session-topic,
+.vc-flashcards-session-acs,
 .vc-flashcards-session-subtopic {
   margin: 0;
   display: inline-flex;
@@ -1301,6 +1304,10 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
+}
+
+.vc-flashcards-session-acs {
+  display: none;
 }
 
 .vc-flashcards-session-subtopic {
@@ -1363,6 +1370,7 @@
 .vc-flashcards-answer span {
   width: 34px;
   height: 34px;
+  flex: 0 0 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1377,11 +1385,18 @@
 
 /* Texto principal de la opcion de respuesta. */
 .vc-flashcards-answer strong {
+  display: block;
+  flex: 0 1 80%;
+  min-width: 0;
+  max-width: 80%;
   color: #666666;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.31px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 /* Limita estos ajustes visuales solo a las respuestas renderizadas dentro de la tarjeta principal. */
@@ -3208,6 +3223,8 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards stats mobile: compacta cada card para que entren tres columnas en 480px. */
   .vc-flashcards-stat-card {
+    display: flex;
+    align-items: center;
     min-height: 115px;
     padding: 12px 6px;
   }
@@ -3216,9 +3233,10 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-stat-card-content {
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 8px;
     text-align: center;
+    width: 100%;
   }
 
   /* Flashcards stats mobile: reduce la caja del icono para sostener tres cards visibles. */
@@ -3305,9 +3323,25 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-session-topic {
     padding: 5px 10px;
     height: 25px;
-    width: 68px;
+    width: fit-content;
     border: 1px solid #E2E8F0;
     background: #e5e7eb;
+    color: #666666;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    border-radius: 6px;
+  }
+
+  .vc-flashcards-session-acs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    min-height: 25px;
+    border: 1px solid #E2E8F0;
+    background: #ffffff;
     color: #666666;
     font-weight: 400;
     font-size: 12px;
@@ -3320,6 +3354,8 @@ body.vc-flashcards-modal-open {
   }
 
   .vc-flashcards-reference-image {
+    display: flex;
+    align-items: center;
     min-height: 72px;
     margin: 0 0 18px;
     padding: 12px;
@@ -3332,18 +3368,18 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
   .vc-flashcards-session-subtopic {
-    display: inline-flex;
-    width: fit-content;
+    display: block;
+    width: auto;
     min-width: 0;
     max-width: 100%;
     justify-self: start;
-    padding: 5px 10px;
-    border: 1px solid #E2E8F0;
-    background: #ffffff;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: #666666;
     font-weight: 400;
     font-size: 12px;
-    border-radius: 6px;
+    border-radius: 0;
     line-height: 16px;
     letter-spacing: 0px;
     white-space: nowrap;
@@ -3353,12 +3389,18 @@ body.vc-flashcards-modal-open {
 
   /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
   .vc-flashcards-session-context {
-    display: grid;
-    grid-template-columns: max-content;
-    align-items: start;
-    justify-items: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     margin: 0 0 18px;
     gap: 10px;
+  }
+
+  .vc-flashcards-session-context-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
   }
 
   /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */
@@ -3404,13 +3446,6 @@ body.vc-flashcards-modal-open {
   .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="correct"],
   .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] {
     padding-right: 48px;
-  }
-
-  /* Flashcards answer state text mobile: limita el texto antes del icono de estado. */
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="correct"] strong,
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] strong {
-    min-width: 0;
-    max-width: 100%;
   }
 
   /* Flashcards answer letter mobile: mantiene la capsula de opcion estable y compacta. */

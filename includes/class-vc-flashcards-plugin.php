@@ -1009,7 +1009,7 @@ class VC_Flashcards_Plugin {
     wp_localize_script('vc-flashcards-script', 'vcFlashcardsData', [
       'ajaxUrl' => admin_url('admin-ajax.php'),
       'nonce' => wp_create_nonce(self::NONCE_ACTION),
-      'cardOptions' => [10, 20, 30],
+      'cardOptions' => [10, 20, 30, 40, 50],
       'labels' => [
         'selectSubtopic' => __('Select a topic or subtopic first.', 'vc-flashcards'),
         'noCards' => __('No flashcards were found for this selection.', 'vc-flashcards'),
@@ -1060,9 +1060,7 @@ class VC_Flashcards_Plugin {
       $mode = 'random';
     }
 
-    $card_limit = in_array($mode, ['category', 'subcategory'], true)
-      ? max(1, $card_limit)
-      : max(1, min(50, $card_limit));
+    $card_limit = max(1, min(50, $card_limit));
 
     if (in_array($mode, ['category', 'subcategory'], true) && $term_id < 1) {
       wp_send_json_error(['message' => __('Please select a topic or subtopic.', 'vc-flashcards')], 400);
@@ -1415,7 +1413,6 @@ class VC_Flashcards_Plugin {
     $answer_c = $this->get_first_meta_value($meta, '_vc_flashcard_answer_c');
     $correct_answer = $this->get_first_meta_value($meta, '_vc_flashcard_correct_answer');
     $explanation = $this->get_first_meta_value($meta, '_vc_flashcard_explanation');
-    $references = $this->get_first_meta_value($meta, '_vc_flashcard_references');
     $question_image_url = $this->get_first_meta_value($meta, '_vc_flashcard_question_image_url');
     $acs_code = $this->get_first_meta_value($meta, '_vc_flashcard_acs_code');
 
@@ -1437,7 +1434,6 @@ class VC_Flashcards_Plugin {
       'acsCode' => $acs_code,
       'correctAnswer' => $correct_answer,
       'explanation' => wp_kses_post(wpautop($explanation)),
-      'references' => $this->parse_references($references),
       'topicTermId' => $term_payload['term_id'],
       'topicLabel' => $term_payload['topic_label'],
       'subtopicLabel' => $term_payload['subtopic_label'],
@@ -1458,13 +1454,6 @@ class VC_Flashcards_Plugin {
   // Genera una clave de cache para reusar pools de tarjetas por modo y term.
   private function get_session_cards_pool_cache_key(string $mode, int $term_id): string {
     return 'vc_flashcards_session_cards_pool_' . md5($mode . '|' . $term_id);
-  }
-
-  // Convierte el texto de referencias guardado en una lista usable por frontend.
-  private function parse_references(string $references): array {
-    $items = preg_split('/\r\n|\r|\n/', $references);
-    $items = is_array($items) ? array_filter(array_map('trim', $items)) : [];
-    return array_values($items);
   }
 
   // Resuelve topic y subtopic de una flashcard y los empaqueta para la UI.

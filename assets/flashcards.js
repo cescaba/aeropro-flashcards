@@ -9,7 +9,7 @@
     // Datos iniciales entregados por PHP y valores por defecto del modulo.
     const categories = parseCategories(root.dataset.categories);
     const labels = (window.vcFlashcardsData && window.vcFlashcardsData.labels) || {};
-    const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30];
+    const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30, 40, 50];
 
     // Referencias DOM principales: vistas, controles, modal y metricas del home.
     const feedback = root.querySelector('[data-vc-flashcards-feedback]');
@@ -242,20 +242,34 @@
       return false;
     }
 
-    // Session: construye chips de topic y subtopic para la tarjeta actual.
-    function renderSessionKicker(topicLabel, subtopicLabel) {
+    // Session: construye chips de topic, ACS y subtopic para la tarjeta actual.
+    function renderSessionKicker(topicLabel, subtopicLabel, acsCode) {
       if (!kicker) {
         return;
       }
 
       kicker.textContent = '';
 
+      const topRow = document.createElement('div');
+      topRow.className = 'vc-flashcards-session-context-row';
+
       if (topicLabel) {
         const topicChip = document.createElement('p');
         // Fix: conserva la clase original del diseño mientras el texto se pinta dinamicamente.
         topicChip.className = 'vc-flashcards-session-topic';
         topicChip.textContent = topicLabel;
-        kicker.appendChild(topicChip);
+        topRow.appendChild(topicChip);
+      }
+
+      if (acsCode) {
+        const acsChip = document.createElement('p');
+        acsChip.className = 'vc-flashcards-session-acs';
+        acsChip.textContent = acsCode;
+        topRow.appendChild(acsChip);
+      }
+
+      if (topRow.childNodes.length) {
+        kicker.appendChild(topRow);
       }
 
       if (subtopicLabel) {
@@ -392,17 +406,19 @@
 
     // Modal: limita la cantidad seleccionada al rango permitido.
     function normalizeCount(value, maxCards) {
-      const safeMax = Math.max(1, Number(maxCards || 1));
+      const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const safeValue = Math.max(1, Math.min(safeMax, Number(value || safeMax)));
       return safeValue;
     }
 
     // Modal: calcula las opciones rapidas de cantidad segun el maximo disponible.
-    function getOptionValues(maxCards) {
+    function getOptionValues(maxCards, mode) {
       const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
       const filtered = cardOptions
         .map(function (value) { return Number(value); })
-        .filter(function (value) { return value <= safeMax; });
+        .filter(function (value) {
+          return value <= safeMax && (mode !== 'subcategory' || value < 40);
+        });
 
       const values = filtered.length > 0 ? filtered : [safeMax];
 
@@ -439,8 +455,8 @@
     }
 
     // Modal: dibuja los botones de cantidades predefinidas.
-    function renderModalOptions(maxCards) {
-      const values = getOptionValues(maxCards);
+    function renderModalOptions(maxCards, mode) {
+      const values = getOptionValues(maxCards, mode);
       optionsWrap.innerHTML = '';
 
       values.forEach(function (value) {
@@ -457,6 +473,10 @@
         });
         optionsWrap.appendChild(button);
       });
+
+      if (mode !== 'subcategory') {
+        return;
+      }
 
       const allButton = document.createElement('button');
       const allLabel = document.createElement('span');
@@ -508,10 +528,10 @@
       modalTitle.textContent = config.title;
       modalCopy.textContent = config.description;
       rangeInput.min = '1';
-      rangeInput.max = String(Math.max(1, maxCards));
-      rangeLabel.textContent = '1 - ' + String(Math.max(1, maxCards));
+      rangeInput.max = String(Math.max(1, Math.min(50, maxCards)));
+      rangeLabel.textContent = '1 - ' + String(Math.max(1, Math.min(50, maxCards)));
 
-      renderModalOptions(maxCards);
+      renderModalOptions(maxCards, pendingConfig.mode);
       updateModalSelection(pendingConfig.selectedCount);
 
       modal.hidden = false;
@@ -657,16 +677,11 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Session: prepara explicacion y referencias sin abrirlas automaticamente.
+    // Session: prepara explicacion sin exponer codigos internos de referencia.
     function renderExplanation(card, isCorrect) {
-      const refs = Array.isArray(card.references) && card.references.length
-        ? '<ul>' + card.references.map(function (ref) { return '<li>' + escapeHtml(ref) + '</li>'; }).join('') + '</ul>'
-        : '';
-
       currentExplanationHtml =
         '<div class="vc-flashcards-explanation-body">' +
           card.explanation +
-          refs +
         '</div>';
 
       explanationEl.hidden = true;
@@ -759,7 +774,7 @@
         // Solo mostrar el botón si la tarjeta tiene una imagen real (no usar fallback para la decisión de visibilidad)
         referenceImageButton.hidden = !card.questionImageUrl;
       }
-      renderSessionKicker(card.topicLabel, card.subtopicLabel);
+      renderSessionKicker(card.topicLabel, card.subtopicLabel, card.acsCode);
 
       Object.keys(card.answers).forEach(function (key) {
         answersWrap.appendChild(buildAnswerButton(key, card.answers[key]));

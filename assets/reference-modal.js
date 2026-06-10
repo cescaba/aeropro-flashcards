@@ -99,6 +99,15 @@
       }
     }
 
+    function centerZoomFrame() {
+      if (!frame || !modal || !modal.classList.contains('is-zoomed')) {
+        return;
+      }
+
+      frame.scrollLeft = Math.max(0, (frame.scrollWidth - frame.clientWidth) / 2);
+      frame.scrollTop = Math.max(0, (frame.scrollHeight - frame.clientHeight) / 2);
+    }
+
     function setZoom(isZoomed) {
       if (!modal) {
         return;
@@ -109,6 +118,13 @@
 
       if (zoomButton) {
         zoomButton.setAttribute('aria-pressed', isZoomed ? 'true' : 'false');
+      }
+
+      if (isZoomed) {
+        window.requestAnimationFrame(centerZoomFrame);
+      } else if (frame) {
+        frame.scrollLeft = 0;
+        frame.scrollTop = 0;
       }
     }
 
