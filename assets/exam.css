@@ -680,13 +680,13 @@
 
 .vc-exam-reference-image {
   width: 100%;
-  min-height: 80px;
+  min-height: 82px;
   display: grid;
   grid-template-columns: 1fr;
   align-items: stretch;
   gap: 0;
   margin: 0 0 30px;
-  padding: 18px 16px;
+  padding: 16px;
   border: 1px solid var(--vc-exam-border);
   border-radius: var(--vc-exam-surface-radius);
   background: #F8FAFC;
@@ -697,7 +697,7 @@
 }
 
 .vc-exam-reference-image:not(.is-expanded) {
-  height: 80px;
+  height: 82px;
 }
 
 .vc-exam-reference-image.is-expanded {
