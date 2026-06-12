@@ -239,16 +239,7 @@ if (!defined('ABSPATH')) {
             <span class="vc-flashcards-reference-image-title"><?php esc_html_e('View reference image', 'vc-flashcards'); ?></span>
             <span class="vc-flashcards-reference-image-subtitle"><?php esc_html_e('Click to expand', 'vc-flashcards'); ?></span>
           </span>
-          <span class="vc-flashcards-reference-image-chevron" aria-hidden="true">
-            <svg
-              class="chevron-right-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
+
         </span>
         <span class="vc-flashcards-reference-image-preview" hidden>
           <img data-vc-flashcards-reference-image-inline alt="<?php esc_attr_e('Reference image', 'vc-flashcards'); ?>">

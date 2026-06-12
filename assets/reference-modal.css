@@ -204,6 +204,10 @@
   transition: transform .2s ease;
 }
 
+.vc-reference-modal.is-zoomed .vc-reference-modal__dialog {
+  overflow: visible;
+}
+
 .vc-reference-modal.is-zoomed .vc-reference-modal__frame {
   display: block;
   width: var(--vc-reference-modal-frame-width);
@@ -219,6 +223,8 @@
   max-width: none;
   max-height: none;
   cursor: zoom-out;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 480px) {
