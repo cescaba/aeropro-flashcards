@@ -142,25 +142,23 @@
   list-style: none;
 }
 
-.vc-exam-badge {
-  min-height: 84px;
-  display: flex;
+/* Stat card styles */
+.vc-flashcards-stat-card {
+  opacity: 1;
   padding: 12px 20px;
-  border: 1px solid var(--vc-exam-border);
-  border-radius: var(--vc-exam-surface-radius);
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
   background: #F1F5F9;
 }
 
-.vc-exam-badge-content {
-  display: grid;
-  grid-template-columns: 50px minmax(0, 1fr);
+.vc-flashcards-stat-card-content {
+  display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  min-width: 0;
 }
 
 .vc-exam-badge-icon,
+.vc-flashcards-stat-card-icon,
 .vc-exam-history-item-icon,
 .vc-exam-timer-icon {
   display: inline-flex;
@@ -168,70 +166,48 @@
   justify-content: center;
 }
 
-.vc-exam-badge-icon {
-  width: 50px;
-  height: 50px;
+.vc-flashcards-stat-card-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
   padding: 11px;
   border-radius: 8px;
-  background: #00A63E;
-  color: #FFFFFF;
+  background: #00a63e;
   box-sizing: border-box;
 }
 
-.vc-exam-badge-icon svg,
-.vc-exam-badge-icon img {
-  flex: 0 0 auto;
+.vc-flashcards-stat-card-icon img {
   display: block;
   width: 28px;
   height: 28px;
 }
 
-.vc-exam-badge-copy {
-  min-width: 0;
-  min-height: 44px;
+.vc-flashcards-stat-card-copy {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
-.vc-exam-badge-copy small,
-.vc-exam-history-header p,
-.vc-exam-history-item-copy-text span,
-.vc-exam-history-item-score-copy small,
-.vc-exam-progress-label,
-.vc-exam-session-header [data-vc-exam-progress],
-.vc-exam-progress-label,
-.vc-exam-result-requirement,
-.vc-exam-summary-result-card h3 {
+.vc-flashcards-stat-card-copy small {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
+  color: #666666;
 }
 
-.vc-exam-badge-copy small,
-.vc-exam-history-header p,
-.vc-exam-history-item-copy-text span,
-.vc-exam-history-item-score-copy small,
-.vc-exam-progress-label,
-.vc-exam-session-header [data-vc-exam-progress],
-.vc-exam-result-requirement {
-  color: var(--vc-exam-muted);
-}
-
-.vc-exam-badge-copy small,
-.vc-exam-badge-copy strong {
+.vc-flashcards-stat-card-copy strong,
+[data-vc-exam-best-score],
+[data-vc-exam-average-score],
+[data-vc-exam-passed-attempts] {
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.vc-exam-badge-copy strong {
   margin-top: 0;
-  color: #0EA44B;
+  color: #0ea44b;
   font-weight: 400;
   font-size: 30px;
   line-height: 42px;
+  letter-spacing: 0.4px;
 }
 
 /* ==========================================================================
@@ -1314,8 +1290,14 @@
 
   /* 720 Home and summary layout */
 
-  .vc-exam-intro-badges{
+  .vc-flashcards-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .vc-flashcards-stat-card {
+    min-width: 0;
+    padding: 10px 12px;
   }
 
   .vc-exam-category-grid {
@@ -1364,7 +1346,7 @@
   }
 
   .vc-exam-page-header {
-    min-height: 72px;
+    min-height: 102px;
     height: auto;
     gap: 10px;
     align-content: center;
@@ -1385,59 +1367,59 @@
     margin-bottom: 20px;
   }
 
-  .vc-exam-intro-badges {
+  .vc-flashcards-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 8px;
   }
 
-  .vc-exam-badge {
+  .vc-flashcards-stat-card {
+    display: flex;
+    align-items: center;
     min-height: 115px;
-    padding: 12px;
+    padding: 12px 6px;
   }
 
-  .vc-exam-badge-content {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 6px;
+  .vc-flashcards-stat-card-content {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     text-align: center;
+    width: 100%;
   }
 
-  .vc-exam-badge-icon {
+  .vc-flashcards-stat-card-icon {
+    padding: 10px;
+    border-radius: 8px;
     width: 40px;
     height: 40px;
-    padding: 10px;
   }
 
-  .vc-exam-badge-icon svg,
-  .vc-exam-badge-icon img {
+  .vc-flashcards-stat-card-icon img {
     width: 20px;
     height: 20px;
   }
 
-  .vc-exam-badge-copy {
-    min-height: 0;
-    width: 100%;
+  .vc-flashcards-stat-card-copy {
+    align-items: center;
+    min-width: 0;
   }
 
-  .vc-exam-badge-copy strong {
-    font-weight: 400;
-    font-size: 20px;
-    line-height: 28px;
-    letter-spacing: -0.45px;
-  }
-
-  .vc-exam-badge-copy small {
-    order: 2;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 12px;
-    line-height: 130%;
+  .vc-flashcards-stat-card-copy [data-vc-flashcards-stat],
+  .vc-flashcards-stat-card-copy [data-vc-exam-best-score],
+  .vc-flashcards-stat-card-copy [data-vc-exam-average-score],
+  .vc-flashcards-stat-card-copy [data-vc-exam-passed-attempts] {
+    order: 1;
+    font-size: 18px;
+    line-height: 20px;
     letter-spacing: 0;
   }
 
-  .vc-exam-badge--passed-attempts {
-    padding-left: 6px;
-    padding-right: 6px;
+  .vc-flashcards-stats .vc-flashcards-stat-card-copy small {
+    order: 2;
+    margin-top: 3px;
+    font-size: 10px;
+    line-height: 12px;
   }
 
   .vc-exam-category-grid {

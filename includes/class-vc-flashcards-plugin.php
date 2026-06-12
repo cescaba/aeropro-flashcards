@@ -980,9 +980,15 @@ class VC_Flashcards_Plugin {
     }
 
     wp_enqueue_style(
+      'vc-general-style',
+      VC_FLASHCARDS_URL . 'assets/general.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
+    );
+    wp_enqueue_style(
       'vc-reference-modal-style',
       VC_FLASHCARDS_URL . 'assets/reference-modal.css',
-      [],
+      ['vc-general-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
     );
     wp_enqueue_style(
@@ -1868,9 +1874,16 @@ class VC_Flashcards_Plugin {
     $exam_home_stats = $this->get_exam_home_stats($user_id);
 
     wp_enqueue_style(
+      'vc-general-style',
+      VC_FLASHCARDS_URL . 'assets/general.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
+    );
+
+    wp_enqueue_style(
       'vc-reference-modal-style',
       VC_FLASHCARDS_URL . 'assets/reference-modal.css',
-      [],
+      ['vc-general-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
     );
 
