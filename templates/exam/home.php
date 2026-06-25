@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 
   <?php if (empty($exam_categories)): ?>
     <article class="vc-exam-empty">
-      <p><?php esc_html_e('No categories or flashcards are available yet.', 'vc-flashcards'); ?></p>
+      <p><?php esc_html_e('No categories or questions are available yet.', 'vc-flashcards'); ?></p>
     </article>
   <?php else: ?>
     <div class="vc-exam-category-grid">

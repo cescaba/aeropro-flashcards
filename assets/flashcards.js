@@ -1,69 +1,82 @@
-﻿(function () {
+(function () {
   
   /*
-   * Flashcards practice controller.
+   * Study sessions practice controller.
    * Manages category selection, configurable sessions, answer review, summaries
-   * and lightweight session restoration for the flashcards shortcode.
+   * and lightweight session restoration for the Study sessions shortcode.
    */
-  function initFlashcardsApp(root) {
+  function initStudySessionsApp(root) {
     // Datos iniciales entregados por PHP y valores por defecto del modulo.
     const categories = parseCategories(root.dataset.categories);
-    const labels = (window.vcFlashcardsData && window.vcFlashcardsData.labels) || {};
-    const cardOptions = (window.vcFlashcardsData && window.vcFlashcardsData.cardOptions) || [10, 20, 30, 40, 50];
+    const labels = (window.vcStudySessionsData && window.vcStudySessionsData.labels) || {};
+    const cardOptions = (window.vcStudySessionsData && window.vcStudySessionsData.cardOptions) || [10, 20, 30, 40, 50];
 
     // Referencias DOM principales: vistas, controles, modal y metricas del home.
-    const feedback = root.querySelector('[data-vc-flashcards-feedback]');
-    const homeView = root.querySelector('[data-vc-flashcards-view="home"]');
-    const detailView = root.querySelector('[data-vc-flashcards-view="detail"]');
-    const sessionPanel = root.querySelector('[data-vc-flashcards-session]');
-    const summaryPanel = root.querySelector('[data-vc-flashcards-summary]');
-    const modal = root.querySelector('[data-vc-flashcards-modal]');
-    const categoryTitle = root.querySelector('[data-vc-flashcards-category-title]');
-    const categoryMeta = root.querySelector('[data-vc-flashcards-category-meta]');
-    const categoryTotal = root.querySelector('[data-vc-flashcards-category-total]');
-    const subtopicsWrap = root.querySelector('[data-vc-flashcards-subtopics]');
-    const nextButton = root.querySelector('[data-vc-flashcards-next]');
-    const revealButton = root.querySelector('[data-vc-flashcards-reveal]');
-    const explanationToggle = root.querySelector('[data-vc-flashcards-explanation-toggle]');
-    const explanationToggleLabel = root.querySelector('.vc-flashcards-explanation-toggle-label');
-    const restartButton = root.querySelector('[data-vc-flashcards-restart]');
-    const summaryBackButton = root.querySelector('[data-vc-flashcards-summary-back]');
-    const answersWrap = root.querySelector('[data-vc-flashcards-answers]');
-    const questionEl = root.querySelector('[data-vc-flashcards-question]');
-    const referenceImageButton = root.querySelector('[data-vc-flashcards-reference-image]');
-    const referenceImageInline = root.querySelector('[data-vc-flashcards-reference-image-inline]');
-    const referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-flashcards-reference-image-preview') : null;
+    const feedback = root.querySelector('[data-vc-study-sessions-feedback]');
+    const homeView = root.querySelector('[data-vc-study-sessions-view="home"]');
+    const detailView = root.querySelector('[data-vc-study-sessions-view="detail"]');
+    const sessionPanel = root.querySelector('[data-vc-study-sessions-session]');
+    const summaryPanel = root.querySelector('[data-vc-study-sessions-summary]');
+    const modal = root.querySelector('[data-vc-study-sessions-modal]');
+    const categoryTitle = root.querySelector('[data-vc-study-sessions-category-title]');
+    const categoryMeta = root.querySelector('[data-vc-study-sessions-category-meta]');
+    const categoryTotal = root.querySelector('[data-vc-study-sessions-category-total]');
+    const subtopicsWrap = root.querySelector('[data-vc-study-sessions-subtopics]');
+    const nextButton = root.querySelector('[data-vc-study-sessions-next]');
+    const revealButton = root.querySelector('[data-vc-study-sessions-reveal]');
+    const explanationToggle = root.querySelector('[data-vc-study-sessions-explanation-toggle]');
+    const explanationToggleLabel = root.querySelector('.vc-study-sessions-explanation-toggle-label');
+    const restartButton = root.querySelector('[data-vc-study-sessions-restart]');
+    const summaryBackButton = root.querySelector('[data-vc-study-sessions-summary-back]');
+    const answersWrap = root.querySelector('[data-vc-study-sessions-answers]');
+    const questionEl = root.querySelector('[data-vc-study-sessions-question]');
+    const referenceImageButton = root.querySelector('[data-vc-study-sessions-reference-image]');
+    const referenceImageInline = root.querySelector('[data-vc-study-sessions-reference-image-inline]');
+    const referenceImageInlineWrap = referenceImageInline ? referenceImageInline.closest('.vc-study-sessions-reference-image-preview') : null;
     const referenceImageModal = window.VCReferenceImageModal ? window.VCReferenceImageModal.create({
       root: root,
       trigger: referenceImageButton,
       expandedClass: 'is-expanded',
-      modalSelector: '[data-vc-flashcards-reference-modal]',
-      imageSelector: '[data-vc-flashcards-reference-modal-image]',
-      zoomSelector: '[data-vc-flashcards-reference-modal-zoom]',
-      frameSelector: '.vc-flashcards-reference-modal-frame',
-      closeSelector: '[data-vc-flashcards-reference-modal-close]'
+      modalSelector: '[data-vc-study-sessions-reference-modal]',
+      imageSelector: '[data-vc-study-sessions-reference-modal-image]',
+      zoomSelector: '[data-vc-study-sessions-reference-modal-zoom]',
+      frameSelector: '.vc-study-sessions-reference-modal-frame',
+      closeSelector: '[data-vc-study-sessions-reference-modal-close]'
     }) : null;
-    const explanationEl = root.querySelector('[data-vc-flashcards-explanation]');
-    const progressCount = root.querySelector('[data-vc-flashcards-progress-count]');
-    const sessionBarFill = root.querySelector('[data-vc-flashcards-session-bar-fill]');
-    const kicker = root.querySelector('[data-vc-flashcards-kicker]');
-    const nextButtonLabel = root.querySelector('.vc-flashcards-next-label');
-    const summaryPrecision = root.querySelector('[data-vc-flashcards-summary-precision]');
-    const summaryScore = root.querySelector('[data-vc-flashcards-summary-score]');
+    const explanationEl = root.querySelector('[data-vc-study-sessions-explanation]');
+    const progressCount = root.querySelector('[data-vc-study-sessions-progress-count]');
+    const sessionBarFill = root.querySelector('[data-vc-study-sessions-session-bar-fill]');
+    const kicker = root.querySelector('[data-vc-study-sessions-kicker]');
+    const nextButtonLabel = root.querySelector('.vc-study-sessions-next-label');
+    const summaryPrecision = root.querySelector('[data-vc-study-sessions-summary-precision]');
+    const summaryScore = root.querySelector('[data-vc-study-sessions-summary-score]');
 
-    const summaryCorrectCount = root.querySelector('[data-vc-flashcards-correct-count]');
-    const summaryIncorrectCount = root.querySelector('[data-vc-flashcards-incorrect-count]');
-    const modalTitle = root.querySelector('[data-vc-flashcards-modal-title]');
-    const modalCopy = root.querySelector('[data-vc-flashcards-modal-copy]');
-    const countDisplay = root.querySelector('[data-vc-flashcards-count-display]');
-    const rangeLabel = root.querySelector('[data-vc-flashcards-range-label]');
-    const rangeInput = root.querySelector('[data-vc-flashcards-range]');
-    const optionsWrap = root.querySelector('[data-vc-flashcards-options]');
-    const confirmButton = root.querySelector('[data-vc-flashcards-confirm]');
+    const summaryCorrectCount = root.querySelector('[data-vc-study-sessions-correct-count]');
+    const summaryIncorrectCount = root.querySelector('[data-vc-study-sessions-incorrect-count]');
+    const modalTitle = root.querySelector('[data-vc-study-sessions-modal-title]');
+    const modalCopy = root.querySelector('[data-vc-study-sessions-modal-copy]');
+    const countDisplay = root.querySelector('[data-vc-study-sessions-count-display]');
+    const rangeLabel = root.querySelector('[data-vc-study-sessions-range-label]');
+    const rangeInput = root.querySelector('[data-vc-study-sessions-range]');
+    const optionsWrap = root.querySelector('[data-vc-study-sessions-options]');
+    const confirmButton = root.querySelector('[data-vc-study-sessions-confirm]');
+    const acsModal = root.querySelector('[data-vc-study-sessions-acs-modal]');
+    const acsModalTitle = root.querySelector('[data-vc-study-sessions-acs-modal-title]');
+    const acsModalCopy = root.querySelector('[data-vc-study-sessions-acs-modal-copy]');
+    const acsCountDisplay = root.querySelector('[data-vc-study-sessions-acs-count-display]');
+    const acsRangeLabel = root.querySelector('[data-vc-study-sessions-acs-range-label]');
+    const acsRangeInput = root.querySelector('[data-vc-study-sessions-acs-range]');
+    const acsOptionsWrap = root.querySelector('[data-vc-study-sessions-acs-options]');
+    const acsConfirmButton = root.querySelector('[data-vc-study-sessions-acs-confirm]');
+    const acsCodeList = root.querySelector('[data-vc-study-sessions-acs-code-list]');
+    const acsCodeSummary = root.querySelector('[data-vc-study-sessions-acs-code-summary]');
+    const acsCodeSearch = root.querySelector('[data-vc-study-sessions-acs-search]');
+    const acsWeakAreasButton = root.querySelector('[data-vc-study-sessions-acs-weak-areas]');
+    const acsClearButton = root.querySelector('[data-vc-study-sessions-acs-clear]');
     // Dashboard stat nodes only. Category/subtopic card metrics are rendered from category payloads.
-    const statHeaderCardsMastered = root.querySelector('[data-vc-flashcards-stat="cards-mastered"]');
-    const statTotalReviewed = root.querySelector('[data-vc-flashcards-stat="total-reviewed"]');
-    const statTopicsCompleted = root.querySelector('[data-vc-flashcards-stat="topics-completed"]');
+    const statHeaderCardsMastered = root.querySelector('[data-vc-study-sessions-stat="cards-mastered"]');
+    const statTotalReviewed = root.querySelector('[data-vc-study-sessions-stat="total-reviewed"]');
+    const statTopicsCompleted = root.querySelector('[data-vc-study-sessions-stat="topics-completed"]');
 
     // Estado vivo de la app: categoria activa, sesion, respuestas y modal.
     let currentCategory = null;
@@ -79,9 +92,12 @@
     let answeredCurrentCard = false;
     let currentExplanationHtml = '';
     let activeConfigCard = null;
-    const storageKey = 'vcFlashcardsState:' + window.location.pathname;
+    let activeConfigModal = 'default';
+    let selectedAcsCodes = new Set();
+    let weakAreasSortActive = false;
+    const storageKey = 'vcStudySessionsState:' + window.location.pathname;
 
-    // Persistencia: limpia el estado cuando el usuario sale de flashcards.
+    // Persistencia: limpia el estado cuando el usuario sale de Study sessions.
     function clearPersistedState() {
       try {
         window.sessionStorage.removeItem(storageKey);
@@ -94,9 +110,9 @@
         link.addEventListener('click', function () {
           try {
             const nextUrl = new URL(link.href, window.location.origin);
-            const nextView = nextUrl.searchParams.get('view') || 'flashcards';
+            const nextView = nextUrl.searchParams.get('view') || 'study-sessions';
 
-            if (nextView !== 'flashcards') {
+            if (nextView !== 'study-sessions') {
               clearPersistedState();
             }
           } catch (error) {}
@@ -183,7 +199,7 @@
       }
 
       if (categoryTotal) {
-        categoryTotal.textContent = String(Number(category.totalCards || 0)) + ' total flashcards';
+        categoryTotal.textContent = String(Number(category.totalCards || 0)) + ' total questions';
       }
     }
 
@@ -251,19 +267,19 @@
       kicker.textContent = '';
 
       const topRow = document.createElement('div');
-      topRow.className = 'vc-flashcards-session-context-row';
+      topRow.className = 'vc-study-sessions-session-context-row';
 
       if (topicLabel) {
         const topicChip = document.createElement('p');
-        // Fix: conserva la clase original del diseño mientras el texto se pinta dinamicamente.
-        topicChip.className = 'vc-flashcards-session-topic';
+        // Fix: conserva la clase original del dise�o mientras el texto se pinta dinamicamente.
+        topicChip.className = 'vc-study-sessions-session-topic';
         topicChip.textContent = topicLabel;
         topRow.appendChild(topicChip);
       }
 
       if (acsCode) {
         const acsChip = document.createElement('p');
-        acsChip.className = 'vc-flashcards-session-acs';
+        acsChip.className = 'vc-study-sessions-session-acs';
         acsChip.textContent = acsCode;
         topRow.appendChild(acsChip);
       }
@@ -274,8 +290,8 @@
 
       if (subtopicLabel) {
         const subtopicChip = document.createElement('p');
-        // Fix: conserva la clase original del diseño mientras el subtopic viene desde la tarjeta actual.
-        subtopicChip.className = 'vc-flashcards-session-subtopic';
+        // Fix: conserva la clase original del dise�o mientras el subtopic viene desde la tarjeta actual.
+        subtopicChip.className = 'vc-study-sessions-session-subtopic';
         subtopicChip.textContent = subtopicLabel;
         subtopicChip.title = subtopicLabel;
         kicker.appendChild(subtopicChip);
@@ -346,7 +362,7 @@
 
       if (!Array.isArray(subtopics) || subtopics.length === 0) {
         const empty = document.createElement('p');
-        empty.className = 'vc-flashcards-subtopics-empty';
+        empty.className = 'vc-study-sessions-subtopics-empty';
         empty.textContent = labels.noSubtopics || 'No subtopics have been added yet for this category.';
         subtopicsWrap.appendChild(empty);
         return;
@@ -363,11 +379,11 @@
         const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
         item.type = 'button';
-        item.className = 'vc-flashcards-subtopic-item';
+        item.className = 'vc-study-sessions-subtopic-item';
 
-        copy.className = 'vc-flashcards-subtopic-copy';
-        heading.className = 'vc-flashcards-subtopic-heading';
-        chevron.className = 'vc-flashcards-subtopic-chevron';
+        copy.className = 'vc-study-sessions-subtopic-copy';
+        heading.className = 'vc-study-sessions-subtopic-heading';
+        chevron.className = 'vc-study-sessions-subtopic-chevron';
         chevron.setAttribute('aria-hidden', 'true');
         chevronSvg.setAttribute('class', 'icono-flecha');
         chevronSvg.setAttribute('viewBox', '0 0 11 20');
@@ -427,17 +443,50 @@
       });
     }
 
+    // Modal: devuelve el set de nodos del modal activo.
+    function getModalControls() {
+      if (activeConfigModal === 'acs' && acsModal) {
+        return {
+          modal: acsModal,
+          title: acsModalTitle,
+          copy: acsModalCopy,
+          countDisplay: acsCountDisplay,
+          rangeLabel: acsRangeLabel,
+          rangeInput: acsRangeInput,
+          optionsWrap: acsOptionsWrap,
+          confirmButton: acsConfirmButton
+        };
+      }
+
+      return {
+        modal: modal,
+        title: modalTitle,
+        copy: modalCopy,
+        countDisplay: countDisplay,
+        rangeLabel: rangeLabel,
+        rangeInput: rangeInput,
+        optionsWrap: optionsWrap,
+        confirmButton: confirmButton
+      };
+    }
+
     // Modal: sincroniza slider, contador y botones rapidos.
     function updateModalSelection(value) {
       if (!pendingConfig) {
         return;
       }
 
-      pendingConfig.selectedCount = normalizeCount(value, pendingConfig.maxCards);
-      rangeInput.value = String(pendingConfig.selectedCount);
-      countDisplay.textContent = String(pendingConfig.selectedCount);
+      const controls = getModalControls();
 
-      optionsWrap.querySelectorAll('button').forEach(function (button) {
+      if (!controls.rangeInput || !controls.countDisplay || !controls.optionsWrap) {
+        return;
+      }
+
+      pendingConfig.selectedCount = normalizeCount(value, pendingConfig.maxCards);
+      controls.rangeInput.value = String(pendingConfig.selectedCount);
+      controls.countDisplay.textContent = String(pendingConfig.selectedCount);
+
+      controls.optionsWrap.querySelectorAll('button').forEach(function (button) {
         button.classList.toggle('is-active', Number(button.dataset.count) === pendingConfig.selectedCount);
       });
 
@@ -446,32 +495,44 @@
 
     // Modal: actualiza el relleno visual del range con una variable CSS.
     function updateRangeFill() {
-      const min = Number(rangeInput.min || 0);
-      const max = Number(rangeInput.max || 100);
-      const value = Number(rangeInput.value || min);
+      const controls = getModalControls();
+
+      if (!controls.rangeInput) {
+        return;
+      }
+
+      const min = Number(controls.rangeInput.min || 0);
+      const max = Number(controls.rangeInput.max || 100);
+      const value = Number(controls.rangeInput.value || min);
       const percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
 
-      rangeInput.style.setProperty('--vc-range-progress', percent + '%');
+      controls.rangeInput.style.setProperty('--vc-range-progress', percent + '%');
     }
 
     // Modal: dibuja los botones de cantidades predefinidas.
     function renderModalOptions(maxCards, mode) {
       const values = getOptionValues(maxCards, mode);
-      optionsWrap.innerHTML = '';
+      const controls = getModalControls();
+
+      if (!controls.optionsWrap) {
+        return;
+      }
+
+      controls.optionsWrap.innerHTML = '';
 
       values.forEach(function (value) {
         const button = document.createElement('button');
         const label = document.createElement('span');
         button.type = 'button';
-        button.className = 'vc-flashcards-count-option';
+        button.className = 'vc-study-sessions-count-option';
         button.dataset.count = String(value);
-        label.className = 'vc-flashcards-count-option-label';
+        label.className = 'vc-study-sessions-count-option-label';
         label.textContent = String(value);
         button.appendChild(label);
         button.addEventListener('click', function () {
           updateModalSelection(value);
         });
-        optionsWrap.appendChild(button);
+        controls.optionsWrap.appendChild(button);
       });
 
       if (mode !== 'subcategory') {
@@ -482,15 +543,145 @@
       const allLabel = document.createElement('span');
       const allCount = normalizeCount(maxCards, maxCards);
       allButton.type = 'button';
-      allButton.className = 'vc-flashcards-count-option vc-flashcards-count-option--all';
+      allButton.className = 'vc-study-sessions-count-option vc-study-sessions-count-option--all';
       allButton.dataset.count = String(allCount);
-      allLabel.className = 'vc-flashcards-count-option-label';
+      allLabel.className = 'vc-study-sessions-count-option-label';
       allLabel.textContent = labels.allQuestions || 'All questions';
       allButton.appendChild(allLabel);
       allButton.addEventListener('click', function () {
         updateModalSelection(allCount);
       });
-      optionsWrap.appendChild(allButton);
+      controls.optionsWrap.appendChild(allButton);
+    }
+
+    function updateAcsCodeSummary(category) {
+      if (!acsCodeSummary) {
+        return;
+      }
+
+      const acsCodes = Array.isArray(category && category.acsCodes) ? category.acsCodes : [];
+      const selectedItems = acsCodes.filter(function (item) {
+        return selectedAcsCodes.has(String(item.code || ''));
+      });
+      const selectedCards = selectedItems.reduce(function (sum, item) {
+        return sum + Number(item.totalCards || 0);
+      }, 0);
+
+      acsCodeSummary.textContent = String(selectedCards) + ' ' + (selectedCards === 1 ? 'question' : 'questions') + ' \u00b7 ' + String(selectedItems.length) + ' ' + (selectedItems.length === 1 ? 'code' : 'codes');
+    }
+
+    function normalizeAcsSearchValue(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    // ACS Code workspace: pinta los codigos disponibles de la categoria activa.
+    function renderAcsCodeList(category, searchTerm) {
+      if (!acsCodeList || !acsCodeSummary) {
+        return;
+      }
+
+      const acsCodes = Array.isArray(category && category.acsCodes) ? category.acsCodes.slice() : [];
+      acsCodes.sort(function (first, second) {
+        if (weakAreasSortActive) {
+          const firstAttempted = Number(first.attemptedCards || 0);
+          const secondAttempted = Number(second.attemptedCards || 0);
+
+          if ((firstAttempted > 0) !== (secondAttempted > 0)) {
+            return firstAttempted > 0 ? -1 : 1;
+          }
+
+          if (firstAttempted > 0 && secondAttempted > 0) {
+            const firstApproval = (firstAttempted - Number(first.incorrectCards || 0)) / firstAttempted;
+            const secondApproval = (secondAttempted - Number(second.incorrectCards || 0)) / secondAttempted;
+
+            if (firstApproval !== secondApproval) {
+              return firstApproval - secondApproval;
+            }
+
+            const incorrectDifference = Number(second.incorrectCards || 0) - Number(first.incorrectCards || 0);
+            if (incorrectDifference !== 0) {
+              return incorrectDifference;
+            }
+          }
+        }
+
+        return String(first.code || '').localeCompare(String(second.code || ''), undefined, { numeric: true });
+      });
+      const normalizedSearch = normalizeAcsSearchValue(searchTerm);
+      const visibleCodes = acsCodes.filter(function (item) {
+        const topics = Array.isArray(item.topics) ? item.topics : [];
+        const searchableText = normalizeAcsSearchValue([item.code].concat(topics).join(' '));
+
+        return !normalizedSearch || searchableText.indexOf(normalizedSearch) !== -1;
+      });
+      acsCodeList.innerHTML = '';
+
+      if (visibleCodes.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'vc-study-sessions-acs-code-empty';
+        empty.textContent = acsCodes.length
+          ? 'No ACS codes match your search.'
+          : 'No ACS codes are available for this category.';
+        acsCodeList.appendChild(empty);
+      } else {
+        visibleCodes.forEach(function (item) {
+          const label = document.createElement('label');
+          const checkbox = document.createElement('input');
+          const copy = document.createElement('span');
+          const code = document.createElement('strong');
+          const count = document.createElement('span');
+          const cardCount = Number(item.totalCards || 0);
+
+          label.className = 'vc-study-sessions-acs-code-item';
+          checkbox.type = 'checkbox';
+          checkbox.value = String(item.code || '');
+          checkbox.dataset.vcStudySessionsAcsCode = String(item.code || '');
+          checkbox.checked = selectedAcsCodes.has(checkbox.value);
+          label.classList.toggle('is-selected', checkbox.checked);
+          copy.className = 'vc-study-sessions-acs-code-item-copy';
+          code.textContent = String(item.code || 'ACS Code');
+          count.textContent = String(cardCount) + ' ' + (cardCount === 1 ? 'question' : 'questions');
+
+          checkbox.addEventListener('change', function () {
+            if (checkbox.checked) {
+              selectedAcsCodes.add(checkbox.value);
+            } else {
+              selectedAcsCodes.delete(checkbox.value);
+            }
+
+            label.classList.toggle('is-selected', checkbox.checked);
+            updateAcsCodeSummary(category);
+          });
+
+          copy.appendChild(code);
+          copy.appendChild(count);
+          label.appendChild(checkbox);
+          label.appendChild(copy);
+          acsCodeList.appendChild(label);
+        });
+      }
+
+      updateAcsCodeSummary(category);
+    }
+
+    function selectWeakAcsCodes() {
+      weakAreasSortActive = !weakAreasSortActive;
+      acsWeakAreasButton.classList.toggle('is-active', weakAreasSortActive);
+      acsWeakAreasButton.setAttribute('aria-pressed', weakAreasSortActive ? 'true' : 'false');
+      renderAcsCodeList(currentCategory, acsCodeSearch ? acsCodeSearch.value : '');
+    }
+
+    function clearSelectedAcsCodes() {
+      selectedAcsCodes.clear();
+      weakAreasSortActive = false;
+      acsWeakAreasButton.classList.remove('is-active');
+      acsWeakAreasButton.setAttribute('aria-pressed', 'false');
+      renderAcsCodeList(currentCategory, acsCodeSearch ? acsCodeSearch.value : '');
     }
 
     // Detail: marca la tarjeta que disparo el modal de configuracion.
@@ -511,7 +702,14 @@
       const maxCards = Number(config.maxCards || 0);
       if (maxCards < 1) {
         setActiveConfigCard(null);
-        setFeedback(labels.noCards || 'No flashcards were found for this selection.', 'error');
+        setFeedback(labels.noCards || 'No questions were found for this selection.', 'error');
+        return;
+      }
+
+      activeConfigModal = config.modalVariant === 'acs' ? 'acs' : 'default';
+      const controls = getModalControls();
+
+      if (!controls.modal || !controls.title || !controls.copy || !controls.rangeInput || !controls.rangeLabel) {
         return;
       }
 
@@ -525,31 +723,56 @@
         selectedCount: normalizeCount(Math.min(20, maxCards), maxCards)
       };
 
-      modalTitle.textContent = config.title;
-      modalCopy.textContent = config.description;
-      rangeInput.min = '1';
-      rangeInput.max = String(Math.max(1, Math.min(50, maxCards)));
-      rangeLabel.textContent = '1 - ' + String(Math.max(1, Math.min(50, maxCards)));
+      controls.title.textContent = config.title;
+      controls.copy.textContent = config.description;
+      controls.rangeInput.min = '1';
+      controls.rangeInput.max = String(Math.max(1, Math.min(50, maxCards)));
+      controls.rangeLabel.textContent = '1 - ' + String(Math.max(1, Math.min(50, maxCards)));
 
       renderModalOptions(maxCards, pendingConfig.mode);
       updateModalSelection(pendingConfig.selectedCount);
 
-      modal.hidden = false;
-      document.body.classList.add('vc-flashcards-modal-open');
+      if (activeConfigModal === 'acs') {
+        selectedAcsCodes.clear();
+        weakAreasSortActive = false;
+        if (acsWeakAreasButton) {
+          acsWeakAreasButton.classList.remove('is-active');
+          acsWeakAreasButton.setAttribute('aria-pressed', 'false');
+        }
+        if (acsCodeSearch) {
+          acsCodeSearch.value = '';
+        }
+        renderAcsCodeList(currentCategory, '');
+      }
+
+      if (modal) {
+        modal.hidden = true;
+      }
+      if (acsModal) {
+        acsModal.hidden = true;
+      }
+      controls.modal.hidden = false;
+      document.body.classList.add('vc-study-sessions-modal-open');
       persistState();
     }
 
     // Modal: cierra el dialogo y limpia el estado visual de la tarjeta activa.
     function closeConfigModal() {
-      modal.hidden = true;
-      document.body.classList.remove('vc-flashcards-modal-open');
+      if (modal) {
+        modal.hidden = true;
+      }
+      if (acsModal) {
+        acsModal.hidden = true;
+      }
+      document.body.classList.remove('vc-study-sessions-modal-open');
+      activeConfigModal = 'default';
       setActiveConfigCard(null);
       persistState();
     }
 
     // Session reference image: obtiene la URL real de la imagen o fallback disponible.
     function getReferenceImageUrl(card) {
-      const fallbackUrl = referenceImageButton ? String(referenceImageButton.dataset.vcFlashcardsReferenceImageFallback || '') : '';
+      const fallbackUrl = referenceImageButton ? String(referenceImageButton.dataset.vcStudySessionsReferenceImageFallback || '') : '';
       return card && card.questionImageUrl ? String(card.questionImageUrl) : fallbackUrl;
     }
 
@@ -587,12 +810,16 @@
     function setSessionStartLoading(isLoading) {
       isStartingSession = isLoading;
 
-      if (confirmButton) {
-        confirmButton.disabled = isLoading;
-        confirmButton.textContent = isLoading
+      [confirmButton, acsConfirmButton].forEach(function (button) {
+        if (!button) {
+          return;
+        }
+
+        button.disabled = isLoading;
+        button.textContent = isLoading
           ? (labels.starting || 'Starting...')
           : (labels.start || 'Start');
-      }
+      });
     }
 
     // Session: actualiza el texto del toggle de explicacion.
@@ -655,7 +882,7 @@
       const label = document.createElement('strong');
 
       button.type = 'button';
-      button.className = 'vc-flashcards-answer';
+      button.className = 'vc-study-sessions-answer';
       button.dataset.answerKey = key;
       badge.textContent = key.toUpperCase();
       label.textContent = text;
@@ -680,7 +907,7 @@
     // Session: prepara explicacion sin exponer codigos internos de referencia.
     function renderExplanation(card, isCorrect) {
       currentExplanationHtml =
-        '<div class="vc-flashcards-explanation-body">' +
+        '<div class="vc-study-sessions-explanation-body">' +
           card.explanation +
         '</div>';
 
@@ -726,7 +953,7 @@
       nextButton.hidden = false;
       nextButton.disabled = false;
 
-      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (answerButton) {
+      answersWrap.querySelectorAll('.vc-study-sessions-answer').forEach(function (answerButton) {
         answerButton.disabled = true;
 
         if (answerButton.dataset.answerKey === attempt.correctAnswer) {
@@ -771,7 +998,7 @@
       }
       questionEl.textContent = card.question;
       if (referenceImageButton) {
-        // Solo mostrar el botón si la tarjeta tiene una imagen real (no usar fallback para la decisión de visibilidad)
+        // Solo mostrar el bot�n si la tarjeta tiene una imagen real (no usar fallback para la decisi�n de visibilidad)
         referenceImageButton.hidden = !card.questionImageUrl;
       }
       renderSessionKicker(card.topicLabel, card.subtopicLabel, card.acsCode);
@@ -801,7 +1028,7 @@
       nextButton.hidden = false;
       nextButton.disabled = false;
 
-      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (answerButton) {
+      answersWrap.querySelectorAll('.vc-study-sessions-answer').forEach(function (answerButton) {
         answerButton.disabled = true;
         if (answerButton.dataset.answerKey === card.correctAnswer) {
           answerButton.dataset.state = 'correct';
@@ -842,7 +1069,7 @@
       nextButton.hidden = false;
       nextButton.disabled = false;
 
-      answersWrap.querySelectorAll('.vc-flashcards-answer').forEach(function (answerButton) {
+      answersWrap.querySelectorAll('.vc-study-sessions-answer').forEach(function (answerButton) {
         answerButton.disabled = true;
         if (answerButton.dataset.answerKey === card.correctAnswer) {
           answerButton.dataset.state = 'correct';
@@ -884,11 +1111,11 @@
     function finishSession() {
       const body = new window.URLSearchParams();
       body.append('action', 'vc_flashcards_complete_session');
-      body.append('nonce', window.vcFlashcardsData.nonce);
+      body.append('nonce', window.vcStudySessionsData.nonce);
       body.append('session_id', String(sessionId));
       body.append('attempts', JSON.stringify(attempts));
 
-      fetch(window.vcFlashcardsData.ajaxUrl, {
+      fetch(window.vcStudySessionsData.ajaxUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -934,12 +1161,15 @@
 
       const body = new window.URLSearchParams();
       body.append('action', 'vc_flashcards_start_session');
-      body.append('nonce', window.vcFlashcardsData.nonce);
+      body.append('nonce', window.vcStudySessionsData.nonce);
       body.append('mode', config.mode);
       body.append('term_id', String(config.termId || 0));
       body.append('card_limit', String(config.selectedCount || 10));
+      if (Array.isArray(config.acsCodes) && config.acsCodes.length > 0) {
+        body.append('acs_codes', JSON.stringify(config.acsCodes));
+      }
 
-      fetch(window.vcFlashcardsData.ajaxUrl, {
+      fetch(window.vcStudySessionsData.ajaxUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -978,19 +1208,19 @@
     }
 
     // Eventos: navegacion hacia categorias desde el home.
-    root.querySelectorAll('[data-vc-flashcards-open-category]').forEach(function (button) {
+    root.querySelectorAll('[data-vc-study-sessions-open-category]').forEach(function (button) {
       button.addEventListener('click', function () {
-        openCategory(Number(button.dataset.vcFlashcardsOpenCategory));
+        openCategory(Number(button.dataset.vcStudySessionsOpenCategory));
       });
     });
 
     // Eventos: apertura de modal para categoria, random y global random.
-    root.querySelectorAll('[data-vc-flashcards-launch]').forEach(function (button) {
+    root.querySelectorAll('[data-vc-study-sessions-launch]').forEach(function (button) {
       button.addEventListener('click', function () {
-        const mode = button.dataset.vcFlashcardsLaunch;
+        const mode = button.dataset.vcStudySessionsLaunch;
         const isRandom = mode === 'random';
         const isGlobalRandom = mode === 'global-random';
-        const launchCard = button.closest('[data-vc-flashcards-launch-card]');
+        const launchCard = button.closest('[data-vc-study-sessions-launch-card]');
 
         if (!isGlobalRandom && !currentCategory) {
           return;
@@ -999,14 +1229,15 @@
         setActiveConfigCard(launchCard);
 
         openConfigModal({
+          modalVariant: isGlobalRandom || isRandom ? 'default' : 'acs',
           mode: isGlobalRandom ? 'global-random' : (isRandom ? 'random' : 'category'),
           termId: isGlobalRandom ? 0 : Number(currentCategory.id),
-          title: isGlobalRandom ? 'Global Random Practice' : (isRandom ? 'Study in random mode' : 'Study the full category'),
+          title: isGlobalRandom ? 'Global Random Practice' : (isRandom ? 'Study in random mode' : 'Study by ACS Code'),
           description: isGlobalRandom
             ? 'Mix cards from all categories for a comprehensive review.'
             : (isRandom
-              ? 'Cards will be shuffled randomly within this category'
-              : 'Select how many cards you want to study in sequential order'),
+              ? 'Questions will be shuffled randomly within this category'
+              : 'Select how many ACS-code questions you want to study from this category.'),
           maxCards: isGlobalRandom ? Number(categories.reduce(function (sum, item) { return sum + Number(item.totalCards || 0); }, 0)) : Number(currentCategory.totalCards || 0),
           kicker: isGlobalRandom ? 'Global Random' : currentCategory.name
         });
@@ -1014,15 +1245,15 @@
     });
 
     // Eventos: permite activar una tarjeta completa sin duplicar el click del boton interno.
-    root.querySelectorAll('[data-vc-flashcards-launch-card]').forEach(function (card) {
-      const launchButton = card.querySelector('[data-vc-flashcards-launch]');
+    root.querySelectorAll('[data-vc-study-sessions-launch-card]').forEach(function (card) {
+      const launchButton = card.querySelector('[data-vc-study-sessions-launch]');
 
       if (!launchButton) {
         return;
       }
 
       card.addEventListener('click', function (event) {
-        if (event.target.closest('[data-vc-flashcards-launch]')) {
+        if (event.target.closest('[data-vc-study-sessions-launch]')) {
           return;
         }
 
@@ -1034,7 +1265,7 @@
           return;
         }
 
-        if (event.target.closest('[data-vc-flashcards-launch]')) {
+        if (event.target.closest('[data-vc-study-sessions-launch]')) {
           return;
         }
 
@@ -1044,11 +1275,15 @@
     });
 
     // Eventos: controles compartidos de regreso, cierre de modal y avance.
-    root.querySelectorAll('[data-vc-flashcards-back]').forEach(function (button) {
+    root.querySelectorAll('[data-vc-study-sessions-back]').forEach(function (button) {
       button.addEventListener('click', openHome);
     });
 
-    root.querySelectorAll('[data-vc-flashcards-close]').forEach(function (button) {
+    root.querySelectorAll('[data-vc-study-sessions-close]').forEach(function (button) {
+      button.addEventListener('click', closeConfigModal);
+    });
+
+    root.querySelectorAll('[data-vc-study-sessions-acs-close]').forEach(function (button) {
       button.addEventListener('click', closeConfigModal);
     });
 
@@ -1076,6 +1311,26 @@
       updateModalSelection(Number(rangeInput.value));
     });
 
+    if (acsRangeInput) {
+      acsRangeInput.addEventListener('input', function () {
+        updateModalSelection(Number(acsRangeInput.value));
+      });
+    }
+
+    if (acsCodeSearch) {
+      acsCodeSearch.addEventListener('input', function () {
+        renderAcsCodeList(currentCategory, acsCodeSearch.value);
+      });
+    }
+
+    if (acsWeakAreasButton) {
+      acsWeakAreasButton.addEventListener('click', selectWeakAcsCodes);
+    }
+
+    if (acsClearButton) {
+      acsClearButton.addEventListener('click', clearSelectedAcsCodes);
+    }
+
     confirmButton.addEventListener('click', function () {
       if (!pendingConfig) {
         return;
@@ -1083,6 +1338,35 @@
 
       startSession(pendingConfig);
     });
+
+    if (acsConfirmButton) {
+      acsConfirmButton.addEventListener('click', function () {
+        if (!pendingConfig) {
+          return;
+        }
+
+        const selectedCodes = Array.from(selectedAcsCodes);
+        if (selectedCodes.length === 0) {
+          setFeedback('Select at least one ACS Code.', 'error');
+          return;
+        }
+
+        const availableCodes = Array.isArray(currentCategory && currentCategory.acsCodes)
+          ? currentCategory.acsCodes
+          : [];
+        const selectedQuestionCount = availableCodes.reduce(function (total, item) {
+          return selectedAcsCodes.has(String(item.code || ''))
+            ? total + Number(item.totalCards || 0)
+            : total;
+        }, 0);
+        const acsConfig = Object.assign({}, pendingConfig, {
+          acsCodes: selectedCodes,
+          selectedCount: Math.max(1, Math.min(50, selectedQuestionCount))
+        });
+
+        startSession(acsConfig);
+      });
+    }
 
     nextButton.addEventListener('click', function () {
       cardIndex += 1;
@@ -1132,7 +1416,7 @@
       }
 
       const key = event.key.toLowerCase();
-      const answerButton = answersWrap.querySelector('.vc-flashcards-answer[data-answer-key="' + key + '"]');
+      const answerButton = answersWrap.querySelector('.vc-study-sessions-answer[data-answer-key="' + key + '"]');
       if (answerButton && !answerButton.disabled) {
         event.preventDefault();
         answerButton.click();
@@ -1149,6 +1433,6 @@
 
   // Inicializa todas las instancias del shortcode presentes en la pagina.
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.vc-flashcards-app').forEach(initFlashcardsApp);
+    document.querySelectorAll('.vc-study-sessions-app').forEach(initStudySessionsApp);
   });
 }());

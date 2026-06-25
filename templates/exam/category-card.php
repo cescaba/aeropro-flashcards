@@ -19,8 +19,8 @@ if (!defined('ABSPATH')) {
           _n('%d subtopic', '%d subtopics', $category['subtopicCount'], 'vc-flashcards'),
           $category['subtopicCount']
         ) . ' · ' . sprintf(
-          /* translators: %d: total cards */
-          _n('%d card available', '%d cards available', $category['totalCards'], 'vc-flashcards'),
+          /* translators: %d: total questions */
+          _n('%d question available', '%d questions available', $category['totalCards'], 'vc-flashcards'),
           $category['totalCards']
         )
       ); ?>

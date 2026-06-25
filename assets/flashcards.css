@@ -4,102 +4,102 @@
    Estructura raiz, herencia tipografica y vistas principales del modulo.
    ========================================================================== */
 
-/* Contenedor principal de la app de flashcards. */
-.vc-flashcards-app {
-  --vc-flashcards-font: "Poppins", sans-serif;
-  /* Flashcards buttons: altura y tipografia unificadas con Cancel del modal. */
-  --vc-flashcards-button-height: 40px;
-  --vc-flashcards-button-height-mobile: 40px;
-  --vc-flashcards-button-font-weight: 500;
-  --vc-flashcards-button-font-size: 16px;
-  --vc-flashcards-button-line-height: 24px;
-  --vc-flashcards-button-letter-spacing: -0.31px;
-  --vc-flashcards-button-font-size-mobile: 16px;
-  --vc-flashcards-button-line-height-mobile: 24px;
-  --vc-flashcards-button-letter-spacing-mobile: -0.31px;
+/* Contenedor principal de la app de Study sessions. */
+.vc-study-sessions-app {
+  --vc-study-sessions-font: "Poppins", sans-serif;
+  /* Study sessions buttons: altura y tipografia unificadas con Cancel del modal. */
+  --vc-study-sessions-button-height: 40px;
+  --vc-study-sessions-button-height-mobile: 40px;
+  --vc-study-sessions-button-font-weight: 500;
+  --vc-study-sessions-button-font-size: 16px;
+  --vc-study-sessions-button-line-height: 24px;
+  --vc-study-sessions-button-letter-spacing: -0.31px;
+  --vc-study-sessions-button-font-size-mobile: 16px;
+  --vc-study-sessions-button-line-height-mobile: 24px;
+  --vc-study-sessions-button-letter-spacing-mobile: -0.31px;
   display: grid;
   gap: 24px;
   color: #212121;
-  font-family: var(--vc-flashcards-font);
-  --vc-flashcards-surface-radius: 12px;
+  font-family: var(--vc-study-sessions-font);
+  --vc-study-sessions-surface-radius: 12px;
 }
 
-.vc-flashcards-app,
-.vc-flashcards-app *,
-.vc-flashcards-app *::before,
-.vc-flashcards-app *::after {
-  font-family: var(--vc-flashcards-font);
+.vc-study-sessions-app,
+.vc-study-sessions-app *,
+.vc-study-sessions-app *::before,
+.vc-study-sessions-app *::after {
+  font-family: var(--vc-study-sessions-font);
 }
 
 
 
 
 /* Estructura base de las grillas principales del modulo. */
-.vc-flashcards-config-grid {
+.vc-study-sessions-config-grid {
   display: grid;
   gap: 24px;
 }
 
-.vc-flashcards-view[hidden] {
+.vc-study-sessions-view[hidden] {
   display: none !important;
 }
 
-.vc-flashcards-home {
+.vc-study-sessions-home {
   display: grid;
   gap: 24px;
 }
 
-.vc-flashcards-stats,
-.vc-flashcards-category-grid {
+.vc-study-sessions-stats,
+.vc-study-sessions-category-grid {
   display: grid;
   gap: 16px;
 }
 
 /* Distribuye las tarjetas de estadisticas en tres columnas. */
-.vc-flashcards-stats {
+.vc-study-sessions-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 /* Oculta las estadisticas en vistas internas de detalle, sesion y resumen. */
-.vc-flashcards-app[data-active-view="detail"] .vc-flashcards-section-header,
-.vc-flashcards-app[data-active-view="session"] .vc-flashcards-section-header,
-.vc-flashcards-app[data-active-view="summary"] .vc-flashcards-section-header,
-.vc-flashcards-app[data-active-view="detail"] .vc-flashcards-stats,
-.vc-flashcards-app[data-active-view="session"] .vc-flashcards-stats,
-.vc-flashcards-app[data-active-view="summary"] .vc-flashcards-stats {
+.vc-study-sessions-app[data-active-view="detail"] .vc-study-sessions-section-header,
+.vc-study-sessions-app[data-active-view="session"] .vc-study-sessions-section-header,
+.vc-study-sessions-app[data-active-view="summary"] .vc-study-sessions-section-header,
+.vc-study-sessions-app[data-active-view="detail"] .vc-study-sessions-stats,
+.vc-study-sessions-app[data-active-view="session"] .vc-study-sessions-stats,
+.vc-study-sessions-app[data-active-view="summary"] .vc-study-sessions-stats {
   display: none;
 }
 
-/* Oculta el encabezado del dashboard solo en vistas internas de flashcards y elimina su hueco. */
-.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) > .vc-dashboard-heading,
-.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) > .vc-dashboard-heading,
-.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="summary"]) > .vc-dashboard-heading {
+/* Oculta el encabezado del dashboard solo en vistas internas de Study sessions y elimina su hueco. */
+.vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) > .vc-dashboard-heading,
+.vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) > .vc-dashboard-heading,
+.vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="summary"]) > .vc-dashboard-heading {
   display: none;
 }
 
-.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+.vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) {
   padding: 50px 41px 57px;
 }
 
-.vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+.vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) {
   padding: 50px 80px 274px;
 }
 
 
 
 /* Distribuye las categorias principales en tres columnas. */
-.vc-flashcards-category-grid {
+.vc-study-sessions-category-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 /* Distribuye las tarjetas de configuracion en dos columnas. */
-.vc-flashcards-config-grid {
+.vc-study-sessions-config-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 32px;
 }
 
 /* Separa la grilla principal de categorias del bloque global que vive debajo en home. */
-.vc-flashcards-category-grid + .vc-flashcards-global-section {
+.vc-study-sessions-category-grid + .vc-study-sessions-global-section {
   margin-top: 0;
 }
 
@@ -111,7 +111,7 @@
 
 
 /* Tarjeta de estadistica con fondo suave para metricas destacadas. */
-.vc-flashcards-stat-card {
+.vc-study-sessions-stat-card {
   opacity: 1;
   padding: 12px 20px;
   border: 1px solid #E2E8F0;
@@ -119,7 +119,7 @@
   background: #F1F5F9;
 }
 
-.vc-flashcards-category-card {
+.vc-study-sessions-category-card {
   display: grid;
   gap: 16px;
   border: 1px solid #E2E8F0;
@@ -127,25 +127,25 @@
   background: #FFFFFF;
 }
 
-.vc-flashcards-home .vc-flashcards-empty {
-  border-radius: var(--vc-flashcards-surface-radius);
+.vc-study-sessions-home .vc-study-sessions-empty {
+  border-radius: var(--vc-study-sessions-surface-radius);
 }
 
-.vc-flashcards-empty {
+.vc-study-sessions-empty {
   padding: 0;
   font-size: 13px;
   font-weight: 400;
 }
 
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
-.vc-flashcards-stat-card-content {
+.vc-study-sessions-stat-card-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 /* Mantiene el icono a la izquierda con una caja estable y centrada verticalmente. */
-.vc-flashcards-stat-card-icon {
+.vc-study-sessions-stat-card-icon {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -158,53 +158,57 @@
 }
 
 /* Evita que la imagen del icono se desplace por su comportamiento inline. */
-.vc-flashcards-stat-card-icon img {
+.vc-study-sessions-stat-card-icon img {
   display: block;
   width: 28px;
   height: 28px;
 }
 
 /* Bloque tipografico de cada metrica alineado con el icono lateral. */
-.vc-flashcards-stat-card-copy {
+.vc-study-sessions-stat-card-copy {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
 }
 
 /* Color secundario para textos descriptivos y ayudas visuales. */
-.vc-flashcards-stat-card small,
-.vc-flashcards-section-header p,
-.vc-flashcards-detail-header p,
-.vc-flashcards-category-card p,
-.vc-flashcards-config-card p,
-.vc-flashcards-subtopics-header p,
-.vc-flashcards-subtopic-copy span,
-.vc-flashcards-feedback,
-.vc-flashcards-modal-count span,
-.vc-flashcards-subtopics-empty {
+.vc-study-sessions-stat-card small,
+.vc-study-sessions-section-header p,
+.vc-study-sessions-detail-header p,
+.vc-study-sessions-category-card p,
+.vc-study-sessions-config-card p,
+.vc-study-sessions-subtopics-header p,
+.vc-study-sessions-subtopic-copy span,
+.vc-study-sessions-feedback,
+.vc-study-sessions-modal-count span,
+.vc-study-sessions-subtopics-empty {
   color: #666666;
 }
 
-.vc-flashcards-modal-count span,
-.vc-flashcards-summary-accuracy-title,
-.vc-flashcards-category-meta {
+.vc-study-sessions-modal-count span,
+.vc-study-sessions-summary-accuracy-title,
+.vc-study-sessions-category-meta {
   font-size: 14px;
 }
 
-.vc-flashcards-summary-accuracy-title {
+.vc-study-sessions-modal-count span {
+  line-height: 20px;
+}
+
+.vc-study-sessions-summary-accuracy-title {
   font-weight: 400;
   line-height: 20px;
   letter-spacing: -0.15px;
 }
 
-.vc-flashcards-stats .vc-flashcards-stat-card-copy small {
+.vc-study-sessions-stats .vc-study-sessions-stat-card-copy small {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
 }
 
 /* Valor principal destacado dentro de cada tarjeta de estadistica. */
-[data-vc-flashcards-stat] {
+[data-vc-study-sessions-stat] {
   display: block;
   margin-top: 0;
   color: #0ea44b;
@@ -215,17 +219,17 @@
 }
 
 /* Estilo base de los encabezados principales del modulo. */
-.vc-flashcards-section-header h2,
-.vc-flashcards-detail-header h2,
-.vc-flashcards-config-card h3,
-.vc-flashcards-subtopics-header h3,
-.vc-flashcards-card h4,
-.vc-flashcards-summary-box h3 {
+.vc-study-sessions-section-header h2,
+.vc-study-sessions-detail-header h2,
+.vc-study-sessions-config-card h3,
+.vc-study-sessions-subtopics-header h3,
+.vc-study-sessions-card h4,
+.vc-study-sessions-summary-box h3 {
   margin: 0px;
   color: #212121;
 }
 
-.vc-flashcards-detail-header [data-vc-flashcards-category-title] {
+.vc-study-sessions-detail-header [data-vc-study-sessions-category-title] {
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
@@ -234,18 +238,18 @@
 }
 
 /* Unifica el tamano de los encabezados secundarios usados en cards y subtopics. */
-.vc-flashcards-config-card h3,
-.vc-flashcards-subtopics-header h3 {
+.vc-study-sessions-config-card h3,
+.vc-study-sessions-subtopics-header h3 {
   font-size: 16px;
 }
 
-.vc-flashcards-subtopics-header h3 {
+.vc-study-sessions-subtopics-header h3 {
   font-weight: 400;
   line-height: 24px;
   letter-spacing: -0.31px;
 }
 
-.vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
+.vc-study-sessions-config-grid .vc-study-sessions-card-cardtitle {
   margin: 0;
   font-weight: 400;
   font-size: 16px;
@@ -254,7 +258,7 @@
 }
 
 
-.vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
+.vc-study-sessions-config-grid .vc-study-sessions-card-cardsubtitle {
   margin: 0;
   font-weight: 400;
   font-size: 14px;
@@ -265,7 +269,7 @@
 
 
 /* Titulo principal de la pregunta dentro de la card. */
-.vc-flashcards-card [data-vc-flashcards-question] {
+.vc-study-sessions-card [data-vc-study-sessions-question] {
   margin-bottom: 30px;
   font-weight: 400;
   font-size: 18px;
@@ -274,7 +278,7 @@
 }
 
 /* Reference image trigger: bloque dedicado para abrir la imagen asociada a la pregunta. */
-.vc-flashcards-reference-image {
+.vc-study-sessions-reference-image {
   width: 100%;
   min-height: 80px;
   display: flex;
@@ -283,7 +287,7 @@
   margin: 0 0 30px;
   padding: 16px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #F8FAFC;
   color: #212121;
   text-align: left;
@@ -291,7 +295,7 @@
   box-sizing: border-box;
 }
 
-.vc-flashcards-reference-image-control {
+.vc-study-sessions-reference-image-control {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr);
   align-items: center;
@@ -300,9 +304,9 @@
   height: 100%;
 }
 
-.vc-flashcards-reference-image:hover,
-.vc-flashcards-reference-image:focus,
-.vc-flashcards-reference-image:focus-visible {
+.vc-study-sessions-reference-image:hover,
+.vc-study-sessions-reference-image:focus,
+.vc-study-sessions-reference-image:focus-visible {
   background: #F8FAFC;
   border-color: #E2E8F0;
   color: #212121;
@@ -310,27 +314,27 @@
   box-shadow: none;
 }
 
-.vc-flashcards-reference-image[hidden] {
+.vc-study-sessions-reference-image[hidden] {
   display: none !important;
 }
 
-.vc-flashcards-reference-image:not(.is-expanded) {
+.vc-study-sessions-reference-image:not(.is-expanded) {
   height: 82px;
 }
 
-.vc-flashcards-reference-image.is-expanded {
+.vc-study-sessions-reference-image.is-expanded {
   height: auto;
 }
 
-.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview {
+.vc-study-sessions-reference-image.is-expanded .vc-study-sessions-reference-image-preview {
   margin-left: -16px;
   margin-right: -16px;
   margin-bottom: -16px;
   width: calc(100% + 32px);
-  border-radius: 0 0 var(--vc-flashcards-surface-radius) var(--vc-flashcards-surface-radius);
+  border-radius: 0 0 var(--vc-study-sessions-surface-radius) var(--vc-study-sessions-surface-radius);
 }
 
-.vc-flashcards-reference-image-icon-wrap {
+.vc-study-sessions-reference-image-icon-wrap {
   width: 48px;
   height: 48px;
   align-self: center;
@@ -341,24 +345,24 @@
   place-items: center;
 }
 
-.vc-flashcards-reference-image-icon-wrap .image-icon {
+.vc-study-sessions-reference-image-icon-wrap .image-icon {
   display: block;
   width: 25px;
   height: 25px;
 }
 
-.vc-flashcards-reference-image-copy {
+.vc-study-sessions-reference-image-copy {
   min-width: 0;
   display: grid;
   align-self: center;
 }
 
-.vc-flashcards-reference-image-title,
-.vc-flashcards-reference-image-subtitle {
+.vc-study-sessions-reference-image-title,
+.vc-study-sessions-reference-image-subtitle {
   display: block;
 }
 
-.vc-flashcards-reference-image-title {
+.vc-study-sessions-reference-image-title {
   color: #212121;
   font-weight: 400;
   font-style: normal;
@@ -367,7 +371,7 @@
   letter-spacing: -0.3px;
 }
 
-.vc-flashcards-reference-image-subtitle {
+.vc-study-sessions-reference-image-subtitle {
   color: #666666;
   font-weight: 400;
   font-style: normal;
@@ -376,7 +380,7 @@
   letter-spacing: -0.15px;
 }
 
-.vc-flashcards-reference-image-chevron {
+.vc-study-sessions-reference-image-chevron {
   width: 24px;
   height: 24px;
   align-self: center;
@@ -386,21 +390,21 @@
   transition: transform .18s ease;
 }
 
-.vc-flashcards-reference-image-chevron .chevron-right-icon {
+.vc-study-sessions-reference-image-chevron .chevron-right-icon {
   display: block;
   width: 18px;
   height: 18px;
 }
 
-.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-chevron {
+.vc-study-sessions-reference-image.is-expanded .vc-study-sessions-reference-image-chevron {
   transform: rotate(90deg);
 }
 
-.vc-flashcards-reference-image-preview[hidden] {
+.vc-study-sessions-reference-image-preview[hidden] {
   display: none !important;
 }
 
-.vc-flashcards-reference-image-preview {
+.vc-study-sessions-reference-image-preview {
   display: block;
   width: 100%;
   height: 240px;
@@ -410,7 +414,7 @@
   background: #FFFFFF;
 }
 
-.vc-flashcards-reference-image-preview img {
+.vc-study-sessions-reference-image-preview img {
   display: block;
   width: 100%;
   height: 100%;
@@ -422,30 +426,30 @@
   padding: 0;
 }
 
-.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview {
+.vc-study-sessions-reference-image.is-expanded .vc-study-sessions-reference-image-preview {
   height: auto;
   padding:16px;
   background:none;
 }
 
-.vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview img {
+.vc-study-sessions-reference-image.is-expanded .vc-study-sessions-reference-image-preview img {
   height: auto;
   max-height: none;
 }
 
 /* Reference image desktop: el trigger abre popup, por eso no muestra chevron ni reserva su columna. */
 @media (min-width: 481px) {
-  .vc-flashcards-reference-image.reference_image .vc-flashcards-reference-image-control {
+  .vc-study-sessions-reference-image.reference_image .vc-study-sessions-reference-image-control {
     grid-template-columns: 48px minmax(0, 1fr);
   }
 
-  .vc-flashcards-reference-image.reference_image .vc-flashcards-reference-image-chevron {
+  .vc-study-sessions-reference-image.reference_image .vc-study-sessions-reference-image-chevron {
     display: none;
   }
 }
 
 /* Titulo principal del modal con tipografia aislada del theme. */
-#vc-flashcards-modal-title {
+#vc-study-sessions-modal-title {
   margin: 0;
   font-weight: 400;
   font-size: 26px;
@@ -454,7 +458,7 @@
 }
 
 /* Texto descriptivo del modal con color propio y sin herencia global. */
-.vc-flashcards-modal-copy {
+.vc-study-sessions-modal-copy {
   color: #666666;
   font-weight: 400;
   font-size: 14px;
@@ -462,8 +466,8 @@
   letter-spacing: -0.15px;
 }
 
-/* Texto secundario que muestra el total de flashcards bajo el titulo de la categoria. */
-.vc-flashcards-category-total {
+/* Texto secundario que muestra el total de Study sessions bajo el titulo de la categoria. */
+.vc-study-sessions-category-total {
   margin: 0;
   font-weight: 400;
   font-size: 14px;
@@ -478,25 +482,25 @@
    ========================================================================== */
 
 /* Layout del encabezado de la vista de detalle de categoria. */
-.vc-flashcards-detail-header {
+.vc-study-sessions-detail-header {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-/* Tarjeta global de practica aleatoria en el home de flashcards. */
-.vc-flashcards-global-random {
+/* Tarjeta global de practica aleatoria en el home de Study sessions. */
+.vc-study-sessions-global-random {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 28px 16px 24px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #F1F5F9;
 }
 
-.vc-flashcards-global-random-main {
+.vc-study-sessions-global-random-main {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -505,7 +509,7 @@
 }
 
 /* Alinea el icono y el bloque tipografico del global random en una misma fila. */
-.vc-flashcards-global-random-content {
+.vc-study-sessions-global-random-content {
   display: flex;
   align-items: center;
   flex: 1 1 auto;
@@ -515,7 +519,7 @@
 
 
 /* Mantiene el icono a la izquierda con una caja estable y centrada verticalmente. */
-.vc-flashcards-global-random-icon {
+.vc-study-sessions-global-random-icon {
   flex: 0 0 auto;
   min-height: 44px;
   display: inline-flex;
@@ -531,18 +535,18 @@
 }
 
 /* Evita que la imagen del icono se desplace por su comportamiento inline. */
-.vc-flashcards-global-random-icon img {
+.vc-study-sessions-global-random-icon img {
   display: block;
   width: 28px;
   height: 28px;
 }
 
-.vc-flashcards-global-random-copy {
+.vc-study-sessions-global-random-copy {
   display: grid;
   gap: 6px;
 }
 
-.vc-flashcards-global-random-copy h3 {
+.vc-study-sessions-global-random-copy h3 {
   margin: 0;
   color: #212121;
   font-weight: 400;
@@ -551,7 +555,7 @@
   letter-spacing: -0.3px;
 }
 
-.vc-flashcards-global-random-copy p {
+.vc-study-sessions-global-random-copy p {
   margin: 0;
   font-weight: 400;
   font-size: 14px;
@@ -561,9 +565,9 @@
 }
 
 /* Boton exclusivo del bloque global random. */
-.vc-flashcards-start.vc-flashcards-global-random-start {
+.vc-study-sessions-start.vc-study-sessions-global-random-start {
   display: inline-flex;
-  min-height: var(--vc-flashcards-button-height);
+  min-height: var(--vc-study-sessions-button-height);
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -575,29 +579,29 @@
   padding: 8px 13px;
   border-radius: 6px;
   box-sizing: border-box;
-  font-size: var(--vc-flashcards-button-font-size);
+  font-size: var(--vc-study-sessions-button-font-size);
   white-space: nowrap;
 }
 
-.vc-flashcards-start.vc-flashcards-global-random-start > span {
+.vc-study-sessions-start.vc-study-sessions-global-random-start > span {
   display: block;
-  font-weight: var(--vc-flashcards-button-font-weight);
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  font-weight: var(--vc-study-sessions-button-font-weight);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
   color: #1447E6;
 }
 
 
 /* Reset visual y transicion comun para elementos interactivos. */
-.vc-flashcards-back,
-.vc-flashcards-start,
-.vc-flashcards-next,
-.vc-flashcards-reveal,
-.vc-flashcards-count-option,
-.vc-flashcards-subtopic-item,
-.vc-flashcards-answer {
+.vc-study-sessions-back,
+.vc-study-sessions-start,
+.vc-study-sessions-next,
+.vc-study-sessions-reveal,
+.vc-study-sessions-count-option,
+.vc-study-sessions-subtopic-item,
+.vc-study-sessions-answer {
   border: 0;
   transition:
     transform 0.15s ease,
@@ -607,28 +611,28 @@
 }
 
 /* Tipografia y caja base de los botones principales. */
-.vc-flashcards-start {
+.vc-study-sessions-start {
 
   padding: 10px 11px;
   border-radius: 5px;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  font-weight: var(--vc-flashcards-button-font-weight);
+  font-weight: var(--vc-study-sessions-button-font-weight);
   font-style: normal;
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
   text-decoration: none;
 }
 
 
 /* Variante visual del boton de regreso. */
-.vc-flashcards-back,
-.vc-flashcards-back:hover,
-.vc-flashcards-back:focus,
-.vc-flashcards-back:active {
+.vc-study-sessions-back,
+.vc-study-sessions-back:hover,
+.vc-study-sessions-back:focus,
+.vc-study-sessions-back:active {
   background: transparent;
   color: #1447E6;
   border: 1px solid #1447E6;
@@ -641,7 +645,7 @@
 }
 
 /* Mantiene una separacion real entre la flecha y el texto del boton Back. */
-.vc-flashcards-back {
+.vc-study-sessions-back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -651,7 +655,7 @@
   line-height: 1;
 }
 
-.vc-flashcards-back span {
+.vc-study-sessions-back span {
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
@@ -660,20 +664,20 @@
   color: #1447E6;
 }
 
-/* Icono de vc-flashcards-back con una flecha hacia la izquierda. */
-.vc-flashcards-back-icon {
+/* Icono de vc-study-sessions-back con una flecha hacia la izquierda. */
+.vc-study-sessions-back-icon {
   display: inline-flex;
 }
 
 /* Color base de los CTA principales. */
-.vc-flashcards-start,
-.vc-flashcards-next {
+.vc-study-sessions-start,
+.vc-study-sessions-next {
   background: #3237B7;
   color: #ffffff;
 }
 
 /* Variante icono del CTA lateral con caja compacta y centrada. */
-.vc-flashcards-start--category {
+.vc-study-sessions-start--category {
   display: inline-flex;
   flex: 0 0 55px;
   width: 55px;
@@ -685,31 +689,31 @@
 }
 
 /* Wrapper del icono principal para asegurar centrado en ambos ejes. */
-.vc-flashcards-start-list-icon {
+.vc-study-sessions-start-list-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 /* Evita que la imagen SVG se desplace por el comportamiento inline del elemento img. */
-.vc-flashcards-start-list-icon img {
+.vc-study-sessions-start-list-icon img {
   display: block;
   width: 24px;
   height: 24px;
 }
 
 /* Reordena los CTA laterales para ubicarlos a la izquierda del bloque de texto. */
-.vc-flashcards-config-card > .vc-flashcards-start--category,
-.vc-flashcards-config-card > .vc-flashcards-start--random {
+.vc-study-sessions-config-card > .vc-study-sessions-start--category,
+.vc-study-sessions-config-card > .vc-study-sessions-start--random {
   order: -1;
   align-self: center;
-  flex: 0 0 var(--vc-flashcards-config-action-size, 48px);
-  width: var(--vc-flashcards-config-action-size, 48px);
-  min-width: var(--vc-flashcards-config-action-size, 48px);
-  max-width: var(--vc-flashcards-config-action-size, 48px);
-  height: var(--vc-flashcards-config-action-size, 48px);
-  min-height: var(--vc-flashcards-config-action-size, 48px);
-  max-height: var(--vc-flashcards-config-action-size, 48px);
+  flex: 0 0 var(--vc-study-sessions-config-action-size, 48px);
+  width: var(--vc-study-sessions-config-action-size, 48px);
+  min-width: var(--vc-study-sessions-config-action-size, 48px);
+  max-width: var(--vc-study-sessions-config-action-size, 48px);
+  height: var(--vc-study-sessions-config-action-size, 48px);
+  min-height: var(--vc-study-sessions-config-action-size, 48px);
+  max-height: var(--vc-study-sessions-config-action-size, 48px);
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
   line-height: 0;
@@ -720,22 +724,22 @@
 }
 
 /* Mantiene este CTA lateral cuadrado aunque el ancho disponible cambie. */
-.vc-flashcards-config-card > .vc-flashcards-start--category {
+.vc-study-sessions-config-card > .vc-study-sessions-start--category {
   background: #155dfc;
 }
 
 /* Variante secundaria del config card como boton icon-only azul igual al CTA de categoria. */
-.vc-flashcards-config-card > .vc-flashcards-start--random {
+.vc-study-sessions-config-card > .vc-study-sessions-start--random {
   background: #155dfc;
   border: 0;
 
 }
 
-.vc-flashcards-config-card-action {
+.vc-study-sessions-config-card-action {
   border-radius: 14px;
 }
 
-.vc-flashcards-config-card-action-icon {
+.vc-study-sessions-config-card-action-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -744,7 +748,7 @@
   flex: 0 0 24px;
 }
 
-.vc-flashcards-config-card-action-icon img {
+.vc-study-sessions-config-card-action-icon img {
   display: block;
   width: 24px;
   height: 24px;
@@ -752,13 +756,13 @@
 
 
 /* Boton principal de categoria: iguala altura al patron Global Random Practice. */
-.vc-flashcards-start--full {
+.vc-study-sessions-start--full {
   width: 100%;
-  min-height: var(--vc-flashcards-button-height);
-  font-weight: var(--vc-flashcards-button-font-weight);
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  min-height: var(--vc-study-sessions-button-height);
+  font-weight: var(--vc-study-sessions-button-font-weight);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -768,24 +772,24 @@
   box-sizing: border-box;
 }
 /* Wrapper del icono del boton Study: queda centrado con el texto del CTA. */
-.vc-flashcards-start-icon {
+.vc-study-sessions-start-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
 }
 
-.vc-flashcards-start-icon svg {
+.vc-study-sessions-start-icon svg {
   display: block;
 }
 
-.vc-flashcards-start--full > span {
+.vc-study-sessions-start--full > span {
   display: inline-flex;
   align-items: center;
 }
 
 /* Variante lateral para la accion de practica aleatoria. */
-.vc-flashcards-start--random {
+.vc-study-sessions-start--random {
 
   display: inline-flex;
   flex: 0 0 auto;
@@ -804,39 +808,39 @@
 }
 
 /* Escala el icono de la accion secundaria sin tocar otros SVG del modulo. */
-.vc-flashcards-start--random img {
+.vc-study-sessions-start--random img {
   width: 24px;
   height: 24px;
 }
 
 /* Estado deshabilitado del boton siguiente. */
-.vc-flashcards-next:disabled {
+.vc-study-sessions-next:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
 /* Espaciado interno de tarjetas y paneles principales. */
-.vc-flashcards-category-card,
-.vc-flashcards-config-card,
-.vc-flashcards-subtopics-card {
+.vc-study-sessions-category-card,
+.vc-study-sessions-config-card,
+.vc-study-sessions-subtopics-card {
   padding: 21px 24px;
 }
 
-.vc-flashcards-empty {
+.vc-study-sessions-empty {
   padding: 0;
   font-size: 13px;
   font-weight: 400;
 }
 
-.vc-flashcards-card {
+.vc-study-sessions-card {
   padding: 32px;
   border: 1px solid #E2E8F0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #FFFFFF;
 }
 
 /* Contenedor neutro para el listado de subtemas sin apariencia de tarjeta. */
-.vc-flashcards-subtopics-card {
+.vc-study-sessions-subtopics-card {
   margin: 0;
   padding: 0;
   background: transparent;
@@ -847,12 +851,12 @@
 }
 
 /* Layout horizontal compartido para encabezados y grupos de acciones. */
-.vc-flashcards-category-top,
-.vc-flashcards-category-progress,
-.vc-flashcards-subtopics-header,
-.vc-flashcards-modal-range-meta,
-.vc-flashcards-modal-actions,
-.vc-flashcards-summary-actions {
+.vc-study-sessions-category-top,
+.vc-study-sessions-category-progress,
+.vc-study-sessions-subtopics-header,
+.vc-study-sessions-modal-range-meta,
+.vc-study-sessions-modal-actions,
+.vc-study-sessions-summary-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -860,13 +864,13 @@
 }
 
 /* Encabezado de la seccion de subtemas con espaciado superior propio. */
-.vc-flashcards-subtopics-header {
+.vc-study-sessions-subtopics-header {
   margin-top: 0;
   margin-bottom: 16px;
 }
 
 /* Estilo del dato destacado en la cabecera de categoria. */
-.vc-flashcards-category-top strong {
+.vc-study-sessions-category-top strong {
   flex: 0 0 auto;
   font-size: 28px;
   line-height: 1;
@@ -874,36 +878,36 @@
 }
 
 /* Reset del titulo principal de cada categoria. */
-.vc-flashcards-category-top h3 {
+.vc-study-sessions-category-top h3 {
   margin: 0;
 }
 
-.vc-flashcards-category-card .vc-flashcards-category-top,
-.vc-flashcards-category-card .vc-flashcards-category-progress-block,
-.vc-flashcards-category-card .vc-flashcards-category-meta {
+.vc-study-sessions-category-card .vc-study-sessions-category-top,
+.vc-study-sessions-category-card .vc-study-sessions-category-progress-block,
+.vc-study-sessions-category-card .vc-study-sessions-category-meta {
   margin-top: 0;
   margin-bottom: 0;
 }
 
 /* Wrapper semantico del progreso completo de categoria: texto + barra. */
-.vc-flashcards-category-progress-block {
+.vc-study-sessions-category-progress-block {
   margin-top: 0;
 }
 
 /* Separacion superior de la fila de progreso. */
-.vc-flashcards-category-progress {
+.vc-study-sessions-category-progress {
   margin-top: 0;
 }
 
 /* Texto auxiliar de la fila de progreso de categoria. */
-.vc-flashcards-category-progress span {
+.vc-study-sessions-category-progress span {
   color: #666666;
   font-size: 14px;
   line-height: 20px;
 }
 
 /* Valor numerico del progreso de categoria. */
-.vc-flashcards-category-progress strong {
+.vc-study-sessions-category-progress strong {
   color: #212121;
   font-weight: 400;
   font-style: normal;
@@ -912,18 +916,18 @@
   letter-spacing: -0.3px;
 }
 
-/* Flashcards category: texto meta como hijo directo para permitir orden responsive estable. */
-.vc-flashcards-category-meta {
+/* Study sessions category: texto meta como hijo directo para permitir orden responsive estable. */
+.vc-study-sessions-category-meta {
   display: block;
 }
 
-/* Flashcards category: ajusta solo el texto auxiliar directo sin tocar el CTA. */
-.vc-flashcards-category-meta {
+/* Study sessions category: ajusta solo el texto auxiliar directo sin tocar el CTA. */
+.vc-study-sessions-category-meta {
   color: #666666;
 }
 
 /* Hace que el boton Study de la categoria ocupe todo el ancho del area meta. */
-.vc-flashcards-category-card > .vc-flashcards-start--full {
+.vc-study-sessions-category-card > .vc-study-sessions-start--full {
   width: 100%;
   display: inline-flex;
   align-items: center;
@@ -932,12 +936,12 @@
 }
 
 /* Limita el color azul de la accion principal solo a la tarjeta de categoria para no tocar otros start. */
-.vc-flashcards-category-card .vc-flashcards-start--full {
+.vc-study-sessions-category-card .vc-study-sessions-start--full {
   background: #1447e6;
 }
 
 /* Limita el CTA principal del modal a su tono propio sin afectar otros botones Start. */
-.vc-flashcards-modal-dialog .vc-flashcards-start {
+.vc-study-sessions-modal-dialog .vc-study-sessions-start {
   background: #3237b7;
 }
 
@@ -947,7 +951,7 @@
    ========================================================================== */
 
 /* Barra visual del progreso total de la categoria. */
-.vc-flashcards-topic-bar {
+.vc-study-sessions-topic-bar {
   width: 100%;
   height: 8px;
   margin: 12px 0 0;
@@ -957,7 +961,7 @@
 }
 
 /* Relleno activo dentro de la barra de progreso. */
-.vc-flashcards-topic-bar span {
+.vc-study-sessions-topic-bar span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -965,14 +969,14 @@
 }
 
 /* Ajuste exclusivo del Back dentro del header de sesion. */
-.vc-flashcards-session-header > .vc-flashcards-back {
+.vc-study-sessions-session-header > .vc-study-sessions-back {
   flex: 0 0 auto;
   justify-content: center;
   box-sizing: border-box;
 }
 
 /* Agrupa el progreso de sesion en una sola capsula compacta. */
-.vc-flashcards-session-progress {
+.vc-study-sessions-session-progress {
   display: flex;
   align-items: center;
   align-self: center;
@@ -983,7 +987,7 @@
 }
 
 /* Sincroniza el contador del progreso con el mismo tono y un peso un poco mayor. */
-.vc-flashcards-session-progress strong[data-vc-flashcards-progress-count] {
+.vc-study-sessions-session-progress strong[data-vc-study-sessions-progress-count] {
   display: inline-flex;
   align-items: center;
   color: #666666;
@@ -994,7 +998,7 @@
 }
 
 /* Barra visual del avance de preguntas dentro de la sesion. */
-.vc-flashcards-session-bar {
+.vc-study-sessions-session-bar {
   width: 100%;
   height: 8px;
   margin: 0 0 24px;
@@ -1004,7 +1008,7 @@
 }
 
 /* Relleno activo sincronizado con el progreso actual de la sesion. */
-.vc-flashcards-session-bar span {
+.vc-study-sessions-session-bar span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -1012,12 +1016,12 @@
 }
 
 /* Separa la barra del header para que el cambio de bloque se sienta mas limpio. */
-.vc-flashcards-session-bar {
+.vc-study-sessions-session-bar {
   margin-top: 16px;
 }
 
 /* Header de sesion con layout propio para no forzar el centrado vertical del boton Back. */
-.vc-flashcards-session-header {
+.vc-study-sessions-session-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -1030,33 +1034,33 @@
    ========================================================================== */
 
 /* Tarjetas de configuracion disponibles en la vista de detalle. */
-.vc-flashcards-config-card {
-  --vc-flashcards-config-action-size: 48px;
+.vc-study-sessions-config-card {
+  --vc-study-sessions-config-action-size: 48px;
   display: flex;
   opacity: 1;
   align-items: stretch;
   gap: 16px;
   border: 1px solid #e2e8f0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #FFFFFF;
   transition: background-color 180ms ease;
 }
 
-.vc-flashcards-config-card[data-vc-flashcards-launch-card] {
+.vc-study-sessions-config-card[data-vc-study-sessions-launch-card] {
   cursor: pointer;
 }
 
 /* Colores de borde exclusivos para las dos tarjetas de configuracion del detail. */
-.vc-flashcards-config-grid > .vc-flashcards-config-card:first-child {
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card:first-child {
   border-color: #bedbff;
 }
 
-.vc-flashcards-config-card--aligned {
+.vc-study-sessions-config-card--aligned {
   align-items: center;
 }
 
 /* Icono derecho de la card alineada: caja estable de 19x20 al extremo final. */
-.vc-flashcards-config-card-trailing-icon {
+.vc-study-sessions-config-card-trailing-icon {
   flex: 0 0 19px;
   display: inline-flex;
   align-items: center;
@@ -1068,41 +1072,41 @@
 }
 
 /* SVG inline del extremo derecho: hereda azul/blanco desde el contenedor. */
-.vc-flashcards-config-card-trailing-icon .icono-flecha {
+.vc-study-sessions-config-card-trailing-icon .icono-flecha {
   display: block;
   width: 9px;
   height: 18px;
 }
 
 /* Estado hover/active: el icono inline pasa a blanco sobre el fondo azul. */
-.vc-flashcards-config-card--aligned:hover .vc-flashcards-config-card-trailing-icon,
-.vc-flashcards-config-card--aligned.is-active .vc-flashcards-config-card-trailing-icon {
+.vc-study-sessions-config-card--aligned:hover .vc-study-sessions-config-card-trailing-icon,
+.vc-study-sessions-config-card--aligned.is-active .vc-study-sessions-config-card-trailing-icon {
   color: #FFFFFF;
 }
 
 /* Hover visual exclusivo de la tarjeta Study full category. */
-.vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:first-child:hover,
-.vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:first-child.is-active {
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card--aligned:first-child:hover,
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card--aligned:first-child.is-active {
   background: #1447E6;
 }
 
-.vc-flashcards-config-grid > .vc-flashcards-config-card:nth-child(2) {
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card:nth-child(2) {
   border-color: #bedbff;
 }
 
 /* Hover visual exclusivo de la tarjeta Random practice igualado al estado de categoria. */
-.vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:nth-child(2):hover,
-.vc-flashcards-config-grid > .vc-flashcards-config-card--aligned:nth-child(2).is-active {
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card--aligned:nth-child(2):hover,
+.vc-study-sessions-config-grid > .vc-study-sessions-config-card--aligned:nth-child(2).is-active {
   background: #1447E6;
 }
 
 /* Copia descriptiva de la tarjeta de configuracion con ancho flexible. */
-.vc-flashcards-config-copy {
+.vc-study-sessions-config-copy {
   flex: 1 1 auto;
 }
 
 /* Config card copy: centra titulo/subtitulo contra el boton lateral sin depender de margenes nativos. */
-.vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
+.vc-study-sessions-config-card--aligned .vc-study-sessions-config-copy {
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -1111,30 +1115,30 @@
   min-width: 0;
 }
 
-.vc-flashcards-config-copy,
-.vc-flashcards-config-copy h3,
-.vc-flashcards-card-cardsubtitle {
+.vc-study-sessions-config-copy,
+.vc-study-sessions-config-copy h3,
+.vc-study-sessions-card-cardsubtitle {
   transition: color 180ms ease;
 }
 
-.vc-flashcards-config-card--aligned:hover .vc-flashcards-config-copy,
-.vc-flashcards-config-card--aligned:hover .vc-flashcards-config-copy h3,
-.vc-flashcards-config-card--aligned:hover .vc-flashcards-card-cardsubtitle,
-.vc-flashcards-config-card--aligned.is-active .vc-flashcards-config-copy,
-.vc-flashcards-config-card--aligned.is-active .vc-flashcards-config-copy h3,
-.vc-flashcards-config-card--aligned.is-active .vc-flashcards-card-cardsubtitle {
+.vc-study-sessions-config-card--aligned:hover .vc-study-sessions-config-copy,
+.vc-study-sessions-config-card--aligned:hover .vc-study-sessions-config-copy h3,
+.vc-study-sessions-config-card--aligned:hover .vc-study-sessions-card-cardsubtitle,
+.vc-study-sessions-config-card--aligned.is-active .vc-study-sessions-config-copy,
+.vc-study-sessions-config-card--aligned.is-active .vc-study-sessions-config-copy h3,
+.vc-study-sessions-config-card--aligned.is-active .vc-study-sessions-card-cardsubtitle {
   color: #ffffff;
 }
 
 /* Grids internos para subtemas y respuestas. */
-.vc-flashcards-subtopics-list,
-.vc-flashcards-answers {
+.vc-study-sessions-subtopics-list,
+.vc-study-sessions-answers {
   display: grid;
   gap: 12px;
 }
 
 /* Boton individual para abrir un subtema especifico. */
-.vc-flashcards-subtopic-item {
+.vc-study-sessions-subtopic-item {
   width: 100%;
   opacity: 1;
   display: flex;
@@ -1143,7 +1147,7 @@
   gap: 16px;
   padding: 16px 16px 20px;
   border: 1px solid #e2e8f0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #f8fbff;
   cursor: pointer;
   text-align: left;
@@ -1151,28 +1155,28 @@
 }
 
 /* Limita el fondo blanco solo a los items renderizados dentro del listado de subtemas. */
-.vc-flashcards-subtopics-list .vc-flashcards-subtopic-item {
+.vc-study-sessions-subtopics-list .vc-study-sessions-subtopic-item {
   background: #ffffff;
 }
 
 /* Activa un hover azul solo en la lista de subtemas para reforzar la interaccion sin tocar otros items. */
-.vc-flashcards-subtopics-list .vc-flashcards-subtopic-item:hover {
+.vc-study-sessions-subtopics-list .vc-study-sessions-subtopic-item:hover {
   background: #155dfc;
   border-color: #155dfc;
 }
 
 /* Sincroniza el titulo y el texto auxiliar con el fondo azul del hover. */
-.vc-flashcards-subtopics-list .vc-flashcards-subtopic-item:hover strong {
+.vc-study-sessions-subtopics-list .vc-study-sessions-subtopic-item:hover strong {
   color: #ffffff;
 }
 
 /* Ajusta el texto secundario del subtema para conservar contraste en hover. */
-.vc-flashcards-subtopics-list .vc-flashcards-subtopic-item:hover .vc-flashcards-subtopic-copy > span {
+.vc-study-sessions-subtopics-list .vc-study-sessions-subtopic-item:hover .vc-study-sessions-subtopic-copy > span {
   color: #dce6ff;
 }
 
 /* Bloque de texto interno de cada subtema. */
-.vc-flashcards-subtopic-copy {
+.vc-study-sessions-subtopic-copy {
   display: grid;
   flex: 1 1 auto;
   gap: 8px;
@@ -1180,7 +1184,7 @@
 }
 
 /* Chevron derecho real del subtema: reemplaza el antiguo ::after y no hereda colores de hover. */
-.vc-flashcards-subtopic-chevron {
+.vc-study-sessions-subtopic-chevron {
   flex: 0 0 20px;
   display: inline-flex;
   align-items: center;
@@ -1191,44 +1195,44 @@
 }
 
 /* SVG inline del subtopic: mismo patron que config-card-trailing-icon, con tamano 6x13. */
-.vc-flashcards-subtopic-chevron .icono-flecha {
+.vc-study-sessions-subtopic-chevron .icono-flecha {
   display: block;
   width: 13px;
   height: 13px;
 }
 
 /* Alinea el titulo del subtema y su badge de estado en una misma fila. */
-.vc-flashcards-subtopic-heading {
+.vc-study-sessions-subtopic-heading {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 /* Titulo principal dentro de cada item de subtema. */
-.vc-flashcards-subtopic-copy strong {
+.vc-study-sessions-subtopic-copy strong {
   color: #212121;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
 }
 
-.vc-flashcards-subtopic-copy span {
+.vc-study-sessions-subtopic-copy span {
   font-size: 14px;
 }
 
 /* Zona de mensajes de error o informacion del modulo. */
-.vc-flashcards-feedback {
+.vc-study-sessions-feedback {
   margin: 0;
   font-size: 14px;
 }
 
 /* Color de mensajes de error. */
-.vc-flashcards-feedback[data-state="error"] {
+.vc-study-sessions-feedback[data-state="error"] {
   color: #c73f36;
 }
 
 /* Color de mensajes informativos. */
-.vc-flashcards-feedback[data-state="info"] {
+.vc-study-sessions-feedback[data-state="info"] {
   color: #325cba;
 }
 
@@ -1238,15 +1242,15 @@
    ========================================================================== */
 
 /* Texto auxiliar superior en sesion y resumen. */
-.vc-flashcards-session-kicker,
-.vc-flashcards-summary-kicker {
+.vc-study-sessions-session-kicker,
+.vc-study-sessions-summary-kicker {
   margin: 0 0 8px;
   color: #666666;
   font-size: 14px;
 }
 
 /* Fila de chips de contexto dentro de la tarjeta de pregunta. */
-.vc-flashcards-session-context {
+.vc-study-sessions-session-context {
   margin: 0 0 30px;
   display: flex;
   align-items: center;
@@ -1254,11 +1258,11 @@
   min-width: 0;
 }
 
-.vc-flashcards-session-context-row {
+.vc-study-sessions-session-context-row {
   display: contents;
 }
 
-.vc-flashcards-card .vc-flashcards-session-kicker {
+.vc-study-sessions-card .vc-study-sessions-session-kicker {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
@@ -1268,7 +1272,7 @@
 }
 
 /* Chip base para topic y subtopic dentro de la sesion. */
-.vc-flashcards-card .vc-flashcards-session-kicker-part {
+.vc-study-sessions-card .vc-study-sessions-session-kicker-part {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1280,22 +1284,22 @@
 }
 
 /* Mantiene el topic con un chip suave y neutro para separarlo del subtopic actual. */
-.vc-flashcards-card .vc-flashcards-session-kicker-part--topic {
+.vc-study-sessions-card .vc-study-sessions-session-kicker-part--topic {
   background: #e5e7eb;
   border-color: #e2e8f0;
   color: #364153;
 }
 
 /* Resalta el subtopic con un contorno sobrio sin competir con el topic. */
-.vc-flashcards-card .vc-flashcards-session-kicker-part--subtopic {
+.vc-study-sessions-card .vc-study-sessions-session-kicker-part--subtopic {
   background: #ffffff;
   border-color: #e2e8f0;
   color: #4a5565;
 }
 
-.vc-flashcards-session-topic,
-.vc-flashcards-session-acs,
-.vc-flashcards-session-subtopic {
+.vc-study-sessions-session-topic,
+.vc-study-sessions-session-acs,
+.vc-study-sessions-session-subtopic {
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -1306,7 +1310,7 @@
   box-sizing: border-box;
 }
 
-.vc-flashcards-session-topic {
+.vc-study-sessions-session-topic {
   flex: 0 0 auto;
   gap: 4px;
   opacity: 1;
@@ -1320,11 +1324,11 @@
   letter-spacing: -0.15px;
 }
 
-.vc-flashcards-session-acs {
+.vc-study-sessions-session-acs {
   display: none;
 }
 
-.vc-flashcards-session-subtopic {
+.vc-study-sessions-session-subtopic {
   min-width: 0;
   max-width: 100%;
   gap: 4px;
@@ -1344,7 +1348,7 @@
 }
 
 /* Session subtopic full: oculto por defecto; solo mobile lo muestra cuando el chip se trunca. */
-.vc-flashcards-session-subtopic-full {
+.vc-study-sessions-session-subtopic-full {
   display: none;
   flex: 1 0 100%;
   margin: -4px 0 0;
@@ -1358,22 +1362,22 @@
 }
 
 /* Separacion superior del listado de respuestas. */
-.vc-flashcards-answers {
+.vc-study-sessions-answers {
   margin-top: 20px;
 }
 
-.vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answers {
+.vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answers {
   margin-top: 0;
 }
 
 /* Tarjeta de respuesta individual dentro de la sesion. */
-.vc-flashcards-answer {
+.vc-study-sessions-answer {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px 18px;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #f7f9fc;
   color: #666666;
   cursor: pointer;
@@ -1381,7 +1385,7 @@
 }
 
 /* Circulo con la letra de cada respuesta. */
-.vc-flashcards-answer span {
+.vc-study-sessions-answer span {
   width: 34px;
   height: 34px;
   flex: 0 0 34px;
@@ -1398,7 +1402,7 @@
 }
 
 /* Texto principal de la opcion de respuesta. */
-.vc-flashcards-answer strong {
+.vc-study-sessions-answer strong {
   display: block;
   flex: 0 1 80%;
   min-width: 0;
@@ -1414,27 +1418,27 @@
 }
 
 /* Limita estos ajustes visuales solo a las respuestas renderizadas dentro de la tarjeta principal. */
-.vc-flashcards-card .vc-flashcards-answer {
+.vc-study-sessions-card .vc-study-sessions-answer {
   background: #ffffff;
   border: 1px solid #e2e8f0;
 }
 
 /* Ajusta el badge de letra solo dentro de la tarjeta principal para no afectar otros contenedores. */
-.vc-flashcards-card .vc-flashcards-answer span {
+.vc-study-sessions-card .vc-study-sessions-answer span {
   background: #e2e8f0;
   color: #4A5565;
 }
 
 /* Una vez respondida la tarjeta, las opciones restantes no deben reaccionar al cursor. */
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):hover,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus-visible,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):hover,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus-visible,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):hover,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):focus,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):focus-visible {
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):hover,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):focus,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):focus-visible,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):hover,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):focus,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):focus-visible,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):hover,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):focus,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):focus-visible {
   background: #ffffff;
   color: #666666;
   border-color: #e2e8f0;
@@ -1444,29 +1448,29 @@
   transform: none;
 }
 
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):hover span,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus span,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="correct"]) .vc-flashcards-answer:not([data-state]):focus-visible span,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):hover span,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus span,
-.vc-flashcards-card:has(.vc-flashcards-answer[data-state="incorrect"]) .vc-flashcards-answer:not([data-state]):focus-visible span,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):hover span,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):focus span,
-.vc-flashcards-card .vc-flashcards-answer:disabled:not([data-state]):focus-visible span {
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):hover span,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):focus span,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="correct"]) .vc-study-sessions-answer:not([data-state]):focus-visible span,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):hover span,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):focus span,
+.vc-study-sessions-card:has(.vc-study-sessions-answer[data-state="incorrect"]) .vc-study-sessions-answer:not([data-state]):focus-visible span,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):hover span,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):focus span,
+.vc-study-sessions-card .vc-study-sessions-answer:disabled:not([data-state]):focus-visible span {
   background: #e2e8f0;
   color: #4A5565;
 }
 
 /* Evita la elevacion de cualquier accion dentro de la card principal sin repetir selectores. */
-.vc-flashcards-card .vc-flashcards-actions > :hover {
+.vc-study-sessions-card .vc-study-sessions-actions > :hover {
   transform: none;
 }
 
 /* Neutraliza por completo el hover del reveal solo dentro de la fila de acciones de la card principal. */
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-reveal,
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-reveal:hover,
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-reveal:focus,
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-reveal:active {
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-reveal,
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-reveal:hover,
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-reveal:focus,
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-reveal:active {
   transform: none;
   background: transparent;
   color: #666666;
@@ -1477,7 +1481,7 @@
 }
 
 /* Estado correcto de una respuesta con borde y check de confirmacion. */
-.vc-flashcards-answer[data-state="correct"] {
+.vc-study-sessions-answer[data-state="correct"] {
   background: #ffffff;
   box-shadow: inset 0 0 0 1px #00c950;
   position: relative;
@@ -1485,8 +1489,8 @@
 }
 
 /* Hace que el estado correcto gane siempre sobre el hover base de la respuesta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:hover,
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:focus-visible {
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"]:hover,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"]:focus-visible {
   background: #ffffff;
   color: #1f2430;
   border-color: #00c950;
@@ -1494,7 +1498,7 @@
 }
 
 /* Coloca el check en el extremo derecho para separar el estado del badge de letra. */
-.vc-flashcards-answer[data-state="correct"]::after {
+.vc-study-sessions-answer[data-state="correct"]::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -1506,7 +1510,7 @@
 }
 
 /* Estado incorrecto de una respuesta con borde y marca de error. */
-.vc-flashcards-answer[data-state="incorrect"] {
+.vc-study-sessions-answer[data-state="incorrect"] {
   background: #fff1f2;
   box-shadow: inset 0 0 0 1px #fb2c36;
   position: relative;
@@ -1514,8 +1518,8 @@
 }
 
 /* Hace que el estado incorrecto gane siempre sobre el hover base de la respuesta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:hover,
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:focus-visible {
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"]:hover,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"]:focus-visible {
   background: #fff1f2;
   color: #1f2430;
   border-color: #fb2c36;
@@ -1523,7 +1527,7 @@
 }
 
 /* Coloca una x roja al extremo derecho para reforzar el estado de error. */
-.vc-flashcards-answer[data-state="incorrect"]::after {
+.vc-study-sessions-answer[data-state="incorrect"]::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -1535,7 +1539,7 @@
 }
 
 /* Panel expandible que contiene la explicacion de la respuesta. */
-.vc-flashcards-explanation {
+.vc-study-sessions-explanation {
   margin-top: 18px;
   padding: 16px;
   border-radius: 16px;
@@ -1543,19 +1547,19 @@
 }
 
 /* Cuerpo tipografico de la explicacion y sus referencias. */
-.vc-flashcards-explanation-body {
+.vc-study-sessions-explanation-body {
   font-size: 14px;
   margin-top: 12px;
   color: #475467;
 }
 
 /* Sangria de la lista de referencias de la explicacion. */
-.vc-flashcards-explanation-body ul {
+.vc-study-sessions-explanation-body ul {
   margin: 12px 0 0 18px;
 }
 
 /* Fila de acciones disponible bajo la tarjeta en sesion. */
-.vc-flashcards-actions {
+.vc-study-sessions-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -1565,13 +1569,13 @@
 }
 
 /* Fila de acciones de la card con ancho estable al expandir contenido. */
-.vc-flashcards-card .vc-flashcards-actions {
+.vc-study-sessions-card .vc-study-sessions-actions {
   width: 100%;
   align-items: stretch;
 }
 
 /* Base visual compartida entre el toggle de explicacion y el CTA siguiente de la sesion. */
-.vc-flashcards-session-action {
+.vc-study-sessions-session-action {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1585,27 +1589,27 @@
   color: #ffffff;
   box-sizing: border-box;
   opacity: 1;
-  font-weight: var(--vc-flashcards-button-font-weight);
+  font-weight: var(--vc-study-sessions-button-font-weight);
   font-style: normal;
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
 }
 
 /* Acciones principales de sesion: misma altura visual aunque una tenga borde y la otra no. */
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle {
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-explanation-toggle {
   width: 100%;
 }
 
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-explanation-toggle,
-.vc-flashcards-card > .vc-flashcards-session-next {
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-explanation-toggle,
+.vc-study-sessions-card > .vc-study-sessions-session-next {
   height: 46px;
   min-height: 46px;
 }
 
 /* Boton siguiente ubicado debajo de la explicacion con el mismo estilo que Mock Test. */
-.vc-flashcards-card > .vc-flashcards-session-next {
+.vc-study-sessions-card > .vc-study-sessions-session-next {
   margin-top: 12px;
   background: #1447E6;
   color: #FFFFFF;
@@ -1613,15 +1617,15 @@
 }
 
 /* Alinea el texto y el simbolo del CTA siguiente en el mismo eje vertical. */
-.vc-flashcards-next-label,
-.vc-flashcards-next-icon {
+.vc-study-sessions-next-label,
+.vc-study-sessions-next-icon {
   display: inline-flex;
   align-items: center;
   line-height: 1;
 }
 
 /* Contenedor del chevron: controla caja y alineacion sin tocar el glifo interno. */
-.vc-flashcards-next-icon {
+.vc-study-sessions-next-icon {
   flex: 0 0 16px;
   justify-content: center;
   width: 16px;
@@ -1630,57 +1634,57 @@
 }
 
 /* SVG inline de flecha: ocupa la caja completa para alinear prev/next con el texto. */
-.vc-flashcards-next-icon .vc-arrow-icon,
-.vc-flashcards-next-icon .vc-flashcards-card-arrow-svg {
+.vc-study-sessions-next-icon .vc-arrow-icon,
+.vc-study-sessions-next-icon .vc-study-sessions-card-arrow-svg {
   display: block;
   width: 16px;
   height: 16px;
 }
 
 /* Session finish CTA: oculta la flecha cuando el boton cambia de Next question a Finish. */
-.vc-flashcards-card > .vc-flashcards-session-next.is-finish .vc-flashcards-next-icon {
+.vc-study-sessions-card > .vc-study-sessions-session-next.is-finish .vc-study-sessions-next-icon {
   display: none;
 }
 
 /* Explanation toggle icon: gira cuando el panel de explicacion esta visible. */
-.vc-flashcards-explanation-toggle .vc-flashcards-next-icon {
+.vc-study-sessions-explanation-toggle .vc-study-sessions-next-icon {
   transition: transform 160ms ease;
 }
 
-.vc-flashcards-explanation-toggle.is-open .vc-flashcards-next-icon {
+.vc-study-sessions-explanation-toggle.is-open .vc-study-sessions-next-icon {
   transform: rotate(90deg);
 }
 
 /* Tipografia compartida de las acciones principales dentro de la sesion. */
-.vc-flashcards-explanation-toggle-label,
-.vc-flashcards-next-label {
-  font-weight: var(--vc-flashcards-button-font-weight);
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+.vc-study-sessions-explanation-toggle-label,
+.vc-study-sessions-next-label {
+  font-weight: var(--vc-study-sessions-button-font-weight);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
 }
 
 /* Oculta por completo el boton siguiente mientras siga marcado como hidden dentro de la card. */
-.vc-flashcards-card > .vc-flashcards-session-next[hidden] {
+.vc-study-sessions-card > .vc-study-sessions-session-next[hidden] {
   display: none !important;
 }
 
 /* Evita que el boton siguiente aparezca de forma fantasma antes de que la pregunta quede resuelta. */
-.vc-flashcards-card > .vc-flashcards-session-next:disabled {
+.vc-study-sessions-card > .vc-study-sessions-session-next:disabled {
   display: none;
 }
 
 /* Oculta elementos marcados como hidden dentro de la interfaz. */
-.vc-flashcards-actions [hidden],
-.vc-flashcards-explanation[hidden],
-.vc-flashcards-summary[hidden],
-.vc-flashcards-modal[hidden] {
+.vc-study-sessions-actions [hidden],
+.vc-study-sessions-explanation[hidden],
+.vc-study-sessions-summary[hidden],
+.vc-study-sessions-modal[hidden] {
   display: none !important;
 }
 
 /* Enlace de ayuda para revelar la respuesta correcta. */
-.vc-flashcards-reveal {
+.vc-study-sessions-reveal {
   justify-self: start;
   padding: 0;
   background: transparent;
@@ -1699,8 +1703,8 @@
 
 
 /* Evita estilos extra al enfocar o activar el boton reveal. */
-.vc-flashcards-reveal:focus,
-.vc-flashcards-reveal:active {
+.vc-study-sessions-reveal:focus,
+.vc-study-sessions-reveal:active {
   background: transparent;
   box-shadow: none;
   outline: none;
@@ -1712,7 +1716,7 @@
    ========================================================================== */
 
 /* Overlay del resumen final: replica Figma con negro 30% y blur de fondo 2.5px. */
-.vc-flashcards-summary {
+.vc-study-sessions-summary {
   position: fixed;
   inset: 0;
   z-index: 9998;
@@ -1723,11 +1727,11 @@
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
   /* Fix: suaviza la aparicion del popup de resultados sin cambiar el flujo JS. */
-  animation: vc-flashcards-summary-fade-in 180ms ease-out both;
+  animation: vc-study-sessions-summary-fade-in 180ms ease-out both;
 }
 
 /* Caja principal del resumen. */
-.vc-flashcards-summary-box {
+.vc-study-sessions-summary-box {
   position: relative;
   display: grid;
   width: min(100%, 435px);
@@ -1737,16 +1741,16 @@
   margin: 0;
   padding: 30px;
   border: 1px solid #dbe4f0;
-  border-radius: var(--vc-flashcards-surface-radius);
+  border-radius: var(--vc-study-sessions-surface-radius);
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
   text-align: center;
   /* Fix: entrada suave con fade, escala leve y desplazamiento ascendente. */
-  animation: vc-flashcards-summary-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: vc-study-sessions-summary-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Fix: animacion del overlay final; corre cada vez que se remueve hidden. */
-@keyframes vc-flashcards-summary-fade-in {
+@keyframes vc-study-sessions-summary-fade-in {
   from {
     opacity: 0;
   }
@@ -1757,7 +1761,7 @@
 }
 
 /* Fix: animacion del dialogo final para evitar una aparicion brusca. */
-@keyframes vc-flashcards-summary-dialog-in {
+@keyframes vc-study-sessions-summary-dialog-in {
   from {
     opacity: 0;
     transform: translateY(10px) scale(0.98);
@@ -1771,14 +1775,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   /* Fix: respeta usuarios con reduccion de movimiento sin tocar el comportamiento del popup. */
-  .vc-flashcards-summary,
-  .vc-flashcards-summary-box {
+  .vc-study-sessions-summary,
+  .vc-study-sessions-summary-box {
     animation: none;
   }
 }
 
 /* Base compartida del boton de cierre del modal. */
-.vc-flashcards-close-button {
+.vc-study-sessions-close-button {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -1790,16 +1794,16 @@
   cursor: pointer;
 }
 
-.vc-flashcards-close-button img {
+.vc-study-sessions-close-button img {
   display: block;
   width: 20px;
   height: 20px;
 }
 
-.vc-flashcards-close-button,
-.vc-flashcards-close-button:hover,
-.vc-flashcards-close-button:focus,
-.vc-flashcards-close-button:active {
+.vc-study-sessions-close-button,
+.vc-study-sessions-close-button:hover,
+.vc-study-sessions-close-button:focus,
+.vc-study-sessions-close-button:active {
   background: transparent;
   box-shadow: none;
   outline: none;
@@ -1808,7 +1812,7 @@
 }
 
 /* Insignia superior del resumen. */
-.vc-flashcards-summary-badge {
+.vc-study-sessions-summary-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1819,14 +1823,14 @@
   background: #1447E6;
 }
 
-.vc-flashcards-summary-badge img {
+.vc-study-sessions-summary-badge img {
   display: block;
   width: 42px;
   height: 42px;
 }
 
 /* Bloque superior del resumen. */
-.vc-flashcards-summary-top {
+.vc-study-sessions-summary-top {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1834,7 +1838,7 @@
 }
 
 /* Titulo principal del resumen. */
-.vc-flashcards-summary-kicker {
+.vc-study-sessions-summary-kicker {
   margin: 0 0 15px;
   color: #111827;
   font-size: 24px;
@@ -1843,24 +1847,24 @@
 }
 
 /* Mensaje final del resumen. */
-.vc-flashcards-summary-box h3 {
+.vc-study-sessions-summary-box h3 {
   margin-bottom: 28px;
 }
 
-.vc-flashcards-summary-box .vc-flashcards-summary-message {
+.vc-study-sessions-summary-box .vc-study-sessions-summary-message {
   font-size: 14px;
   color: #364153;
   text-align: center;
 }
 
 /* Contenedor de resultados. */
-.vc-flashcards-summary-results {
+.vc-study-sessions-summary-results {
   display: flex;
   gap: 10px;
 }
 
 /* Tarjeta base de resultado. */
-.vc-flashcards-summary-result-card {
+.vc-study-sessions-summary-result-card {
   flex: 1 1 0;
   padding: 10px 17px;
   border-style: solid;
@@ -1869,16 +1873,16 @@
 }
 
 /* Summary cards height: iguala Correct, Incorrect y Accuracy en desktop sin tocar tipografia. */
-.vc-flashcards-summary-result-card,
-.vc-flashcards-summary-accuracy-card {
+.vc-study-sessions-summary-result-card,
+.vc-study-sessions-summary-accuracy-card {
   height: 76px;
   box-sizing: border-box;
 }
 
 /* Valor principal compartido: iguala numeros de correct, incorrect y accuracy. */
-.vc-flashcards-summary-count,
-.vc-flashcards-summary-accuracy-card strong,
-[data-vc-flashcards-summary-precision] {
+.vc-study-sessions-summary-count,
+.vc-study-sessions-summary-accuracy-card strong,
+[data-vc-study-sessions-summary-precision] {
   display: block;
   font-weight: 400;
   font-size: 30px;
@@ -1888,17 +1892,17 @@
 }
 
 /* Color de respuestas correctas. */
-.vc-flashcards-summary-count--correct {
+.vc-study-sessions-summary-count--correct {
   color: #008236;
 }
 
 /* Color de respuestas incorrectas. */
-.vc-flashcards-summary-count--incorrect {
+.vc-study-sessions-summary-count--incorrect {
   color: #C10007;
 }
 
 /* Etiqueta de cada resultado. */
-.vc-flashcards-summary-result-card h3 {
+.vc-study-sessions-summary-result-card h3 {
   margin: 0;
   font-weight: 400;
   font-size: 16px;
@@ -1908,29 +1912,29 @@
 }
 
 /* Variante de correctas. */
-.vc-flashcards-summary-result-card--correct h3 {
+.vc-study-sessions-summary-result-card--correct h3 {
   color: #0D542B;
 }
 
 /* Variante de incorrectas. */
-.vc-flashcards-summary-result-card--incorrect h3 {
+.vc-study-sessions-summary-result-card--incorrect h3 {
   color: #C10007;
 }
 
 /* Tarjeta de correctas. */
-.vc-flashcards-summary-result-card--correct {
+.vc-study-sessions-summary-result-card--correct {
   border-color: #b9f8cf;
   background: #f0fdf4;
 }
 
 /* Tarjeta de incorrectas. */
-.vc-flashcards-summary-result-card--incorrect {
+.vc-study-sessions-summary-result-card--incorrect {
   border-color: #ffc9c9;
   background: #fef2f2;
 }
 
 /* Tarjeta de accuracy. */
-.vc-flashcards-summary-accuracy-card {
+.vc-study-sessions-summary-accuracy-card {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -1943,7 +1947,7 @@
 }
 
 /* Titulo de accuracy. */
-.vc-flashcards-summary-accuracy-title {
+.vc-study-sessions-summary-accuracy-title {
   display: block;
   margin: 0;
   color: #1447E6;
@@ -1955,13 +1959,13 @@
 }
 
 /* Valor principal de accuracy. */
-.vc-flashcards-summary-accuracy-card strong {
+.vc-study-sessions-summary-accuracy-card strong {
   margin-bottom: 0;
   color: #1447E6;
 }
 
 /* Botonera del resumen. */
-.vc-flashcards-summary-actions {
+.vc-study-sessions-summary-actions {
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
@@ -1969,7 +1973,7 @@
 }
 
 /* Base de acciones del resumen. */
-.vc-flashcards-summary-action {
+.vc-study-sessions-summary-action {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -1981,11 +1985,11 @@
   padding: 7px 0px;
   border-radius: 6px;
   box-sizing: border-box;
-  font-weight: var(--vc-flashcards-button-font-weight);
+  font-weight: var(--vc-study-sessions-button-font-weight);
   font-style: normal;
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
   transform: none;
   box-shadow: none;
@@ -1994,11 +1998,11 @@
 }
 
 /* Accion principal. */
-.vc-flashcards-summary-action--back,
-.vc-flashcards-summary-action--back:hover,
-.vc-flashcards-summary-action--back:focus,
-.vc-flashcards-summary-action--back:focus-visible,
-.vc-flashcards-summary-action--back:active {
+.vc-study-sessions-summary-action--back,
+.vc-study-sessions-summary-action--back:hover,
+.vc-study-sessions-summary-action--back:focus,
+.vc-study-sessions-summary-action--back:focus-visible,
+.vc-study-sessions-summary-action--back:active {
   opacity: 1;
   background: #1447E6;
   color: #ffffff;
@@ -2006,18 +2010,18 @@
 }
 
 /* Accion secundaria con icono. */
-.vc-flashcards-summary-action--restart,
-.vc-flashcards-summary-action--restart:hover,
-.vc-flashcards-summary-action--restart:focus,
-.vc-flashcards-summary-action--restart:focus-visible,
-.vc-flashcards-summary-action--restart:active {
+.vc-study-sessions-summary-action--restart,
+.vc-study-sessions-summary-action--restart:hover,
+.vc-study-sessions-summary-action--restart:focus,
+.vc-study-sessions-summary-action--restart:focus-visible,
+.vc-study-sessions-summary-action--restart:active {
   background: #ffffff;
   color: #1447E6;
   border: 1px solid #1447E6;
 }
 
 /* Icono del boton de reinicio. */
-.vc-flashcards-summary-action-icon {
+.vc-study-sessions-summary-action-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2026,7 +2030,7 @@
   flex: 0 0 16px;
 }
 
-.vc-flashcards-summary-action-icon img {
+.vc-study-sessions-summary-action-icon img {
   display: block;
   color: #1447E6;
   width: 16px;
@@ -2039,12 +2043,12 @@
    ========================================================================== */
 
 /* Garantiza que el modal oculto no ocupe espacio. */
-.vc-flashcards-modal[hidden] {
+.vc-study-sessions-modal[hidden] {
   display: none;
 }
 
 /* Capa general del modal de configuracion. */
-.vc-flashcards-modal {
+.vc-study-sessions-modal {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -2055,7 +2059,7 @@
 }
 
 /* Fondo oscurecido del modal: comparte el mismo overlay visual que el resumen final. */
-.vc-flashcards-modal-backdrop {
+.vc-study-sessions-modal-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
@@ -2064,7 +2068,7 @@
 }
 
 /* Caja principal del modal de configuracion. */
-.vc-flashcards-modal-dialog {
+.vc-study-sessions-modal-dialog {
   position: relative;
   width: min(100%, 445px);
   box-sizing: border-box;
@@ -2076,7 +2080,7 @@
 }
 
 /* Encabezado del modal para alinear titulo y cierre. */
-.vc-flashcards-modal-header {
+.vc-study-sessions-modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -2085,7 +2089,7 @@
 }
 
 /* Columna de texto del modal: mantiene titulo y descripcion con separacion propia. */
-.vc-flashcards-modal-heading {
+.vc-study-sessions-modal-heading {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2093,15 +2097,15 @@
 }
 
 /* Boton para cerrar el modal. */
-.vc-flashcards-modal-close {
+.vc-study-sessions-modal-close {
   cursor: pointer;
 }
 
 /* Evita efectos visuales innecesarios en el cierre del modal para mantenerlo neutro. */
-.vc-flashcards-modal-close,
-.vc-flashcards-modal-close:hover,
-.vc-flashcards-modal-close:focus,
-.vc-flashcards-modal-close:active {
+.vc-study-sessions-modal-close,
+.vc-study-sessions-modal-close:hover,
+.vc-study-sessions-modal-close:focus,
+.vc-study-sessions-modal-close:active {
   border-radius: 20px;
   background: #F1F5F9;
   color: #666666;
@@ -2111,7 +2115,7 @@
 }
 
 /* Texto descriptivo bajo el titulo del modal. */
-.vc-flashcards-modal-copy {
+.vc-study-sessions-modal-copy {
   width: 100%;
   font-size: 14px;
   max-width: none;
@@ -2119,7 +2123,7 @@
 }
 
 /* Bloque que muestra la cantidad seleccionada de tarjetas. */
-.vc-flashcards-modal-count {
+.vc-study-sessions-modal-count {
   display: grid;
   justify-items: center;
   gap: 12px;
@@ -2127,7 +2131,7 @@
 }
 
 /* Numero principal dentro del selector de cantidad. */
-.vc-flashcards-modal-count strong {
+.vc-study-sessions-modal-count strong {
   width: 74px;
   height: 96px;
   opacity: 1;
@@ -2142,13 +2146,13 @@
 }
 
 /* Separacion inferior de la cabecera del rango. */
-.vc-flashcards-modal-range-meta {
+.vc-study-sessions-modal-range-meta {
   margin-bottom: 12px;
 }
 
 /* Tipografia auxiliar de los textos del rango. */
-.vc-flashcards-modal-range-meta span,
-.vc-flashcards-modal-range-meta strong {
+.vc-study-sessions-modal-range-meta span,
+.vc-study-sessions-modal-range-meta strong {
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
@@ -2156,7 +2160,7 @@
   color: #666666;
 }
 
-[data-vc-flashcards-range-label] {
+[data-vc-study-sessions-range-label] {
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
@@ -2164,7 +2168,7 @@
 }
 
 /* Slider de cantidad con ancho completo. */
-.vc-flashcards-modal-slider-wrap input[type="range"] {
+.vc-study-sessions-modal-slider-wrap input[type="range"] {
   display: block;
   width: 100%;
   height: 8px;
@@ -2180,7 +2184,7 @@
 }
 
 /* Mantiene transparente la pista nativa para que el relleno dinamico lo controle el propio input. */
-.vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
+.vc-study-sessions-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
   height: 8px;
   border: 0;
   border-radius: 999px;
@@ -2189,7 +2193,7 @@
 }
 
 /* Deja la bola del slider en blanco sin alterar el resto del control. */
-.vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
+.vc-study-sessions-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   margin-top: -6px;
@@ -2202,7 +2206,7 @@
   box-shadow: none;
 }
 
-.vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-track {
+.vc-study-sessions-modal-slider-wrap input[type="range"]::-moz-range-track {
   height: 8px;
   border: 0;
   border-radius: 999px;
@@ -2210,7 +2214,7 @@
   box-shadow: none;
 }
 
-.vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
+.vc-study-sessions-modal-slider-wrap input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border: 2px solid #1447E6;
@@ -2221,7 +2225,7 @@
 }
 
 /* Grid de cantidades rapidas dentro del modal. */
-.vc-flashcards-modal-options {
+.vc-study-sessions-modal-options {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
@@ -2229,7 +2233,7 @@
 }
 
 /* Boton individual para una cantidad predefinida. */
-.vc-flashcards-count-option {
+.vc-study-sessions-count-option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2242,14 +2246,14 @@
   box-sizing: border-box;
 }
 
-.vc-flashcards-count-option--all {
+.vc-study-sessions-count-option--all {
   grid-column: span 2;
   padding-right: 8px;
   padding-left: 8px;
 }
 
 /* Texto interno de la cantidad: separado del boton para controlar tipografia sin tocar caja. */
-.vc-flashcards-count-option-label {
+.vc-study-sessions-count-option-label {
   display: block;
   font-weight: 400;
   color: #667085;
@@ -2260,11 +2264,11 @@
 }
 
 /* Estado activo de la cantidad elegida. */
-.vc-flashcards-count-option.is-active,
-.vc-flashcards-count-option.is-active:hover,
-.vc-flashcards-count-option.is-active:focus,
-.vc-flashcards-count-option.is-active:focus-visible,
-.vc-flashcards-count-option.is-active:active {
+.vc-study-sessions-count-option.is-active,
+.vc-study-sessions-count-option.is-active:hover,
+.vc-study-sessions-count-option.is-active:focus,
+.vc-study-sessions-count-option.is-active:focus-visible,
+.vc-study-sessions-count-option.is-active:active {
   border-color: #1447E6;
   border-radius: 8px;
   background: #1447E6;
@@ -2274,48 +2278,48 @@
 }
 
 /* Texto de la cantidad activa. */
-.vc-flashcards-count-option.is-active .vc-flashcards-count-option-label,
-.vc-flashcards-count-option.is-active:hover .vc-flashcards-count-option-label,
-.vc-flashcards-count-option.is-active:focus .vc-flashcards-count-option-label,
-.vc-flashcards-count-option.is-active:focus-visible .vc-flashcards-count-option-label,
-.vc-flashcards-count-option.is-active:active .vc-flashcards-count-option-label {
+.vc-study-sessions-count-option.is-active .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option.is-active:hover .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option.is-active:focus .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option.is-active:focus-visible .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option.is-active:active .vc-study-sessions-count-option-label {
   color: #ffffff;
 }
 
 /* Mantiene estable el estilo de las cantidades no activas aunque el cursor pase por encima. */
-.vc-flashcards-count-option:not(.is-active):hover,
-.vc-flashcards-count-option:not(.is-active):focus,
-.vc-flashcards-count-option:not(.is-active):focus-visible {
+.vc-study-sessions-count-option:not(.is-active):hover,
+.vc-study-sessions-count-option:not(.is-active):focus,
+.vc-study-sessions-count-option:not(.is-active):focus-visible {
   border-color: #e2e8f0;
   background: #f3f6fb;
   box-shadow: none;
 }
 
-.vc-flashcards-count-option:not(.is-active):hover .vc-flashcards-count-option-label,
-.vc-flashcards-count-option:not(.is-active):focus .vc-flashcards-count-option-label,
-.vc-flashcards-count-option:not(.is-active):focus-visible .vc-flashcards-count-option-label {
+.vc-study-sessions-count-option:not(.is-active):hover .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option:not(.is-active):focus .vc-study-sessions-count-option-label,
+.vc-study-sessions-count-option:not(.is-active):focus-visible .vc-study-sessions-count-option-label {
   color: #667085;
 }
 
 /* Separacion superior del footer del modal. */
-.vc-flashcards-modal-actions {
+.vc-study-sessions-modal-actions {
   width: 100%;
   gap: 12px;
   margin-top: 24px;
 }
 
 /* Evita cambios visuales al pasar el cursor por el footer del modal. */
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:hover,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:focus,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:focus-within {
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:hover,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:focus,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:focus-within {
   background: transparent;
   color: inherit;
   box-shadow: none;
 }
 
-.vc-flashcards-modal-cancel,
-.vc-flashcards-modal-confirm {
+.vc-study-sessions-modal-cancel,
+.vc-study-sessions-modal-confirm {
   flex: 1 1 0;
   height: 42px;
   min-height: 42px;
@@ -2324,33 +2328,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: var(--vc-flashcards-button-font-weight);
+  font-weight: var(--vc-study-sessions-button-font-weight);
   font-style: normal;
-  font-size: var(--vc-flashcards-button-font-size);
-  line-height: var(--vc-flashcards-button-line-height);
-  letter-spacing: var(--vc-flashcards-button-letter-spacing);
+  font-size: var(--vc-study-sessions-button-font-size);
+  line-height: var(--vc-study-sessions-button-line-height);
+  letter-spacing: var(--vc-study-sessions-button-letter-spacing);
   text-align: center;
   cursor: pointer;
   box-sizing: border-box;
 }
 
-.vc-flashcards-modal-cancel {
+.vc-study-sessions-modal-cancel {
   background: transparent;
   color: #1447E6;
   border: 1px solid #1447E6;
 }
 
-.vc-flashcards-modal-confirm {
+.vc-study-sessions-modal-confirm {
   background: #1447E6;
   color: #ffffff;
   border: 0;
 }
 
-.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:hover,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:focus-visible,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-cancel:active {
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-cancel,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-cancel:hover,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-cancel:focus,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-cancel:focus-visible,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-cancel:active {
   background: transparent;
   color: #1447E6;
   border-color: #1447E6;
@@ -2362,11 +2366,11 @@
   transition: none;
 }
 
-.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:hover,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:focus-visible,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-confirm:active {
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-confirm,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-confirm:hover,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-confirm:focus,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-confirm:focus-visible,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-confirm:active {
   background: #1447E6;
   color: #ffffff;
   border: 0;
@@ -2379,10 +2383,10 @@
 }
 
 /* Mantiene estable el boton opuesto aunque el otro este en hover, foco o clic. */
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:hover) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:focus-visible) .vc-flashcards-modal-confirm,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-cancel:active) .vc-flashcards-modal-confirm {
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-cancel:hover) .vc-study-sessions-modal-confirm,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-cancel:focus) .vc-study-sessions-modal-confirm,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-cancel:focus-visible) .vc-study-sessions-modal-confirm,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-cancel:active) .vc-study-sessions-modal-confirm {
   background: #1447E6;
   color: #ffffff;
   border: 0;
@@ -2393,10 +2397,10 @@
   transform: none;
 }
 
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:hover) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:focus-visible) .vc-flashcards-modal-cancel,
-.vc-flashcards-modal-dialog .vc-flashcards-modal-actions:has(.vc-flashcards-modal-confirm:active) .vc-flashcards-modal-cancel {
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-confirm:hover) .vc-study-sessions-modal-cancel,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-confirm:focus) .vc-study-sessions-modal-cancel,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-confirm:focus-visible) .vc-study-sessions-modal-cancel,
+.vc-study-sessions-modal-dialog .vc-study-sessions-modal-actions:has(.vc-study-sessions-modal-confirm:active) .vc-study-sessions-modal-cancel {
   background: transparent;
   color: #1447E6;
   border-color: #1447E6;
@@ -2407,6 +2411,517 @@
   transform: none;
 }
 
+/* Ambiente dedicado de Study by ACS Code: diseno visual independiente del modal general. */
+.vc-study-sessions-acs-code-modal[hidden] {
+  display: none;
+}
+
+.vc-study-sessions-acs-code-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.vc-study-sessions-acs-code-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.vc-study-sessions-acs-code-workspace {
+  position: relative;
+  width: 445px;
+  min-height: 386px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.vc-study-sessions-acs-code-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 13px;
+}
+
+.vc-study-sessions-acs-code-header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-width: 335px;
+}
+
+#vc-study-sessions-acs-code-title {
+  margin: 0;
+  color: #212121;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 26px;
+  line-height: 31px;
+  letter-spacing: -1px;
+}
+
+.vc-study-sessions-acs-code-copy {
+  display: none;
+}
+
+.vc-study-sessions-acs-code-close,
+.vc-study-sessions-acs-code-close:hover,
+.vc-study-sessions-acs-code-close:focus,
+.vc-study-sessions-acs-code-close:active {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding-right: 6px;
+  padding-left: 6px;
+  border: 0;
+  border-radius: 20px;
+  color: #666666;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+
+.vc-study-sessions-acs-code-close svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.vc-study-sessions-acs-code-intro {
+  margin: 0;
+  color: #666666;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.vc-study-sessions-acs-code-search {
+  position: relative;
+  display: block;
+  margin-bottom: 11px;
+}
+
+.vc-study-sessions-acs-code-search input {
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 7px 10px 7px 40px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #212121;
+  font-weight: 400; 
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  outline: 0;
+  box-shadow: none;
+}
+
+.vc-study-sessions-acs-code-search input::placeholder {
+  color: #b7b7b7;
+}
+
+.vc-study-sessions-acs-code-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 17px;
+  height: 17px;
+  color: #9ca3af;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.vc-study-sessions-acs-code-search-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.vc-study-sessions-acs-code-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 24px;
+}
+
+.vc-study-sessions-acs-code-weak-areas,
+.vc-study-sessions-acs-code-clear {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 0 !important;
+  border-radius: 6px;
+  background-color: #f5f6f8 !important;
+  color: #0046ff !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  line-height: 18px !important;
+  letter-spacing: -0.15px !important;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:hover,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:focus,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:active,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:hover,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:focus,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:active {
+  border: 0;
+  background: #f5f6f8 !important;
+  background-color: #f5f6f8 !important;
+  color: #0046ff !important;
+  text-decoration: none !important;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+  opacity: 1;
+}
+
+.vc-study-sessions-acs-code-weak-areas {
+  width: 201px;
+  height: 38px;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #f7f7f7 !important;
+  color: #1447e6 !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  letter-spacing: -0.15px !important;
+  text-align: center;
+  opacity: 1;
+}
+
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:hover,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:focus,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-weak-areas:active {
+  background: #f7f7f7 !important;
+  background-color: #f7f7f7 !important;
+  color: #1447e6 !important;
+}
+
+.vc-study-sessions-acs-code-weak-areas > span[aria-hidden="true"] {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  box-sizing: border-box;
+  border: 1.5px solid #1447e6;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.vc-study-sessions-acs-code-weak-areas > span[aria-hidden="true"]::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1447e6;
+  content: "";
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.vc-study-sessions-acs-code-weak-areas.is-active > span[aria-hidden="true"]::after,
+.vc-study-sessions-acs-code-weak-areas[aria-pressed="true"] > span[aria-hidden="true"]::after {
+  opacity: 1;
+}
+
+.vc-study-sessions-acs-code-clear {
+  width: 62px;
+  height: 38px;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #f7f7f7 !important;
+  color: #1447e6 !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  letter-spacing: -0.15px !important;
+  text-align: center;
+  opacity: 1 !important;
+}
+
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:hover,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:focus,
+.vc-study-sessions-acs-code-tools .vc-study-sessions-acs-code-clear:active {
+  background: #f7f7f7 !important;
+  background-color: #f7f7f7 !important;
+  color: #1447e6 !important;
+}
+
+.vc-study-sessions-acs-code-list-frame {
+  flex: 0 0 auto;
+  padding-bottom: 28px;
+  box-sizing: border-box;
+}
+
+.vc-study-sessions-acs-code-list {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  width: 100%;
+  height: calc((56px * 6) + (9px * 5));
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.vc-study-sessions-acs-code-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.vc-study-sessions-acs-code-item {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  padding: 7px 12px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #ffffff;
+  opacity: 1;
+}
+
+.vc-study-sessions-acs-code-item.is-selected {
+  background: #E2E8F0;
+}
+
+.vc-study-sessions-acs-code-item.is-selected:hover,
+.vc-study-sessions-acs-code-item.is-selected:focus,
+.vc-study-sessions-acs-code-item.is-selected:focus-within,
+.vc-study-sessions-acs-code-item.is-selected:active {
+  border: 1px solid #E2E8F0;
+  background: #E2E8F0;
+  color: inherit;
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.vc-study-sessions-acs-code-item input {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid #999999; 
+  flex: 0 0 14px;
+  margin: 0;
+  accent-color: #F1F5F9;
+}
+
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  padding: 0;
+  border: 1px solid #999999;
+  border-radius: 2px;
+  background-color: #ffffff;
+  flex: 0 0 14px;
+  margin: 0;
+  accent-color: #F1F5F9;
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:hover,
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:focus,
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:focus-visible,
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:active {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid #999999 !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.vc-study-sessions-acs-code-item-copy {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 1px;
+  min-width: 0;
+}
+
+.vc-study-sessions-acs-code-item-copy strong {
+  color: #212121;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.vc-study-sessions-acs-code-item-copy span {
+  color: #B8B8B8;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.vc-study-sessions-acs-code-empty {
+  min-height: 49px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed #dfe7f1;
+  border-radius: 8px;
+  color: #666666;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: -0.15px;
+}
+
+.vc-study-sessions-acs-code-js-hooks {
+  display: none;
+}
+
+.vc-study-sessions-acs-code-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vc-study-sessions-acs-code-summary {
+  margin: 0;
+  color: #212121;
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.vc-study-sessions-acs-code-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.vc-study-sessions-acs-code-cancel,
+.vc-study-sessions-acs-code-confirm {
+  height: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: Poppins, sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+  text-align: center;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.vc-study-sessions-acs-code-cancel,
+.vc-study-sessions-acs-code-cancel:hover,
+.vc-study-sessions-acs-code-cancel:focus,
+.vc-study-sessions-acs-code-cancel:focus-visible,
+.vc-study-sessions-acs-code-cancel:active {
+  width: 100%;
+  border: 1px solid #1447e6;
+  background: #ffffff;
+  color: #1447e6;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  transform: none;
+}
+
+.vc-study-sessions-acs-code-confirm,
+.vc-study-sessions-acs-code-confirm:hover,
+.vc-study-sessions-acs-code-confirm:focus,
+.vc-study-sessions-acs-code-confirm:focus-visible,
+.vc-study-sessions-acs-code-confirm:active {
+  width: 100%;
+  border: 1px solid #1447e6;
+  background: #1447e6;
+  color: #ffffff;
+  box-shadow: none;
+  outline: none;
+  text-decoration: none;
+  transform: none;
+}
+
+.vc-study-sessions-acs-code-confirm:disabled {
+  opacity: 0.6;
+}
 
 /* ==========================================================================
    Component: Shared Interaction States
@@ -2414,38 +2929,38 @@
    ========================================================================== */
 
 /* Hace visible el bloqueo temporal del CTA de inicio mientras la sesion se prepara. */
-.vc-flashcards-modal-confirm:disabled {
+.vc-study-sessions-modal-confirm:disabled {
   opacity: 0.6;
 }
 
 /* Aplica el estilo azul solo al boton back dentro de las acciones de la card. */
-.vc-flashcards-card .vc-flashcards-actions .vc-flashcards-back {
+.vc-study-sessions-card .vc-study-sessions-actions .vc-study-sessions-back {
   background: #1447e6;
   color: #ffffff;
   border: 0;
 }
 
 /* Centra icono y texto del toggle de explicacion dentro del mismo eje visual. */
-.vc-flashcards-explanation-toggle {
+.vc-study-sessions-explanation-toggle {
   background: transparent;
   color: #1447E6;
   border: 1px solid #1447E6;
 }
 
-.vc-flashcards-explanation-toggle:hover,
-.vc-flashcards-explanation-toggle:focus,
-.vc-flashcards-explanation-toggle:focus-visible,
-.vc-flashcards-explanation-toggle:active {
+.vc-study-sessions-explanation-toggle:hover,
+.vc-study-sessions-explanation-toggle:focus,
+.vc-study-sessions-explanation-toggle:focus-visible,
+.vc-study-sessions-explanation-toggle:active {
   background: transparent;
   color: #1447E6;
   border: 1px solid #1447E6;
   box-shadow: none;
 }
 
-.vc-flashcards-session-next:hover,
-.vc-flashcards-session-next:focus,
-.vc-flashcards-session-next:focus-visible,
-.vc-flashcards-session-next:active {
+.vc-study-sessions-session-next:hover,
+.vc-study-sessions-session-next:focus,
+.vc-study-sessions-session-next:focus-visible,
+.vc-study-sessions-session-next:active {
   background: #1447E6;
   color: #ffffff;
   border: 0;
@@ -2453,17 +2968,17 @@
 }
 
 /* Mantiene el label del toggle con la misma caja tipografica de Next question. */
-.vc-flashcards-explanation-toggle-label {
+.vc-study-sessions-explanation-toggle-label {
   display: inline-flex;
   align-items: center;
-  line-height: var(--vc-flashcards-button-line-height);
+  line-height: var(--vc-study-sessions-button-line-height);
 }
 
 
 
 /* Reparte ambas acciones del modal de forma pareja y centra su contenido. */
 /* Bloquea el scroll del body mientras el modal esta abierto. */
-body.vc-flashcards-modal-open {
+body.vc-study-sessions-modal-open {
   overflow: hidden;
 }
 
@@ -2483,76 +2998,76 @@ body.vc-flashcards-modal-open {
 
   /* 1180 Dashboard host */
 
-  /* Flashcards dashboard compact desktop: suaviza el salto antes del layout tablet. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+  /* Study sessions dashboard compact desktop: suaviza el salto antes del layout tablet. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) {
     padding: 44px 32px 56px;
   }
 
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) {
     padding: 44px 56px 140px;
   }
 }
 
 @media (max-width: 960px) {
   /* --------------------------------------------------------------------------
-     960px: tablet/flashcards flow.
+     960px: tablet/Study sessions flow.
      Ajusta grillas y cards sin asumir el diseno de 480px.
      -------------------------------------------------------------------------- */
 
   /* 960 Category and config grids */
 
-  /* Flashcards category/config tablet: mantiene dos tarjetas por fila horizontal en 960px. */
-  .vc-flashcards-category-grid,
-  .vc-flashcards-config-grid {
+  /* Study sessions category/config tablet: mantiene dos tarjetas por fila horizontal en 960px. */
+  .vc-study-sessions-category-grid,
+  .vc-study-sessions-config-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* Flashcards dashboard mobile: adapta paddings internos para no pisar el dashboard responsive. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+  /* Study sessions dashboard mobile: adapta paddings internos para no pisar el dashboard responsive. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) {
     padding: 32px 22px 56px;
   }
 
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) {
     padding: 32px 22px 72px;
   }
 
   /* 960 Config card alignment */
 
-  /* Flashcards config tablet: usa columnas fijas para que el CTA no herede la altura del texto. */
-  .vc-flashcards-config-card--aligned {
+  /* Study sessions config tablet: usa columnas fijas para que el CTA no herede la altura del texto. */
+  .vc-study-sessions-config-card--aligned {
     display: grid;
-    grid-template-columns: var(--vc-flashcards-config-action-size, 48px) minmax(0, 1fr) 19px;
+    grid-template-columns: var(--vc-study-sessions-config-action-size, 48px) minmax(0, 1fr) 19px;
     align-items: center;
     gap: 12px;
   }
 
-  .vc-flashcards-config-grid .vc-flashcards-config-card {
+  .vc-study-sessions-config-grid .vc-study-sessions-config-card {
     padding: 18px;
   }
 
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-action {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-card-action {
     grid-column: 1;
     align-self: center;
     justify-self: center;
   }
 
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-copy {
     grid-column: 2;
     align-self: center;
   }
 
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-trailing-icon {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-card-trailing-icon {
     grid-column: 3;
     justify-self: end;
     margin-left: 0;
   }
 
-  .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardtitle {
     font-size: 15px;
     line-height: 20px;
   }
 
-  .vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardsubtitle {
     font-size: 13px;
     line-height: 18px;
   }
@@ -2567,68 +3082,79 @@ body.vc-flashcards-modal-open {
 
   /* 720 Dashboard host */
 
-  /* Flashcards dashboard mobile: mantiene paddings controlados en vistas internas. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+  /* Study sessions dashboard mobile: mantiene paddings controlados en vistas internas. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) {
     padding: 24px 18px 44px;
   }
 
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) {
     padding: 24px 18px 56px;
   }
 
-  /* Flashcards category tablet: mantiene dos tarjetas por fila horizontal en 720px. */
-  .vc-flashcards-category-grid {
+  /* Study sessions category tablet: mantiene dos tarjetas por fila horizontal en 720px. */
+  .vc-study-sessions-category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* Flashcards stats responsive: mantiene siempre las 3 metricas en una fila horizontal. */
-  .vc-flashcards-stats {
+  /* Study sessions stats responsive: mantiene siempre las 3 metricas en una fila horizontal. */
+  .vc-study-sessions-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
 
   /* 720 Modal and summary */
 
-  /* Flashcards stats responsive: reduce solo el aire interno sin cambiar el layout base. */
-  .vc-flashcards-stat-card {
+  /* Study sessions stats responsive: reduce solo el aire interno sin cambiar el layout base. */
+  .vc-study-sessions-stat-card {
     min-width: 0;
     padding: 10px 12px;
   }
 
-  /* Flashcards modal mobile: deja 14px reales por lado dentro del contenedor visible. */
-  .vc-flashcards-modal {
+  /* Study sessions modal mobile: deja 14px reales por lado dentro del contenedor visible. */
+  .vc-study-sessions-modal {
     padding-right: 14px;
     padding-left: 14px;
   }
 
-  .vc-flashcards-modal-dialog {
+  .vc-study-sessions-acs-code-modal {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .vc-study-sessions-modal-dialog {
+    width: min(100%, 445px);
+    margin-top: 24px;
+    padding: 22px 18px;
+  }
+
+  .vc-study-sessions-acs-code-workspace {
     width: min(100%, 445px);
     margin-top: 24px;
     padding: 22px 18px;
   }
 
   /* Mejora: ajusta el modal de resumen en movil para conservar aire lateral y legibilidad. */
-  .vc-flashcards-summary {
+  .vc-study-sessions-summary {
     padding: 16px;
   }
 
-  .vc-flashcards-summary-box {
+  .vc-study-sessions-summary-box {
     width: min(100%, 420px);
     min-width: 0;
     padding: 24px 18px 18px;
   }
 
-  /* Flashcards config small tablet: baja la presion del texto antes del breakpoint movil. */
-  .vc-flashcards-config-grid .vc-flashcards-config-card {
+  /* Study sessions config small tablet: baja la presion del texto antes del breakpoint movil. */
+  .vc-study-sessions-config-grid .vc-study-sessions-config-card {
     padding: 16px;
   }
 
-  .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardtitle {
     font-size: 14px;
     line-height: 19px;
   }
 
-  .vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardsubtitle {
     font-size: 12px;
     line-height: 17px;
   }
@@ -2642,13 +3168,13 @@ body.vc-flashcards-modal-open {
 
   /* 480 Home */
 
-  /* Flashcards home mobile: el contenido del dashboard no aporta aire externo en 480px. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="home"]) {
+  /* Study sessions home mobile: el contenido del dashboard no aporta aire externo en 480px. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="home"]) {
     padding: 0;
   }
 
-  /* Flashcards home heading mobile: franja superior independiente del padding del contenido. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="home"]) > .vc-dashboard-heading {
+  /* Study sessions home heading mobile: franja superior independiente del padding del contenido. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="home"]) > .vc-dashboard-heading {
     min-height: 102px;
     margin-bottom: 0;
     gap: 10px;
@@ -2658,133 +3184,133 @@ body.vc-flashcards-modal-open {
     border-bottom: 1px solid #E2E8F0;
   }
 
-  /* Flashcards home mobile: recibe el padding que antes tenia el contenedor dashboard. */
-  .vc-flashcards-view.vc-flashcards-home {
+  /* Study sessions home mobile: recibe el padding que antes tenia el contenedor dashboard. */
+  .vc-study-sessions-view.vc-study-sessions-home {
     padding: 16px 16px 33px;
   }
 
   /* 480 Shared actions and summary */
 
-  /* Flashcards mobile: apila encabezados y acciones solo en el breakpoint realmente movil. */
-  .vc-flashcards-category-top,
-  .vc-flashcards-subtopics-header,
-  .vc-flashcards-modal-actions,
-  .vc-flashcards-summary-actions,
-  .vc-flashcards-actions {
+  /* Study sessions mobile: apila encabezados y acciones solo en el breakpoint realmente movil. */
+  .vc-study-sessions-category-top,
+  .vc-study-sessions-subtopics-header,
+  .vc-study-sessions-modal-actions,
+  .vc-study-sessions-summary-actions,
+  .vc-study-sessions-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  /* Flashcards summary buttons mobile: aplica medidas y tipografia de Figma solo en 480px. */
-  .vc-flashcards-summary-action {
+  /* Study sessions summary buttons mobile: aplica medidas y tipografia de Figma solo en 480px. */
+  .vc-study-sessions-summary-action {
     height: 42px;
     min-height: 42px;
     gap: 8px;
-    font-weight: var(--vc-flashcards-button-font-weight);
-    font-size: var(--vc-flashcards-button-font-size-mobile);
-    line-height: var(--vc-flashcards-button-line-height-mobile);
-    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
+    font-weight: var(--vc-study-sessions-button-font-weight);
+    font-size: var(--vc-study-sessions-button-font-size-mobile);
+    line-height: var(--vc-study-sessions-button-line-height-mobile);
+    letter-spacing: var(--vc-study-sessions-button-letter-spacing-mobile);
     text-align: center;
   }
 
-  /* Flashcards text buttons mobile: iguala altura a Global Random Practice en 480px. */
-  .vc-flashcards-session-action,
-  .vc-flashcards-modal-cancel,
-  .vc-flashcards-modal-confirm {
+  /* Study sessions text buttons mobile: iguala altura a Global Random Practice en 480px. */
+  .vc-study-sessions-session-action,
+  .vc-study-sessions-modal-cancel,
+  .vc-study-sessions-modal-confirm {
     height: 46px;
     min-height: 46px;
-    font-weight: var(--vc-flashcards-button-font-weight);
-    font-size: var(--vc-flashcards-button-font-size-mobile);
-    line-height: var(--vc-flashcards-button-line-height-mobile);
-    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
+    font-weight: var(--vc-study-sessions-button-font-weight);
+    font-size: var(--vc-study-sessions-button-font-size-mobile);
+    line-height: var(--vc-study-sessions-button-line-height-mobile);
+    letter-spacing: var(--vc-study-sessions-button-letter-spacing-mobile);
   }
 
-  /* Flashcards modal buttons mobile: mantiene Cancel/Start en 42px sin afectar acciones de sesion. */
-  .vc-flashcards-modal-cancel,
-  .vc-flashcards-modal-confirm {
+  /* Study sessions modal buttons mobile: mantiene Cancel/Start en 42px sin afectar acciones de sesion. */
+  .vc-study-sessions-modal-cancel,
+  .vc-study-sessions-modal-confirm {
     height: 42px;
     min-height: 42px;
   }
 
-  /* Flashcards summary results mobile: fuerza numero arriba y etiqueta debajo. */
-  .vc-flashcards-summary-result-card {
+  /* Study sessions summary results mobile: fuerza numero arriba y etiqueta debajo. */
+  .vc-study-sessions-summary-result-card {
     display: flex;
     flex-direction: column;
     height: 76px;
     padding: 10px 17px;
   }
 
-  .vc-flashcards-summary-accuracy-card {
+  .vc-study-sessions-summary-accuracy-card {
     padding: 8px 17px;
     height: 76px;
   }
   
 
-  .vc-flashcards-summary-result-card strong {
+  .vc-study-sessions-summary-result-card strong {
     order: 1;
     margin-bottom: 0px;
   }
 
-  .vc-flashcards-summary-result-card h3,
-  .vc-flashcards-summary-result-card span {
+  .vc-study-sessions-summary-result-card h3,
+  .vc-study-sessions-summary-result-card span {
     order: 2;
   }
 
-  /* Flashcards summary typography mobile: mantiene correct, incorrect y accuracy con el mismo tamano. */
-  .vc-flashcards-summary-result-card h3,
-  .vc-flashcards-summary-accuracy-title {
+  /* Study sessions summary typography mobile: mantiene correct, incorrect y accuracy con el mismo tamano. */
+  .vc-study-sessions-summary-result-card h3,
+  .vc-study-sessions-summary-accuracy-title {
     font-size: 15px;
     line-height: 20px;
     letter-spacing: -0.15px;
   }
 
-  /* Flashcards detail mobile: el aire externo pasa a las secciones internas. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="detail"]) {
+  /* Study sessions detail mobile: el aire externo pasa a las secciones internas. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="detail"]) {
     padding: 0;
   }
 
-  /* Flashcards session mobile: deja el aire externo en la card, no en el contenedor dashboard. */
-  .vc-dashboard-content:has(.vc-dashboard-panel--flashcards .vc-flashcards-app[data-active-view="session"]) {
+  /* Study sessions session mobile: deja el aire externo en la card, no en el contenedor dashboard. */
+  .vc-dashboard-content:has(.vc-dashboard-panel--study-sessions .vc-study-sessions-app[data-active-view="session"]) {
     padding: 0;
     min-height: calc(100dvh - 80px);
   }
 
-  /* Flashcards cards mobile: reduce aire interno antes de reglas especificas por card. */
-  .vc-flashcards-config-card {
+  /* Study sessions cards mobile: reduce aire interno antes de reglas especificas por card. */
+  .vc-study-sessions-config-card {
     padding: 10px 16px;
   }
 
-  /* Flashcards summary mobile: replica el aire lateral del modal en el overlay de resultados. */
-  .vc-flashcards-summary {
+  /* Study sessions summary mobile: replica el aire lateral del modal en el overlay de resultados. */
+  .vc-study-sessions-summary {
     padding: 19px;
   }
 
-  /* Flashcards summary box mobile: conserva la caja amplia del resultado en 480px. */
-  .vc-flashcards-summary-box {
+  /* Study sessions summary box mobile: conserva la caja amplia del resultado en 480px. */
+  .vc-study-sessions-summary-box {
     padding: 30px;
   }
 
-  /* Flashcards subtopics mobile: recibe el padding lateral que antes tenia el dashboard. */
-  .vc-flashcards-subtopics-card {
+  /* Study sessions subtopics mobile: recibe el padding lateral que antes tenia el dashboard. */
+  .vc-study-sessions-subtopics-card {
     padding: 0 16px 33px;
   }
 
-  /* Flashcards subtopic item mobile: ajusta padding a 15px vertical y 12px lateral solo en 480px. */
-  .vc-flashcards-subtopic-item {
+  /* Study sessions subtopic item mobile: ajusta padding a 15px vertical y 12px lateral solo en 480px. */
+  .vc-study-sessions-subtopic-item {
     padding: 15px 12px;
   }
 
-  /* Flashcards modal options mobile: reparte las cantidades en una fila proporcional solo en 480px. */
-  .vc-flashcards-modal-options {
+  /* Study sessions modal options mobile: reparte las cantidades en una fila proporcional solo en 480px. */
+  .vc-study-sessions-modal-options {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
   }
 
-  /* Flashcards modal option mobile: evita que el contenido fuerce una columna debajo de otra. */
+  /* Study sessions modal option mobile: evita que el contenido fuerce una columna debajo de otra. */
    
 
   /* Config card mobile: refuerza jerarquia del titulo dentro de cada modo. */
-  .vc-flashcards-config-grid .vc-flashcards-card-cardtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardtitle {
     margin: 0;
     font-weight: 500;
     font-size: 16px;
@@ -2793,7 +3319,7 @@ body.vc-flashcards-modal-open {
   }
 
   /* Config grid mobile: mantiene una separacion compacta entre modos. */
-  .vc-flashcards-config-grid {
+  .vc-study-sessions-config-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
@@ -2801,18 +3327,18 @@ body.vc-flashcards-modal-open {
   }
 
   /* Config card mobile: compacta el subtitulo para sostener tarjetas bajas. */
-  .vc-flashcards-config-grid .vc-flashcards-card-cardsubtitle {
+  .vc-study-sessions-config-grid .vc-study-sessions-card-cardsubtitle {
     font-size: 12px;
   }
 
-  /* Flashcards detail mobile: destaca un poco mas el titulo activo en 480px. */
-  .vc-flashcards-detail-header [data-vc-flashcards-category-title] {
+  /* Study sessions detail mobile: destaca un poco mas el titulo activo en 480px. */
+  .vc-study-sessions-detail-header [data-vc-study-sessions-category-title] {
     font-weight: 500;
     font-size: 18px;
     line-height: 24px;
   }
 
-  .vc-flashcards-card [data-vc-flashcards-question] {
+  .vc-study-sessions-card [data-vc-study-sessions-question] {
     margin-bottom: 18px;
     font-weight: 400;
     font-size: 16px;
@@ -2821,7 +3347,7 @@ body.vc-flashcards-modal-open {
   }
 
   /* Subtopic item mobile: ajusta el titulo del subtema a escala compacta. */
-  .vc-flashcards-subtopic-copy strong {
+  .vc-study-sessions-subtopic-copy strong {
     color: #212121;
     font-size: 14px;
     font-weight: 400;
@@ -2830,77 +3356,90 @@ body.vc-flashcards-modal-open {
   }
 
   /* Subtopic item mobile: reduce la descripcion para evitar wraps largos. */
-  .vc-flashcards-subtopic-copy span {
+  .vc-study-sessions-subtopic-copy span {
     font-size: 12px;
   }
 
   /* Subtopic item mobile: compacta la distancia entre titulo y descripcion. */
-  .vc-flashcards-subtopic-copy {
+  .vc-study-sessions-subtopic-copy {
     gap: 5px;
   }
 
-  /* Flashcards modal mobile: asegura que el dialog quede centrado en pantalla solo en 480px. */
-  .vc-flashcards-modal {
+  /* Study sessions modal mobile: asegura que el dialog quede centrado en pantalla solo en 480px. */
+  .vc-study-sessions-modal {
     place-items: center;
     align-items: center;
     justify-items: center;
     padding: 15px;
   }
 
-  /* Flashcards modal heading mobile: compacta la distancia entre titulo y descripcion. */
-  .vc-flashcards-modal-heading {
+  .vc-study-sessions-acs-code-modal {
+    place-items: center;
+    align-items: center;
+    justify-items: center;
+    padding: 15px;
+  }
+
+  /* Study sessions modal heading mobile: compacta la distancia entre titulo y descripcion. */
+  .vc-study-sessions-modal-heading {
     gap: 6px;
   }
 
-  /* Flashcards modal dialog mobile: elimina el desplazamiento superior heredado en 480px. */
-  .vc-flashcards-modal-dialog {
+  /* Study sessions modal dialog mobile: elimina el desplazamiento superior heredado en 480px. */
+  .vc-study-sessions-modal-dialog {
     margin: 0;
     padding: 18px 16px;
   }
 
-  /* Flashcards modal close mobile: fija el control de cierre en 26x26 solo en 480px. */
-  .vc-flashcards-close-button.vc-flashcards-modal-close {
+  .vc-study-sessions-acs-code-workspace {
+    margin: 0;
+    max-height: calc(100dvh - 30px);
+    padding: 18px 16px;
+  }
+
+  /* Study sessions modal close mobile: fija el control de cierre en 26x26 solo en 480px. */
+  .vc-study-sessions-close-button.vc-study-sessions-modal-close {
     width: 26px;
     height: 26px;
     flex: 0 0 26px;
     padding: 0;
   }
 
-  /* Flashcards modal range mobile: mantiene la meta del rango en una sola linea solo en 480px. */
-  .vc-flashcards-modal-range-meta {
+  /* Study sessions modal range mobile: mantiene la meta del rango en una sola linea solo en 480px. */
+  .vc-study-sessions-modal-range-meta {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
 
-  /* Flashcards modal range mobile: fija el texto inicial al extremo izquierdo en 480px. */
-  .vc-flashcards-modal-range-meta span {
+  /* Study sessions modal range mobile: fija el texto inicial al extremo izquierdo en 480px. */
+  .vc-study-sessions-modal-range-meta span {
     flex: 1 1 auto;
     min-width: 0;
     text-align: left;
   }
 
-  /* Flashcards modal range mobile: fija el valor fuerte al extremo derecho en 480px. */
-  .vc-flashcards-modal-range-meta strong {
+  /* Study sessions modal range mobile: fija el valor fuerte al extremo derecho en 480px. */
+  .vc-study-sessions-modal-range-meta strong {
     flex: 0 0 auto;
     text-align: right;
   }
 
-  /* Flashcards modal actions mobile: mantiene las acciones en una sola linea solo en 480px. */
-  .vc-flashcards-modal-actions {
+  /* Study sessions modal actions mobile: mantiene las acciones en una sola linea solo en 480px. */
+  .vc-study-sessions-modal-actions {
     flex-direction: row;
     align-items: center;
   }
 
-  /* Flashcards modal actions mobile: reparte ambos botones de forma pareja en 480px. */
-  .vc-flashcards-modal-actions > * {
+  /* Study sessions modal actions mobile: reparte ambos botones de forma pareja en 480px. */
+  .vc-study-sessions-modal-actions > * {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  /* Flashcards detail mobile: alinea el titulo al extremo izquierdo y Back al extremo derecho. */
-  .vc-flashcards-detail-header {
+  /* Study sessions detail mobile: alinea el titulo al extremo izquierdo y Back al extremo derecho. */
+  .vc-study-sessions-detail-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -2913,19 +3452,19 @@ body.vc-flashcards-modal-open {
     box-sizing: border-box;
   }
 
-  /* Flashcards subtopics header mobile: recibe el padding lateral que antes tenia el dashboard. */
-  .vc-flashcards-subtopics-header {
+  /* Study sessions subtopics header mobile: recibe el padding lateral que antes tenia el dashboard. */
+  .vc-study-sessions-subtopics-header {
     padding: 0 16px;
   }
 
-  /* Flashcards detail mobile: mantiene el bloque del titulo al inicio de la fila. */
-  .vc-flashcards-detail-header > div {
+  /* Study sessions detail mobile: mantiene el bloque del titulo al inicio de la fila. */
+  .vc-study-sessions-detail-header > div {
     order: 1;
     min-width: 0;
   }
 
-  /* Flashcards detail mobile: mueve el boton Back al final derecho de la fila. */
-  .vc-flashcards-detail-header > .vc-flashcards-back {
+  /* Study sessions detail mobile: mueve el boton Back al final derecho de la fila. */
+  .vc-study-sessions-detail-header > .vc-study-sessions-back {
     order: 2;
     flex: 0 0 auto;
     min-height: 32px;
@@ -2934,14 +3473,14 @@ body.vc-flashcards-modal-open {
     padding-bottom: 0;
   }
 
-  /* Flashcards detail mobile: oculta el total de la categoria solo en 480px. */
-  .vc-flashcards-category-total {
+  /* Study sessions detail mobile: oculta el total de la categoria solo en 480px. */
+  .vc-study-sessions-category-total {
     display: none;
   }
 
   /* Config card aligned mobile: aplica la fila compacta solo en 480px. */
-  .vc-flashcards-config-card--aligned {
-    --vc-flashcards-config-action-size: 40px;
+  .vc-study-sessions-config-card--aligned {
+    --vc-study-sessions-config-action-size: 40px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -2950,7 +3489,7 @@ body.vc-flashcards-modal-open {
   }
 
   /* Config card aligned mobile: deja el texto a la derecha del CTA en 480px. */
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-copy {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-copy {
     order: 2;
     align-self: center;
     justify-content: center;
@@ -2959,88 +3498,88 @@ body.vc-flashcards-modal-open {
   }
 
   /* Config card aligned mobile: deja el CTA al lado izquierdo en 480px. */
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-action {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-card-action {
     order: 1;
     align-self: center;
   }
 
-  /* Flashcards subtopics title mobile: reduce la altura visual del heading. */
-  .vc-flashcards-subtopics-header h3 {
+  /* Study sessions subtopics title mobile: reduce la altura visual del heading. */
+  .vc-study-sessions-subtopics-header h3 {
     line-height: 16px;
     letter-spacing: -0.31px;
   }
 
-  /* Flashcards actions mobile: compacta la fila de apoyo dentro de la sesion. */
-  .vc-flashcards-actions {
+  /* Study sessions actions mobile: compacta la fila de apoyo dentro de la sesion. */
+  .vc-study-sessions-actions {
     gap: 10px;
     margin-top: 26px;
   }
 
-  /* Flashcards explanation mobile: conserva una caja legible debajo de la pregunta. */
-  .vc-flashcards-explanation {
+  /* Study sessions explanation mobile: conserva una caja legible debajo de la pregunta. */
+  .vc-study-sessions-explanation {
     margin-top: 10px;
     padding: 12px 20px 20px 20px;
     border-radius: 12px;
   }
 
-  /* Flashcards session next mobile: reduce el aire antes del CTA final. */
-  .vc-flashcards-card > .vc-flashcards-session-next {
+  /* Study sessions session next mobile: reduce el aire antes del CTA final. */
+  .vc-study-sessions-card > .vc-study-sessions-session-next {
     margin-top: 10px;
   }
 
   /* Config card action mobile: baja el icono para ajustarlo al boton de 40px. */
-  .vc-flashcards-config-card-action-icon img {
+  .vc-study-sessions-config-card-action-icon img {
     width: 20px;
     height: 20px;
   }
 
   /* Config card aligned mobile: mantiene el chevron al extremo derecho. */
-  .vc-flashcards-config-card--aligned .vc-flashcards-config-card-trailing-icon {
+  .vc-study-sessions-config-card--aligned .vc-study-sessions-config-card-trailing-icon {
     order: 3;
     margin-left: auto;
   }
 
-  /* Flashcards category mobile: vuelve a una tarjeta por fila y reduce el gap en celular pequeno. */
-  .vc-flashcards-category-grid {
+  /* Study sessions category mobile: vuelve a una tarjeta por fila y reduce el gap en celular pequeno. */
+  .vc-study-sessions-category-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  /* Flashcards category mobile: controla el padding interno de cada card en 480px. */
-  .vc-flashcards-category-card {
+  /* Study sessions category mobile: controla el padding interno de cada card en 480px. */
+  .vc-study-sessions-category-card {
     padding: 17px;
     min-height: 185px ;
     gap: 8px;
   }
 
-  /* Flashcards category mobile: ordena los elementos para 480px. */
-  .vc-flashcards-category-card .vc-flashcards-category-top {
+  /* Study sessions category mobile: ordena los elementos para 480px. */
+  .vc-study-sessions-category-card .vc-study-sessions-category-top {
     order: 1;
   }
 
-  .vc-flashcards-category-card .vc-flashcards-category-meta {
+  .vc-study-sessions-category-card .vc-study-sessions-category-meta {
     order: 2;
   }
 
-  .vc-flashcards-category-card .vc-flashcards-category-progress-block {
+  .vc-study-sessions-category-card .vc-study-sessions-category-progress-block {
     order: 3;
-    /* Flashcards category mobile spacing: gap 8px + margin 8px = separacion visual de 16px desde meta. */
+    /* Study sessions category mobile spacing: gap 8px + margin 8px = separacion visual de 16px desde meta. */
     margin-top: 8px;
   }
 
-  .vc-flashcards-category-card .vc-flashcards-start.vc-flashcards-start--full {
+  .vc-study-sessions-category-card .vc-study-sessions-start.vc-study-sessions-start--full {
     order: 4;
-    /* Flashcards category mobile spacing: mantiene 16px entre progreso y boton sin cambiar el gap global. */
+    /* Study sessions category mobile spacing: mantiene 16px entre progreso y boton sin cambiar el gap global. */
     margin-top: 8px;
   }
 
-  /* Flashcards global mobile: usa el mismo aire interno de category card sin cambiar su posicion. */
-  .vc-flashcards-global-random {
+  /* Study sessions global mobile: usa el mismo aire interno de category card sin cambiar su posicion. */
+  .vc-study-sessions-global-random {
     padding: 16px;
   }
 
-  /* Flashcards global mobile: alinea icono y copy en la misma fila, con CTA debajo. */
-  .vc-flashcards-global-random-main {
+  /* Study sessions global mobile: alinea icono y copy en la misma fila, con CTA debajo. */
+  .vc-study-sessions-global-random-main {
     display: grid;
     grid-template-columns: 56px minmax(0, 1fr);
     align-items: start;
@@ -3049,13 +3588,13 @@ body.vc-flashcards-modal-open {
     width: 100%;
   }
 
-  .vc-flashcards-summary-accuracy-title {
+  .vc-study-sessions-summary-accuracy-title {
   margin: 0px;
 
  }
 
-  /* Flashcards global mobile: mantiene el icono como primer elemento visual. */
-  .vc-flashcards-global-random-icon {
+  /* Study sessions global mobile: mantiene el icono como primer elemento visual. */
+  .vc-study-sessions-global-random-icon {
     width: 56px;
     height: 56px;
     min-width: 56px;
@@ -3065,19 +3604,19 @@ body.vc-flashcards-modal-open {
     aspect-ratio: 1 / 1;
   }
 
-  /* Flashcards global mobile: conserva el icono interno en 24px dentro de su caja compacta. */
-  .vc-flashcards-global-random-icon img {
+  /* Study sessions global mobile: conserva el icono interno en 24px dentro de su caja compacta. */
+  .vc-study-sessions-global-random-icon img {
     width: 24px;
     height: 24px;
   }
 
-  /* Flashcards global mobile: permite que copy y CTA participen en la grilla principal. */
-  .vc-flashcards-global-random-content {
+  /* Study sessions global mobile: permite que copy y CTA participen en la grilla principal. */
+  .vc-study-sessions-global-random-content {
     display: contents;
   }
 
-  /* Flashcards global mobile: mantiene titulo y descripcion como bloque compacto. */
-  .vc-flashcards-global-random-copy {
+  /* Study sessions global mobile: mantiene titulo y descripcion como bloque compacto. */
+  .vc-study-sessions-global-random-copy {
     display: grid;
     gap: 4px;
     min-width: 0;
@@ -3086,8 +3625,8 @@ body.vc-flashcards-modal-open {
     align-self: center;
   }
 
-  /* Flashcards global mobile: ajusta el titulo tomando la escala de category card. */
-  .vc-flashcards-global-random-copy h3 {
+  /* Study sessions global mobile: ajusta el titulo tomando la escala de category card. */
+  .vc-study-sessions-global-random-copy h3 {
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -3095,8 +3634,8 @@ body.vc-flashcards-modal-open {
     letter-spacing: -0.31px;
   }
 
-  /* Flashcards global mobile: compacta el texto descriptivo como metadata mobile. */
-  .vc-flashcards-global-random-copy p {
+  /* Study sessions global mobile: compacta el texto descriptivo como metadata mobile. */
+  .vc-study-sessions-global-random-copy p {
     font-weight: 400;
     font-style: normal;
     font-size: 12px;
@@ -3104,30 +3643,30 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0;
   }
 
-  /* Flashcards global mobile: ajusta el CTA global con la misma escala visual del CTA de categoria. */
-  .vc-flashcards-start.vc-flashcards-global-random-start {
+  /* Study sessions global mobile: ajusta el CTA global con la misma escala visual del CTA de categoria. */
+  .vc-study-sessions-start.vc-study-sessions-global-random-start {
     grid-column: 1 / -1;
     grid-row: 2;
     min-height: 0;
-    height: var(--vc-flashcards-button-height-mobile);
+    height: var(--vc-study-sessions-button-height-mobile);
     width: 100%;
     max-width: none;
     border-radius: 10px;
     opacity: 1;
   }
 
-  /* Flashcards global mobile: ajusta solo el texto del CTA global sin tocar su posicion. */
-  .vc-flashcards-start.vc-flashcards-global-random-start > span {
-    font-weight: var(--vc-flashcards-button-font-weight);
+  /* Study sessions global mobile: ajusta solo el texto del CTA global sin tocar su posicion. */
+  .vc-study-sessions-start.vc-study-sessions-global-random-start > span {
+    font-weight: var(--vc-study-sessions-button-font-weight);
     font-style: normal;
-    font-size: var(--vc-flashcards-button-font-size-mobile);
-    line-height: var(--vc-flashcards-button-line-height-mobile);
-    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
+    font-size: var(--vc-study-sessions-button-font-size-mobile);
+    line-height: var(--vc-study-sessions-button-line-height-mobile);
+    letter-spacing: var(--vc-study-sessions-button-letter-spacing-mobile);
     text-align: center;
   }
 
-  /* Flashcards category mobile: aplica la escala tipografica compacta al titulo. */
-  .vc-flashcards-category-top h3 {
+  /* Study sessions category mobile: aplica la escala tipografica compacta al titulo. */
+  .vc-study-sessions-category-top h3 {
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
@@ -3135,8 +3674,8 @@ body.vc-flashcards-modal-open {
     letter-spacing: -0.31px;
   }
 
-  /* Flashcards category mobile: ajusta la etiqueta de progreso. */
-  .vc-flashcards-category-progress span {
+  /* Study sessions category mobile: ajusta la etiqueta de progreso. */
+  .vc-study-sessions-category-progress span {
     font-weight: 400;
     font-style: normal;
     font-size: 12px;
@@ -3144,8 +3683,8 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0;
   }
 
-  /* Flashcards category mobile: ajusta el valor numerico del progreso. */
-  .vc-flashcards-category-progress strong {
+  /* Study sessions category mobile: ajusta el valor numerico del progreso. */
+  .vc-study-sessions-category-progress strong {
     font-weight: 500;
     font-style: normal;
     font-size: 12px;
@@ -3153,19 +3692,19 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0;
   }
 
-  /* Flashcards modal mobile: reduce la escala del titulo para evitar saltos de linea agresivos. */
-  #vc-flashcards-modal-title {
+  /* Study sessions modal mobile: reduce la escala del titulo para evitar saltos de linea agresivos. */
+  #vc-study-sessions-modal-title {
     font-size: 20px;
     letter-spacing: -1px;
   }
 
-  /* Flashcards summary mobile: muestra el mensaje final en dos lineas controladas. */
-  .vc-flashcards-summary-message span {
+  /* Study sessions summary mobile: muestra el mensaje final en dos lineas controladas. */
+  .vc-study-sessions-summary-message span {
     display: block;
   }
 
-  /* Flashcards modal mobile: mantiene la descripcion a ancho completo con la escala base. */
-  .vc-flashcards-modal-copy {
+  /* Study sessions modal mobile: mantiene la descripcion a ancho completo con la escala base. */
+  .vc-study-sessions-modal-copy {
     width: 100%;
     font-weight: 400;
     font-size: 14px;
@@ -3173,37 +3712,37 @@ body.vc-flashcards-modal-open {
     letter-spacing: -0.15px;
   }
 
-  /* Flashcards modal mobile: suaviza el peso del numero seleccionado. */
-  .vc-flashcards-modal-count strong {
+  /* Study sessions modal mobile: suaviza el peso del numero seleccionado. */
+  .vc-study-sessions-modal-count strong {
     font-weight: 400;
   }
 
-  /* Flashcards modal slider mobile: reduce la altura real del control en 480px. */
-  .vc-flashcards-modal-slider-wrap input[type="range"] {
+  /* Study sessions modal slider mobile: reduce la altura real del control en 480px. */
+  .vc-study-sessions-modal-slider-wrap input[type="range"] {
     width: 100%;
     height: 8px;
   }
 
-  /* Flashcards modal slider mobile: sincroniza la pista WebKit con la altura del input. */
-  .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
+  /* Study sessions modal slider mobile: sincroniza la pista WebKit con la altura del input. */
+  .vc-study-sessions-modal-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
     height: 8px;
   }
 
-  /* Flashcards modal slider mobile: reduce y recentra el thumb WebKit sobre una pista de 7px. */
-  .vc-flashcards-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
+  /* Study sessions modal slider mobile: reduce y recentra el thumb WebKit sobre una pista de 7px. */
+  .vc-study-sessions-modal-slider-wrap input[type="range"]::-webkit-slider-thumb {
     width: 17px;
     height: 17px;
     margin-top: -4.5px;
   }
 
-  /* Flashcards modal slider mobile: sincroniza el thumb de Firefox con WebKit. */
-  .vc-flashcards-modal-slider-wrap input[type="range"]::-moz-range-thumb {
+  /* Study sessions modal slider mobile: sincroniza el thumb de Firefox con WebKit. */
+  .vc-study-sessions-modal-slider-wrap input[type="range"]::-moz-range-thumb {
     width: 17px;
     height: 17px;
   }
 
-  /* Flashcards category mobile: ajusta el texto meta directo sin tocar el boton. */
-  .vc-flashcards-category-meta {
+  /* Study sessions category mobile: ajusta el texto meta directo sin tocar el boton. */
+  .vc-study-sessions-category-meta {
     font-weight: 400;
     font-style: normal;
     font-size: 12px;
@@ -3211,40 +3750,40 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0;
   }
 
-  /* Flashcards category mobile: define altura y radio del CTA full de categoria. */
-  .vc-flashcards-category-card .vc-flashcards-start--full {
+  /* Study sessions category mobile: define altura y radio del CTA full de categoria. */
+  .vc-study-sessions-category-card .vc-study-sessions-start--full {
     min-height: 0;
-    height: var(--vc-flashcards-button-height-mobile);
+    height: var(--vc-study-sessions-button-height-mobile);
     border-radius: 6px;
     opacity: 1;
   }
 
-  /* Flashcards category mobile: ajusta el texto del CTA full de categoria. */
-  .vc-flashcards-category-card .vc-flashcards-start--full > span:first-child {
-    font-weight: var(--vc-flashcards-button-font-weight);
+  /* Study sessions category mobile: ajusta el texto del CTA full de categoria. */
+  .vc-study-sessions-category-card .vc-study-sessions-start--full > span:first-child {
+    font-weight: var(--vc-study-sessions-button-font-weight);
     font-style: normal;
-    font-size: var(--vc-flashcards-button-font-size-mobile);
-    line-height: var(--vc-flashcards-button-line-height-mobile);
-    letter-spacing: var(--vc-flashcards-button-letter-spacing-mobile);
+    font-size: var(--vc-study-sessions-button-font-size-mobile);
+    line-height: var(--vc-study-sessions-button-line-height-mobile);
+    letter-spacing: var(--vc-study-sessions-button-letter-spacing-mobile);
     text-align: center;
   }
 
-  /* Flashcards stats mobile: conserva las 3 metricas en una fila horizontal. */
-  .vc-flashcards-stats {
+  /* Study sessions stats mobile: conserva las 3 metricas en una fila horizontal. */
+  .vc-study-sessions-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
-  /* Flashcards stats mobile: compacta cada card para que entren tres columnas en 480px. */
-  .vc-flashcards-stat-card {
+  /* Study sessions stats mobile: compacta cada card para que entren tres columnas en 480px. */
+  .vc-study-sessions-stat-card {
     display: flex;
     align-items: center;
     min-height: 115px;
     padding: 12px 6px;
   }
 
-  /* Flashcards stats mobile: apila icono arriba y textos debajo dentro de cada card. */
-  .vc-flashcards-stat-card-content {
+  /* Study sessions stats mobile: apila icono arriba y textos debajo dentro de cada card. */
+  .vc-study-sessions-stat-card-content {
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -3253,49 +3792,49 @@ body.vc-flashcards-modal-open {
     width: 100%;
   }
 
-  /* Flashcards stats mobile: reduce la caja del icono para sostener tres cards visibles. */
-  .vc-flashcards-stat-card-icon {
+  /* Study sessions stats mobile: reduce la caja del icono para sostener tres cards visibles. */
+  .vc-study-sessions-stat-card-icon {
     padding: 10px;
     border-radius: 8px;
     width: 40px;
     height: 40px;
   }
 
-  /* Flashcards stats mobile: reduce el pictograma para acompanarlo con la caja compacta. */
-  .vc-flashcards-stat-card-icon img {
+  /* Study sessions stats mobile: reduce el pictograma para acompanarlo con la caja compacta. */
+  .vc-study-sessions-stat-card-icon img {
     width: 20px;
     height: 20px;
   }
 
-  /* Flashcards stats mobile: ordena valor arriba y etiqueta abajo. */
-  .vc-flashcards-stat-card-copy {
+  /* Study sessions stats mobile: ordena valor arriba y etiqueta abajo. */
+  .vc-study-sessions-stat-card-copy {
     align-items: center;
     min-width: 0;
   }
 
-  /* Flashcards stats mobile: compacta el valor numerico dentro de cards pequenas. */
-  .vc-flashcards-stat-card-copy [data-vc-flashcards-stat] {
+  /* Study sessions stats mobile: compacta el valor numerico dentro de cards pequenas. */
+  .vc-study-sessions-stat-card-copy [data-vc-study-sessions-stat] {
     order: 1;
     font-size: 18px;
     line-height: 20px;
     letter-spacing: 0;
   }
 
-  /* Flashcards stats mobile: reduce la etiqueta para que no rompa las tres columnas. */
-  .vc-flashcards-stats .vc-flashcards-stat-card-copy small {
+  /* Study sessions stats mobile: reduce la etiqueta para que no rompa las tres columnas. */
+  .vc-study-sessions-stats .vc-study-sessions-stat-card-copy small {
     order: 2;
     margin-top: 3px;
     font-size: 10px;
     line-height: 12px;
   }
 
-  /* Flashcards session mobile: oculta la barra visual de progreso solo en 480px o menos. */
-  .vc-flashcards-session-bar {
+  /* Study sessions session mobile: oculta la barra visual de progreso solo en 480px o menos. */
+  .vc-study-sessions-session-bar {
     display: none;
   }
 
-  /* Flashcards session mobile: mantiene Back y progreso en la misma recta y en extremos opuestos. */
-  .vc-flashcards-session-header {
+  /* Study sessions session mobile: mantiene Back y progreso en la misma recta y en extremos opuestos. */
+  .vc-study-sessions-session-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -3307,8 +3846,8 @@ body.vc-flashcards-modal-open {
     box-sizing: border-box;
   }
 
-  /* Flashcards session mobile: fija el Back al extremo izquierdo sin crecer. */
-  .vc-flashcards-session-header > .vc-flashcards-back {
+  /* Study sessions session mobile: fija el Back al extremo izquierdo sin crecer. */
+  .vc-study-sessions-session-header > .vc-study-sessions-back {
   gap: 5px;
   height: 32px;
   width: 80px;
@@ -3317,14 +3856,14 @@ body.vc-flashcards-modal-open {
 
   }
 
-  /* Flashcards session mobile: fija el contador de progreso al extremo derecho. */
-  .vc-flashcards-session-progress {
+  /* Study sessions session mobile: fija el contador de progreso al extremo derecho. */
+  .vc-study-sessions-session-progress {
     margin-left: auto;
     align-self: center;
   }
 
-  /* Flashcards session card mobile: mueve el aire externo del dashboard a la tarjeta de sesion. */
-  .vc-flashcards-session > .vc-flashcards-card {
+  /* Study sessions session card mobile: mueve el aire externo del dashboard a la tarjeta de sesion. */
+  .vc-study-sessions-session > .vc-study-sessions-card {
     width: auto;
     max-width: calc(100% - 32px);
     box-sizing: border-box;
@@ -3333,8 +3872,8 @@ body.vc-flashcards-modal-open {
     overflow: hidden;
   }
 
-  /* Flashcards session topic mobile: compacta el chip principal dentro de la card. */
-  .vc-flashcards-session-topic {
+  /* Study sessions session topic mobile: compacta el chip principal dentro de la card. */
+  .vc-study-sessions-session-topic {
     padding: 5px 10px;
     height: 25px;
     width: fit-content;
@@ -3348,7 +3887,7 @@ body.vc-flashcards-modal-open {
     border-radius: 6px;
   }
 
-  .vc-flashcards-session-acs {
+  .vc-study-sessions-session-acs {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3363,11 +3902,11 @@ body.vc-flashcards-modal-open {
     letter-spacing: 0px;
     border-radius: 6px;
   }
-  .vc-flashcards-reference-image:not(.is-expanded) {
+  .vc-study-sessions-reference-image:not(.is-expanded) {
     height: 82px;
   }
 
-  .vc-flashcards-reference-image {
+  .vc-study-sessions-reference-image {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3377,22 +3916,22 @@ body.vc-flashcards-modal-open {
     background: none;
   }
 
-  /* Flashcards reference image mobile: ajusta solo el gap; la alineacion vertical vive en la base. */
-  .vc-flashcards-reference-image-control {
+  /* Study sessions reference image mobile: ajusta solo el gap; la alineacion vertical vive en la base. */
+  .vc-study-sessions-reference-image-control {
     gap: 12px;
     height: auto;
   }
 
-  /* Flashcards reference image expanded mobile: ajusta márgenes negativos al padding móvil (16px todos lados). */
-  .vc-flashcards-reference-image.is-expanded .vc-flashcards-reference-image-preview {
+  /* Study sessions reference image expanded mobile: ajusta márgenes negativos al padding móvil (16px todos lados). */
+  .vc-study-sessions-reference-image.is-expanded .vc-study-sessions-reference-image-preview {
     margin-left: -16px;
     margin-right: -16px;
     margin-bottom: -16px;
     width: calc(100% + 32px);
   }
 
-  /* Flashcards session subtopic mobile: compacta el chip secundario sin perder contraste. */
-  .vc-flashcards-session-subtopic {
+  /* Study sessions session subtopic mobile: compacta el chip secundario sin perder contraste. */
+  .vc-study-sessions-session-subtopic {
     display: block;
     width: auto;
     min-width: 0;
@@ -3412,8 +3951,8 @@ body.vc-flashcards-modal-open {
     text-overflow: clip;
   }
 
-  /* Flashcards session context mobile: reduce separacion entre chips y pregunta. */
-  .vc-flashcards-session-context {
+  /* Study sessions session context mobile: reduce separacion entre chips y pregunta. */
+  .vc-study-sessions-session-context {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -3421,15 +3960,15 @@ body.vc-flashcards-modal-open {
     gap: 10px;
   }
 
-  .vc-flashcards-session-context-row {
+  .vc-study-sessions-session-context-row {
     display: inline-flex;
     align-items: center;
     gap: 12px;
     min-width: 0;
   }
 
-  /* Flashcards session question mobile: asegura lectura y evita desbordes del enunciado. */
-  .vc-flashcards-session > .vc-flashcards-card [data-vc-flashcards-question] {
+  /* Study sessions session question mobile: asegura lectura y evita desbordes del enunciado. */
+  .vc-study-sessions-session > .vc-study-sessions-card [data-vc-study-sessions-question] {
     max-width: 100%;
     min-width: 0;
     font-size: 16px;
@@ -3439,21 +3978,21 @@ body.vc-flashcards-modal-open {
     word-break: normal;
   }
 
-  /* Flashcards answer mobile: adapta cada opcion al ancho de la card en celular. */
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer {
+  /* Study sessions answer mobile: adapta cada opcion al ancho de la card en celular. */
+  .vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answer {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
     gap: 12px;
     padding: 13px 14px;
     border: 1px solid #E2E8F0;
-    border-radius: var(--vc-flashcards-surface-radius);
+    border-radius: var(--vc-study-sessions-surface-radius);
     background: #FFFFFF;
     color: #666666;
   }
 
-  /* Flashcards answer text mobile: permite respuestas largas sin romper el layout. */
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer strong {
+  /* Study sessions answer text mobile: permite respuestas largas sin romper el layout. */
+  .vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answer strong {
     display: block;
     flex: 1 1 auto;
     min-width: 0;
@@ -3467,14 +4006,14 @@ body.vc-flashcards-modal-open {
     word-break: normal;
   }
 
-  /* Flashcards answer state mobile: reserva espacio para el check/X en 480px. */
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="correct"],
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] {
+  /* Study sessions answer state mobile: reserva espacio para el check/X en 480px. */
+  .vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"],
+  .vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"] {
     padding-right: 48px;
   }
 
-  /* Flashcards answer letter mobile: mantiene la capsula de opcion estable y compacta. */
-  .vc-flashcards-session > .vc-flashcards-card .vc-flashcards-answer span {
+  /* Study sessions answer letter mobile: mantiene la capsula de opcion estable y compacta. */
+  .vc-study-sessions-session > .vc-study-sessions-card .vc-study-sessions-answer span {
     width: 28px;
     height: 28px;
     flex: 0 0 28px;
@@ -3487,19 +4026,25 @@ body.vc-flashcards-modal-open {
     letter-spacing: -0.15px;
   }
 
-  /* Flashcards reveal mobile: reduce el texto auxiliar para que no compita con las respuestas. */
-  .vc-flashcards-reveal {
+  /* Study sessions reveal mobile: reduce el texto auxiliar para que no compita con las respuestas. */
+  .vc-study-sessions-reveal {
     font-size: 12px;
     line-height: 140%;
     letter-spacing: 0px;
   }
-  .vc-flashcards-reference-image-title {
+  .vc-study-sessions-reference-image-title {
   font-size: 14px;
 }
-.vc-flashcards-reference-image-subtitle {
+.vc-study-sessions-reference-image-subtitle {
   font-size: 12px;
 
 }
+
+#vc-study-sessions-acs-code-title {
+  font-size: 20px;
+  line-height: 24px;
+}
+
 
   
   
@@ -3510,18 +4055,21 @@ body.vc-flashcards-modal-open {
    Estados que deben quedar al final para ganar sobre overrides mobile y theme.css.
    ========================================================================== */
 
-/* Flashcards answer state: mantiene el badge verde en cualquier resolucion cuando la opcion es correcta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"] span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:hover span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="correct"]:focus-visible span {
+/* Study sessions answer state: mantiene el badge verde en cualquier resolucion cuando la opcion es correcta. */
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"] span,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"]:hover span,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="correct"]:focus-visible span {
   background: #00a63e;
   color: #FFFFFF;
 }
 
-/* Flashcards answer state: mantiene el badge rojo en cualquier resolucion cuando la opcion es incorrecta. */
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"] span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:hover span,
-.vc-flashcards-card .vc-flashcards-answer[data-state="incorrect"]:focus-visible span {
+/* Study sessions answer state: mantiene el badge rojo en cualquier resolucion cuando la opcion es incorrecta. */
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"] span,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"]:hover span,
+.vc-study-sessions-card .vc-study-sessions-answer[data-state="incorrect"]:focus-visible span {
   background: #e2101b;
   color: #FFFFFF;
 }
+
+
+

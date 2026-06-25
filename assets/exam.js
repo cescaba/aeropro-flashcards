@@ -285,7 +285,7 @@
     }
 
     // Vigila la navegacion lateral del dashboard para detectar cuando el usuario
-    // abandona el mock test y entra a otra vista como Flashcards, Profile o Logout.
+    // abandona el mock test y entra a otra vista como Study sessions, Profile o Logout.
     // En ese momento limpiamos el estado persistido del examen para que el summary
     // no quede "pegado" al volver mas tarde.
     function bindDashboardExitCleanup() {
@@ -307,8 +307,8 @@
 
           // "view" identifica el panel activo del dashboard. Si cambia de mock-test
           // a cualquier otro panel, debemos descartar el estado del examen anterior.
-          var currentView = new URL(window.location.href).searchParams.get('view') || 'flashcards';
-          var targetView = targetUrl.searchParams.get('view') || 'flashcards';
+          var currentView = new URL(window.location.href).searchParams.get('view') || 'study-sessions';
+          var targetView = targetUrl.searchParams.get('view') || 'study-sessions';
           var samePath = targetUrl.pathname === window.location.pathname;
           var leavingMockTestView = !samePath || targetView !== currentView;
 
@@ -333,7 +333,7 @@
         }
 
         // Si habia un resultado abierto, restauramos la sesion como fondo
-        // y volvemos a abrir el modal encima, igual que Flashcards.
+        // y volvemos a abrir el modal encima, igual que Study sessions.
         if ((state.view === 'summary' || state.summaryOpen) && state.summaryResults) {
           sessionId           = state.sessionId || 0;
           cards               = state.cards || [];

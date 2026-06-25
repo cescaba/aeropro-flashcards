@@ -284,28 +284,28 @@ class VC_Flashcards_Plugin {
     $acs_code = (string) get_post_meta($post->ID, '_vc_flashcard_acs_code', true);
     ?>
     <style>
-      .vc-flashcards-admin-grid {
+      .vc-study-sessions-admin-grid {
         display: grid;
         gap: 16px;
       }
-      .vc-flashcards-admin-grid label {
+      .vc-study-sessions-admin-grid label {
         display: block;
         margin-bottom: 6px;
         font-weight: 600;
       }
-      .vc-flashcards-admin-grid input[type="text"],
-      .vc-flashcards-admin-grid input[type="url"],
-      .vc-flashcards-admin-grid textarea,
-      .vc-flashcards-admin-grid select {
+      .vc-study-sessions-admin-grid input[type="text"],
+      .vc-study-sessions-admin-grid input[type="url"],
+      .vc-study-sessions-admin-grid textarea,
+      .vc-study-sessions-admin-grid select {
         width: 100%;
       }
-      .vc-flashcards-admin-inline {
+      .vc-study-sessions-admin-inline {
         display: grid;
         gap: 16px;
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     </style>
-    <div class="vc-flashcards-admin-grid">
+    <div class="vc-study-sessions-admin-grid">
       <p><strong><?php esc_html_e('Flashcard ID', 'vc-flashcards'); ?>:</strong> <?php echo esc_html((string) $post->ID); ?></p>
 
       <div>
@@ -323,7 +323,7 @@ class VC_Flashcards_Plugin {
         <input id="vc_flashcard_acs_code" type="text" name="vc_flashcard_acs_code" value="<?php echo esc_attr($acs_code); ?>">
       </div>
 
-      <div class="vc-flashcards-admin-inline">
+      <div class="vc-study-sessions-admin-inline">
         <div>
           <label for="vc_flashcard_answer_a"><?php esc_html_e('Answer A', 'vc-flashcards'); ?></label>
           <input id="vc_flashcard_answer_a" type="text" name="vc_flashcard_answer_a" value="<?php echo esc_attr($answer_a); ?>">
@@ -976,7 +976,7 @@ class VC_Flashcards_Plugin {
   // Aqui se calculan stats, se encolan assets y se carga el template PHP.
   public function render_flashcards_shortcode($atts = []): string {
     if (!is_user_logged_in()) {
-      return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the flashcards tool.', 'vc-flashcards') . '</div>';
+      return '<div class="vc-study-sessions-guest">' . esc_html__('Please log in to use the study sessions tool.', 'vc-flashcards') . '</div>';
     }
 
     wp_enqueue_style(
@@ -992,7 +992,7 @@ class VC_Flashcards_Plugin {
       file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
     );
     wp_enqueue_style(
-      'vc-flashcards-style',
+      'vc-study-sessions-style',
       VC_FLASHCARDS_URL . 'assets/flashcards.css',
       ['vc-reference-modal-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
@@ -1005,20 +1005,20 @@ class VC_Flashcards_Plugin {
       true
     );
     wp_enqueue_script(
-      'vc-flashcards-script',
+      'vc-study-sessions-script',
       VC_FLASHCARDS_URL . 'assets/flashcards.js',
       ['vc-reference-modal-script'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.js') : '1.0.0',
       true
     );
 
-    wp_localize_script('vc-flashcards-script', 'vcFlashcardsData', [
+    wp_localize_script('vc-study-sessions-script', 'vcStudySessionsData', [
       'ajaxUrl' => admin_url('admin-ajax.php'),
       'nonce' => wp_create_nonce(self::NONCE_ACTION),
       'cardOptions' => [10, 20, 30, 40, 50],
       'labels' => [
         'selectSubtopic' => __('Select a topic or subtopic first.', 'vc-flashcards'),
-        'noCards' => __('No flashcards were found for this selection.', 'vc-flashcards'),
+        'noCards' => __('No questions were found for this selection.', 'vc-flashcards'),
         'loading' => __('Preparing your practice session...', 'vc-flashcards'),
         'next' => __('Next card', 'vc-flashcards'),
         'summaryTitle' => __('Session complete', 'vc-flashcards'),
@@ -1061,6 +1061,11 @@ class VC_Flashcards_Plugin {
     $mode = isset($_POST['mode']) ? sanitize_key(wp_unslash($_POST['mode'])) : 'random';
     $term_id = isset($_POST['term_id']) ? absint($_POST['term_id']) : 0;
     $card_limit = isset($_POST['card_limit']) ? absint($_POST['card_limit']) : 10;
+    $acs_codes_json = isset($_POST['acs_codes']) ? wp_unslash($_POST['acs_codes']) : '[]';
+    $acs_codes_input = json_decode($acs_codes_json, true);
+    $acs_codes = is_array($acs_codes_input)
+      ? array_values(array_unique(array_filter(array_map('sanitize_text_field', $acs_codes_input))))
+      : [];
 
     if (!in_array($mode, ['random', 'global-random', 'category', 'subcategory'], true)) {
       $mode = 'random';
@@ -1072,9 +1077,9 @@ class VC_Flashcards_Plugin {
       wp_send_json_error(['message' => __('Please select a topic or subtopic.', 'vc-flashcards')], 400);
     }
 
-    $cards = $this->get_flashcards_for_session($mode, $term_id, $card_limit);
+    $cards = $this->get_flashcards_for_session($mode, $term_id, $card_limit, $acs_codes);
     if (empty($cards)) {
-      wp_send_json_error(['message' => __('No flashcards were found for this selection.', 'vc-flashcards')], 404);
+      wp_send_json_error(['message' => __('No questions were found for this selection.', 'vc-flashcards')], 404);
     }
 
     global $wpdb;
@@ -1345,12 +1350,18 @@ class VC_Flashcards_Plugin {
   }
 
   // Reune el pool base de tarjetas disponibles segun el modo de practica y el term elegido.
-  private function get_flashcards_for_session(string $mode, int $term_id, int $limit): array {
+  private function get_flashcards_for_session(string $mode, int $term_id, int $limit, array $acs_codes = []): array {
     $pool_cache_key = $this->get_session_cards_pool_cache_key($mode, $term_id);
     $cached_pool = get_transient($pool_cache_key);
     $is_random_mode = in_array($mode, ['random', 'global-random'], true);
 
     if (is_array($cached_pool)) {
+      if (!empty($acs_codes)) {
+        $cached_pool = array_values(array_filter($cached_pool, static function (array $card) use ($acs_codes): bool {
+          return in_array((string) ($card['acsCode'] ?? ''), $acs_codes, true);
+        }));
+      }
+
       return $this->select_cards_from_pool($cached_pool, $limit, $is_random_mode);
     }
 
@@ -1395,6 +1406,12 @@ class VC_Flashcards_Plugin {
     }
 
     set_transient($pool_cache_key, $cards_pool, 5 * MINUTE_IN_SECONDS);
+
+    if (!empty($acs_codes)) {
+      $cards_pool = array_values(array_filter($cards_pool, static function (array $card) use ($acs_codes): bool {
+        return in_array((string) ($card['acsCode'] ?? ''), $acs_codes, true);
+      }));
+    }
 
     return $this->select_cards_from_pool($cards_pool, $limit, $is_random_mode);
   }
@@ -1604,10 +1621,103 @@ class VC_Flashcards_Plugin {
           count($card_ids)
         ),
         'children' => $child_items,
+        'acsCodes' => $this->get_acs_code_counts_for_flashcards($card_ids),
       ];
     }
 
     return $categories;
+  }
+
+  // Groups the published questions in a topic by their ACS Code meta value.
+  private function get_acs_code_counts_for_flashcards(array $card_ids): array {
+    global $wpdb;
+
+    $card_ids = array_values(array_unique(array_map('intval', $card_ids)));
+
+    if (empty($card_ids)) {
+      return [];
+    }
+
+    update_meta_cache('post', $card_ids);
+    update_object_term_cache($card_ids, self::POST_TYPE);
+
+    $latest_results = [];
+    $user_id = get_current_user_id();
+
+    if ($user_id > 0) {
+      $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+      $placeholders = implode(', ', array_fill(0, count($card_ids), '%d'));
+      $query_args = array_merge([$user_id], $card_ids, [$user_id]);
+      $rows = $wpdb->get_results(
+        $wpdb->prepare(
+          "SELECT latest_attempt.flashcard_id, latest_attempt.is_correct
+          FROM {$attempts_table} latest_attempt
+          INNER JOIN (
+            SELECT flashcard_id, MAX(id) AS latest_id
+            FROM {$attempts_table}
+            WHERE user_id = %d
+              AND flashcard_id IN ({$placeholders})
+            GROUP BY flashcard_id
+          ) latest ON latest.latest_id = latest_attempt.id
+          WHERE latest_attempt.user_id = %d",
+          $query_args
+        ),
+        ARRAY_A
+      );
+
+      foreach ($rows as $row) {
+        $latest_results[(int) $row['flashcard_id']] = (int) $row['is_correct'];
+      }
+    }
+
+    $counts = [];
+    foreach ($card_ids as $card_id) {
+      $acs_code = trim((string) get_post_meta($card_id, '_vc_flashcard_acs_code', true));
+
+      if ($acs_code === '') {
+        continue;
+      }
+
+      if (!isset($counts[$acs_code])) {
+        $counts[$acs_code] = [
+          'total' => 0,
+          'attempted' => 0,
+          'incorrect' => 0,
+          'topics' => [],
+        ];
+      }
+
+      $counts[$acs_code]['total']++;
+      $term_payload = $this->get_flashcard_term_payload($card_id);
+
+      foreach ([$term_payload['topic_label'], $term_payload['subtopic_label']] as $term_label) {
+        $term_label = trim((string) $term_label);
+
+        if ($term_label !== '') {
+          $counts[$acs_code]['topics'][$term_label] = true;
+        }
+      }
+
+      if (array_key_exists($card_id, $latest_results)) {
+        $counts[$acs_code]['attempted']++;
+
+        if ($latest_results[$card_id] !== 1) {
+          $counts[$acs_code]['incorrect']++;
+        }
+      }
+    }
+
+    uksort($counts, 'strnatcasecmp');
+
+    return array_map(static function (string $acs_code, array $metrics): array {
+      return [
+        'code' => $acs_code,
+        'totalCards' => $metrics['total'],
+        'attemptedCards' => $metrics['attempted'],
+        'incorrectCards' => $metrics['incorrect'],
+        'topics' => array_keys($metrics['topics']),
+      ];
+    }, array_keys($counts), array_values($counts));
   }
 
   // Formats the secondary text below a subtopic title.
@@ -1618,7 +1728,7 @@ class VC_Flashcards_Plugin {
 
     return sprintf(
       /* translators: 1: total cards in subtopic, 2: mastered cards in subtopic */
-      __('%1$d cards · %2$d completed', 'vc-flashcards'),
+      __('%1$d questions · %2$d completed', 'vc-flashcards'),
       $safe_total,
       $safe_mastered
     );
@@ -1861,7 +1971,7 @@ class VC_Flashcards_Plugin {
   // Aqui se preparan assets, labels y datos iniciales del home del mock test.
   public function render_exam_shortcode($atts = []): string {
     if (!is_user_logged_in()) {
-      return '<div class="vc-flashcards-guest">' . esc_html__('Please log in to use the exam simulator.', 'vc-flashcards') . '</div>';
+      return '<div class="vc-study-sessions-guest">' . esc_html__('Please log in to use the exam simulator.', 'vc-flashcards') . '</div>';
     }
 
     $user_id = get_current_user_id();
@@ -1888,7 +1998,7 @@ class VC_Flashcards_Plugin {
     );
 
     wp_enqueue_style(
-      'vc-flashcards-style',
+      'vc-study-sessions-style',
       VC_FLASHCARDS_URL . 'assets/flashcards.css',
       ['vc-reference-modal-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
@@ -1897,7 +2007,7 @@ class VC_Flashcards_Plugin {
     wp_enqueue_style(
       'vc-exam-style',
       VC_FLASHCARDS_URL . 'assets/exam.css',
-      ['vc-flashcards-style'],
+      ['vc-study-sessions-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/exam.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/exam.css') : '1.0.0'
     );
 
@@ -2025,7 +2135,7 @@ class VC_Flashcards_Plugin {
     $cards = $this->get_exam_cards_for_topic($topic_term_id);
 
     if (empty($cards)) {
-      wp_send_json_error(['message' => __('No flashcards were found for this topic.', 'vc-flashcards')], 404);
+      wp_send_json_error(['message' => __('No questions were found for this topic.', 'vc-flashcards')], 404);
     }
 
     global $wpdb;
