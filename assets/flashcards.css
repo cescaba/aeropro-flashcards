@@ -137,6 +137,97 @@
   font-weight: 400;
 }
 
+.vc-study-sessions-help {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.vc-study-sessions-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vc-study-sessions-help-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #1447E6;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.vc-study-sessions-help h3,
+.vc-study-sessions-help h4,
+.vc-study-sessions-help p {
+  margin: 0;
+}
+
+.vc-study-sessions-help h3 {
+  color: #212121;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.vc-study-sessions-help-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.vc-study-sessions-help-group {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #F8FAFC;
+}
+
+.vc-study-sessions-help-group h4 {
+  color: #212121;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.vc-study-sessions-help-group p,
+.vc-study-sessions-help-item span {
+  color: #666666;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.vc-study-sessions-help-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vc-study-sessions-help-item {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vc-study-sessions-help-item strong {
+  color: #212121;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
 /* Alinea el icono y el bloque tipografico de cada metrica en una misma fila. */
 .vc-study-sessions-stat-card-content {
   display: flex;
@@ -1205,19 +1296,60 @@
 .vc-study-sessions-subtopic-heading {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 /* Titulo principal dentro de cada item de subtema. */
 .vc-study-sessions-subtopic-copy strong {
+  min-width: 0;
   color: #212121;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
 }
 
+.vc-study-sessions-subtopic-status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.vc-study-sessions-subtopic-copy .vc-study-sessions-subtopic-status--mastered {
+  color: #008236;
+  background: #DCFCE7;
+  border-color: #B9F8CF;
+}
+
+.vc-study-sessions-subtopic-copy .vc-study-sessions-subtopic-status--in-progress {
+  color: #1447E6;
+  background: #DBEAFE;
+  border-color: #BEDBFF;
+}
+
+.vc-study-sessions-subtopic-copy .vc-study-sessions-subtopic-status--needs-review {
+  color: #E2101B;
+  background: #FFEDD4;
+  border-color: #FFD6A8;
+}
+
 .vc-study-sessions-subtopic-copy span {
   font-size: 14px;
+}
+
+.vc-study-sessions-subtopic-copy .vc-study-sessions-subtopic-status {
+  font-size: 12px;
 }
 
 /* Zona de mensajes de error o informacion del modulo. */
@@ -2704,7 +2836,7 @@
   align-content: start;
   gap: 9px;
   width: 100%;
-  height: calc((56px * 6) + (9px * 5));
+  height: calc((56px * 4) + (9px * 3));
   box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -3094,6 +3226,14 @@ body.vc-study-sessions-modal-open {
   /* Study sessions category tablet: mantiene dos tarjetas por fila horizontal en 720px. */
   .vc-study-sessions-category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vc-study-sessions-help {
+    padding: 16px;
+  }
+
+  .vc-study-sessions-help-grid {
+    grid-template-columns: 1fr;
   }
 
   /* Study sessions stats responsive: mantiene siempre las 3 metricas en una fila horizontal. */

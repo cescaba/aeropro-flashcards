@@ -120,6 +120,7 @@ if (!defined('ABSPATH')) {
         </article>
       </section>
     <?php endif; ?>
+
   </section>
 
   <?php /* Vista de detalle donde se elige como estudiar una categoria. */ ?>
@@ -166,8 +167,8 @@ if (!defined('ABSPATH')) {
       <?php /* Opcion para estudiar toda la categoria en orden secuencial. */ ?>
       <article class="vc-study-sessions-config-card vc-study-sessions-config-card--aligned" data-vc-study-sessions-launch-card tabindex="0" role="button" aria-label="<?php esc_attr_e('Study full category', 'vc-study-sessions'); ?>">
         <div class="vc-study-sessions-config-copy">
-          <h3 class="vc-study-sessions-card-cardtitle"><?php esc_html_e('Study Full Category', 'vc-study-sessions'); ?></h3>
-          <p class="vc-study-sessions-card-cardsubtitle"><?php esc_html_e('Study all General cards in order', 'vc-study-sessions'); ?></p>
+          <h3 class="vc-study-sessions-card-cardtitle"><?php esc_html_e('Study by ACS Code', 'vc-study-sessions'); ?></h3>
+          <p class="vc-study-sessions-card-cardsubtitle"><?php esc_html_e('Target specific FAA exam areas', 'vc-study-sessions'); ?></p>
         </div>
         <button type="button" class="vc-study-sessions-start vc-study-sessions-start--category vc-study-sessions-config-card-action" data-vc-study-sessions-launch="category" aria-label="<?php esc_attr_e('Study full category', 'vc-study-sessions'); ?>">
           <span class="vc-study-sessions-start-list-icon vc-study-sessions-config-card-action-icon" aria-hidden="true">

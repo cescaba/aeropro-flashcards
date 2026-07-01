@@ -25,6 +25,9 @@ class VC_Flashcards_Plugin {
   // so browser payloads cannot change correct answers or inject foreign flashcards.
   const SESSION_CARD_TABLE = 'vc_flashcard_session_cards';
 
+  // Tabla donde se guardaran los mensajes enviados desde el widget global de ayuda.
+  const FEEDBACK_TABLE = 'vc_flashcard_feedback';
+
   // Nonce compartido para validar llamadas AJAX del plugin.
   const NONCE_ACTION = 'vc_flashcards_nonce';
 
@@ -41,7 +44,13 @@ class VC_Flashcards_Plugin {
   const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
 
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
-  const DB_VERSION = '1.2.1';
+  const DB_VERSION = '1.2.2';
+
+  // Limites ligeros para proteger el widget de feedback sin hacerlo lento.
+  const FEEDBACK_RATE_LIMIT_WINDOW = 300;
+  const FEEDBACK_RATE_LIMIT_MAX = 3;
+  const FEEDBACK_MESSAGE_MAX_LENGTH = 2000;
+  const FEEDBACK_SCREENSHOT_MAX_BYTES = 2097152;
 
   // Orden deseado de topics padre al mostrarlos en frontend.
   // Sirve para que General/Airframe/Powerplant aparezcan siempre en ese orden.
@@ -102,8 +111,19 @@ class VC_Flashcards_Plugin {
     add_action('admin_post_vc_flashcards_import_csv', [$this, 'handle_import_csv']);
     add_action('admin_post_vc_flashcards_download_sample', [$this, 'handle_download_sample']);
 
+    if (is_admin() && !wp_doing_ajax()) {
+      require_once VC_FLASHCARDS_DIR . 'includes/class-vc-flashcards-feedback-admin.php';
+      (new VC_Flashcards_Feedback_Admin())->register();
+    }
+
     // Ajuste visual/comportamental del checklist de terms en el editor.
     add_filter('wp_terms_checklist_args', [$this, 'filter_terms_checklist_args']);
+
+    // Ayuda global: boton flotante visible en el frontend, independiente de los shortcodes.
+    add_action('wp_enqueue_scripts', [$this, 'enqueue_global_help_assets']);
+    add_action('wp_footer', [$this, 'render_global_help_fab']);
+    add_action('wp_ajax_vc_flashcards_submit_feedback', [$this, 'ajax_submit_feedback']);
+    add_action('wp_ajax_nopriv_vc_flashcards_submit_feedback', [$this, 'ajax_submit_feedback']);
 
     // Shortcodes del frontend: app normal de flashcards y alias historico.
     add_shortcode('vc_flashcards_app', [$this, 'render_flashcards_shortcode']);
@@ -154,6 +174,223 @@ class VC_Flashcards_Plugin {
       'hierarchical' => true,
       'rewrite' => false,
     ]);
+  }
+
+  // Carga solo los estilos minimos del boton flotante global.
+  public function enqueue_global_help_assets(): void {
+    if (is_admin()) {
+      return;
+    }
+
+    wp_enqueue_style(
+      'vc-flashcards-help-fab',
+      VC_FLASHCARDS_URL . 'assets/help-fab.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/help-fab.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/help-fab.css') : '1.0.0'
+    );
+
+    wp_enqueue_script(
+      'vc-flashcards-help-fab',
+      VC_FLASHCARDS_URL . 'assets/help-fab.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/help-fab.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/help-fab.js') : '1.0.0',
+      true
+    );
+
+    wp_localize_script('vc-flashcards-help-fab', 'vcFlashcardsHelpFab', [
+      'ajaxUrl' => admin_url('admin-ajax.php'),
+      'nonce' => wp_create_nonce(self::NONCE_ACTION),
+      'labels' => [
+        'sending' => __('Sending...', 'vc-flashcards'),
+        'success' => __('Thanks. Your feedback was sent.', 'vc-flashcards'),
+        'error' => __('Could not send feedback. Please try again.', 'vc-flashcards'),
+      ],
+    ]);
+  }
+
+  // Renderiza el boton flotante de ayuda en el footer del frontend.
+  public function render_global_help_fab(): void {
+    if (is_admin()) {
+      return;
+    }
+
+    include VC_FLASHCARDS_DIR . 'templates/partials/help-fab.php';
+  }
+
+  // Guarda el feedback enviado desde el widget global de ayuda.
+  public function ajax_submit_feedback(): void {
+    check_ajax_referer(self::NONCE_ACTION, 'nonce');
+
+    $honeypot = isset($_POST['vc_flashcards_feedback_website']) && is_scalar($_POST['vc_flashcards_feedback_website'])
+      ? trim((string) wp_unslash($_POST['vc_flashcards_feedback_website']))
+      : '';
+    if ($honeypot !== '') {
+      wp_send_json_error(['message' => __('Feedback could not be submitted.', 'vc-flashcards')], 400);
+    }
+
+    $rendered_at = isset($_POST['rendered_at']) && is_scalar($_POST['rendered_at']) ? absint($_POST['rendered_at']) : 0;
+    if ($rendered_at <= 0 || (time() - $rendered_at) < 2) {
+      wp_send_json_error(['message' => __('Please try again in a moment.', 'vc-flashcards')], 429);
+    }
+
+    $user_id = get_current_user_id();
+    $ip_hash = $this->get_feedback_ip_hash();
+
+    if ($this->is_feedback_rate_limited($user_id, $ip_hash)) {
+      wp_send_json_error(['message' => __('Please wait before sending more feedback.', 'vc-flashcards')], 429);
+    }
+
+    $feedback_type = $this->normalize_feedback_type(isset($_POST['feedback_type']) && is_scalar($_POST['feedback_type']) ? (string) $_POST['feedback_type'] : 'other');
+    $message = $this->sanitize_feedback_message(isset($_POST['message']) && is_scalar($_POST['message']) ? (string) $_POST['message'] : '');
+
+    if ($message === '') {
+      wp_send_json_error(['message' => __('Please describe your feedback.', 'vc-flashcards')], 400);
+    }
+
+    $screenshot = $this->handle_feedback_screenshot_upload();
+    if (is_wp_error($screenshot)) {
+      wp_send_json_error(['message' => $screenshot->get_error_message()], 400);
+    }
+
+    global $wpdb;
+    $table = $wpdb->prefix . self::FEEDBACK_TABLE;
+    $now = current_time('mysql');
+    $page_url = isset($_POST['page_url']) && is_scalar($_POST['page_url']) ? esc_url_raw(wp_unslash((string) $_POST['page_url'])) : '';
+    $referrer_url = isset($_POST['referrer_url']) && is_scalar($_POST['referrer_url']) ? esc_url_raw(wp_unslash((string) $_POST['referrer_url'])) : '';
+    $user_agent = isset($_SERVER['HTTP_USER_AGENT'])
+      ? substr(sanitize_text_field(wp_unslash((string) $_SERVER['HTTP_USER_AGENT'])), 0, 255)
+      : '';
+
+    $inserted = $wpdb->insert(
+      $table,
+      [
+        'user_id' => $user_id,
+        'feedback_type' => $feedback_type,
+        'message' => $message,
+        'screenshot_attachment_id' => $screenshot['attachment_id'],
+        'screenshot_url' => $screenshot['url'],
+        'page_url' => substr($page_url, 0, 500),
+        'referrer_url' => substr($referrer_url, 0, 500),
+        'user_agent' => $user_agent,
+        'ip_hash' => $ip_hash,
+        'status' => 'new',
+        'spam_score' => 0,
+        'created_at' => $now,
+        'updated_at' => $now,
+      ],
+      ['%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s']
+    );
+
+    if (!$inserted) {
+      wp_send_json_error(['message' => __('Feedback could not be saved.', 'vc-flashcards')], 500);
+    }
+
+    $this->bump_feedback_rate_limit($user_id, $ip_hash);
+
+    wp_send_json_success(['message' => __('Thanks. Your feedback was sent.', 'vc-flashcards')]);
+  }
+
+  // Normaliza el tipo de feedback recibido desde el widget.
+  private function normalize_feedback_type(string $type): string {
+    $type = sanitize_key($type);
+    $allowed_types = ['bug', 'suggestion', 'other'];
+
+    return in_array($type, $allowed_types, true) ? $type : 'other';
+  }
+
+  // Limpia el mensaje y limita su longitud para evitar payloads pesados o basura.
+  private function sanitize_feedback_message(string $message): string {
+    $message = trim(wp_strip_all_tags(wp_unslash($message)));
+
+    if (function_exists('mb_substr')) {
+      return mb_substr($message, 0, self::FEEDBACK_MESSAGE_MAX_LENGTH);
+    }
+
+    return substr($message, 0, self::FEEDBACK_MESSAGE_MAX_LENGTH);
+  }
+
+  // Valida y guarda la captura opcional como attachment de WordPress.
+  private function handle_feedback_screenshot_upload() {
+    if (
+      empty($_FILES['screenshot'])
+      || !isset($_FILES['screenshot']['tmp_name'], $_FILES['screenshot']['name'])
+      || (int) ($_FILES['screenshot']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE
+    ) {
+      return [
+        'attachment_id' => 0,
+        'url' => '',
+      ];
+    }
+
+    $file = $_FILES['screenshot'];
+
+    if ((int) ($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+      return new WP_Error('feedback_upload_error', __('The screenshot could not be uploaded.', 'vc-flashcards'));
+    }
+
+    if ((int) ($file['size'] ?? 0) > self::FEEDBACK_SCREENSHOT_MAX_BYTES) {
+      return new WP_Error('feedback_upload_too_large', __('The screenshot must be 2 MB or smaller.', 'vc-flashcards'));
+    }
+
+    $allowed_mimes = [
+      'jpg|jpeg|jpe' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+    ];
+    $filetype = wp_check_filetype_and_ext((string) $file['tmp_name'], (string) $file['name'], $allowed_mimes);
+
+    if (empty($filetype['type']) || !in_array($filetype['type'], $allowed_mimes, true)) {
+      return new WP_Error('feedback_upload_invalid_type', __('Please attach a valid image file.', 'vc-flashcards'));
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $attachment_id = media_handle_upload('screenshot', 0);
+
+    if (is_wp_error($attachment_id)) {
+      return $attachment_id;
+    }
+
+    return [
+      'attachment_id' => (int) $attachment_id,
+      'url' => (string) wp_get_attachment_url($attachment_id),
+    ];
+  }
+
+  // Genera un hash estable de IP para rate limiting sin guardar la IP real.
+  private function get_feedback_ip_hash(): string {
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash((string) $_SERVER['REMOTE_ADDR'])) : '';
+
+    if ($ip === '') {
+      return '';
+    }
+
+    return hash_hmac('sha256', $ip, wp_salt('nonce'));
+  }
+
+  // Rate limit ligero por usuario o IP hasheada para reducir spam sin consultas pesadas.
+  private function is_feedback_rate_limited(int $user_id, string $ip_hash): bool {
+    $key = $this->get_feedback_rate_limit_key($user_id, $ip_hash);
+    $count = (int) get_transient($key);
+
+    return $count >= self::FEEDBACK_RATE_LIMIT_MAX;
+  }
+
+  // Registra un intento de feedback para el rate limit temporal.
+  private function bump_feedback_rate_limit(int $user_id, string $ip_hash): void {
+    $key = $this->get_feedback_rate_limit_key($user_id, $ip_hash);
+    $count = (int) get_transient($key);
+
+    set_transient($key, $count + 1, self::FEEDBACK_RATE_LIMIT_WINDOW);
+  }
+
+  private function get_feedback_rate_limit_key(int $user_id, string $ip_hash): string {
+    $subject = $user_id > 0 ? 'user_' . $user_id : 'ip_' . $ip_hash;
+
+    return 'vc_feedback_rate_' . md5($subject);
   }
 
   // Crea el submenu "Bulk Import" debajo del CPT de Flashcards en el admin.
@@ -492,6 +729,7 @@ class VC_Flashcards_Plugin {
     $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
     $session_cards_table = $wpdb->prefix . self::SESSION_CARD_TABLE;
+    $feedback_table = $wpdb->prefix . self::FEEDBACK_TABLE;
 
     // Tabla resumen de cada sesion.
     // Una fila = una sesion completa de estudio o examen.
@@ -554,10 +792,35 @@ class VC_Flashcards_Plugin {
       KEY topic_term_id (topic_term_id)
     ) {$charset_collate};";
 
+    // Tabla de feedback del widget global de ayuda.
+    // Guarda datos limpios para revision admin y hashes para rate limiting sin persistir IPs crudas.
+    $feedback_sql = "CREATE TABLE {$feedback_table} (
+      id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+      user_id bigint(20) unsigned NOT NULL DEFAULT 0,
+      feedback_type varchar(20) NOT NULL DEFAULT 'other',
+      message text NOT NULL,
+      screenshot_attachment_id bigint(20) unsigned DEFAULT NULL,
+      screenshot_url varchar(500) NOT NULL DEFAULT '',
+      page_url varchar(500) NOT NULL DEFAULT '',
+      referrer_url varchar(500) NOT NULL DEFAULT '',
+      user_agent varchar(255) NOT NULL DEFAULT '',
+      ip_hash char(64) NOT NULL DEFAULT '',
+      status varchar(20) NOT NULL DEFAULT 'new',
+      spam_score tinyint(3) unsigned NOT NULL DEFAULT 0,
+      created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at datetime DEFAULT NULL,
+      PRIMARY KEY  (id),
+      KEY user_created (user_id, created_at),
+      KEY status_created (status, created_at),
+      KEY type_created (feedback_type, created_at),
+      KEY ip_created (ip_hash, created_at)
+    ) {$charset_collate};";
+
     // dbDelta crea la tabla si no existe y la ajusta si la estructura cambio.
     dbDelta($sessions_sql);
     dbDelta($attempts_sql);
     dbDelta($session_cards_sql);
+    dbDelta($feedback_sql);
   }
 
   // Ejecuta dbDelta solo cuando cambia la version del esquema.
@@ -1591,6 +1854,7 @@ class VC_Flashcards_Plugin {
           $child_card_ids = $this->get_flashcard_ids_for_term((int) $child->term_id);
           $child_mastered_count = count(array_intersect($child_card_ids, $mastered_ids));
           $child_progress = !empty($child_card_ids) ? (int) round(($child_mastered_count / count($child_card_ids)) * 100) : 0;
+          $child_status = $this->get_subtopic_mastery_status($child_progress);
 
           $child_items[] = [
             'id' => (int) $child->term_id,
@@ -1598,7 +1862,8 @@ class VC_Flashcards_Plugin {
             'totalCards' => count($child_card_ids),
             'masteredCards' => $child_mastered_count,
             'progress' => $child_progress,
-            'status' => $child_progress >= 100 && !empty($child_card_ids) ? __('Mastered', 'vc-flashcards') : '',
+            'status' => $child_status['label'],
+            'statusClass' => $child_status['class'],
             // Subtopic row metric only.
             // Do not reuse dashboard metrics here: this text must stay tied to this subtopic's own card totals.
             'description' => $this->format_subtopic_mastery_description($child_mastered_count, count($child_card_ids)),
@@ -1732,6 +1997,73 @@ class VC_Flashcards_Plugin {
       $safe_total,
       $safe_mastered
     );
+  }
+
+  // Convierte el porcentaje dominado del subtema en una etiqueta estable para la UI.
+  private function get_subtopic_mastery_status(int $progress): array {
+    $safe_progress = max(0, min(100, $progress));
+
+    if ($safe_progress >= 81) {
+      return [
+        'label' => __('Mastered', 'vc-flashcards'),
+        'class' => 'mastered',
+      ];
+    }
+
+    if ($safe_progress >= 31) {
+      return [
+        'label' => __('In Progress', 'vc-flashcards'),
+        'class' => 'in-progress',
+      ];
+    }
+
+    return [
+      'label' => __('Needs review', 'vc-flashcards'),
+      'class' => 'needs-review',
+    ];
+  }
+
+  // Contenido del apartado de ayuda de Study Sessions.
+  // Mantenerlo en backend permite traducirlo y ampliarlo sin mezclar datos con markup.
+  private function get_study_sessions_help_sections(): array {
+    return [
+      [
+        'title' => __('Progress labels', 'vc-flashcards'),
+        'description' => __('Use each label to decide what to study next.', 'vc-flashcards'),
+        'items' => [
+          [
+            'title' => __('Needs review', 'vc-flashcards'),
+            'description' => __('0-30% mastered. Start here when you want to build the foundation.', 'vc-flashcards'),
+          ],
+          [
+            'title' => __('In Progress', 'vc-flashcards'),
+            'description' => __('31-80% mastered. Keep practicing until the topic feels consistent.', 'vc-flashcards'),
+          ],
+          [
+            'title' => __('Mastered', 'vc-flashcards'),
+            'description' => __('81-100% mastered. Revisit occasionally to keep it fresh.', 'vc-flashcards'),
+          ],
+        ],
+      ],
+      [
+        'title' => __('Study options', 'vc-flashcards'),
+        'description' => __('Choose the practice mode that matches your goal.', 'vc-flashcards'),
+        'items' => [
+          [
+            'title' => __('Random practice', 'vc-flashcards'),
+            'description' => __('Mix questions inside the selected category.', 'vc-flashcards'),
+          ],
+          [
+            'title' => __('Study by ACS Code', 'vc-flashcards'),
+            'description' => __('Focus on a specific FAA exam area.', 'vc-flashcards'),
+          ],
+          [
+            'title' => __('Study by Subtopic', 'vc-flashcards'),
+            'description' => __('Work through one subtopic at a time.', 'vc-flashcards'),
+          ],
+        ],
+      ],
+    ];
   }
 
   // Calcula todas las metricas del home de flashcards para el usuario actual.

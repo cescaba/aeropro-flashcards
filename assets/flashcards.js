@@ -373,6 +373,7 @@
         const copy = document.createElement('div');
         const heading = document.createElement('div');
         const title = document.createElement('strong');
+        const status = document.createElement('span');
         const description = document.createElement('span');
         const chevron = document.createElement('span');
         const chevronSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -395,11 +396,16 @@
         chevronPath.setAttribute('stroke-linecap', 'round');
         chevronPath.setAttribute('stroke-linejoin', 'round');
         title.textContent = subtopic.name || '';
+        status.className = 'vc-study-sessions-subtopic-status vc-study-sessions-subtopic-status--' + String(subtopic.statusClass || 'needs-review');
+        status.textContent = subtopic.status || '';
         description.textContent = subtopic.description || '';
 
         chevronSvg.appendChild(chevronPath);
         chevron.appendChild(chevronSvg);
         heading.appendChild(title);
+        if (status.textContent) {
+          heading.appendChild(status);
+        }
         copy.appendChild(heading);
         copy.appendChild(description);
         item.appendChild(copy);
