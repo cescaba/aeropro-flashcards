@@ -27,7 +27,6 @@
     var nonce     = data.nonce           || '';
 
     var storageKey = 'vcExamState:' + window.location.pathname;
-
     /* ── DOM references ─────────────────────────────────────────────────── */
 
     var homeView    = root.querySelector('[data-vc-exam-view="home"]');
@@ -105,6 +104,24 @@
         dashboardContent.classList.toggle('is-exam-session', isSession);
         dashboardContent.classList.toggle('is-exam-summary-open', isSummaryOpen);
       }
+    }
+
+    // URL: mantiene home/session del mock test sincronizado para evitar volver al home al recargar.
+    function updateExamUrl(viewName) {
+      if (!window.history || !window.history.pushState) {
+        return;
+      }
+
+      try {
+        var url = new URL(window.location.href);
+        if (viewName === 'session') {
+          url.searchParams.set('vc_exam_view', 'session');
+        } else {
+          url.searchParams.delete('vc_exam_view');
+        }
+
+        window.history.pushState({ vcExamView: viewName }, '', url.toString());
+      } catch (e) {}
     }
 
     // Resetea por completo el estado del examen en memoria.
@@ -393,6 +410,9 @@
       setSummaryOpen(false, false);
       syncViewStateClasses();
       scrollExamToTop(opts.behavior);
+      if (opts.updateUrl !== false) {
+        updateExamUrl(name);
+      }
 
       if (opts.persist !== false) {
         persistState();
@@ -896,6 +916,26 @@
         clearState();
         setFeedback('', '');
       });
+    });
+
+    window.addEventListener('popstate', function () {
+      var requestedView = 'home';
+      try {
+        var url = new URL(window.location.href);
+        requestedView = url.searchParams.get('vc_exam_view') === 'session' ? 'session' : 'home';
+      } catch (e) {}
+
+      if (requestedView === 'session' && restoreState()) {
+        return;
+      }
+
+      stopTimer();
+      clearAutoAdvanceTimer();
+      resetExamState();
+      setSummaryOpen(false, false);
+      showView('home', { persist: false, updateUrl: false });
+      clearState();
+      setFeedback('', '');
     });
 
     // Summary: try again (same category)

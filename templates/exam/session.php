@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
   exit;
 }
 ?>
-<section class="vc-exam-view vc-exam-session" data-vc-exam-view="session" hidden aria-labelledby="vc-exam-session-title">
+<section class="vc-exam-view vc-exam-session" data-vc-exam-view="session"<?php echo (isset($initial_exam_view) && $initial_exam_view === 'session') ? '' : ' hidden'; ?> aria-labelledby="vc-exam-session-title">
   <div class="vc-mock-test-exam-shell">
     <?php include VC_FLASHCARDS_DIR . 'templates/exam/session-header.php'; ?>
 

@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
   exit;
 }
 ?>
-<section class="vc-exam-view vc-exam-home" data-vc-exam-view="home" aria-labelledby="vc-exam-home-title">
+<section class="vc-exam-view vc-exam-home" data-vc-exam-view="home"<?php echo (isset($initial_exam_view) && $initial_exam_view === 'session') ? ' hidden' : ''; ?> aria-labelledby="vc-exam-home-title">
   <header class="vc-exam-page-header">
     <h1 id="vc-exam-home-title"><?php esc_html_e('A&P Mock Test', 'vc-flashcards'); ?></h1>
     <p><?php esc_html_e('Simulate real FAA exam conditions and measure your readiness', 'vc-flashcards'); ?></p>

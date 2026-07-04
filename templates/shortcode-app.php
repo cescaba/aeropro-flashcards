@@ -2,13 +2,36 @@
 if (!defined('ABSPATH')) {
   exit;
 }
+
+$requested_view = isset($_GET['vc_study_sessions_view']) ? sanitize_key(wp_unslash($_GET['vc_study_sessions_view'])) : '';
+$requested_category = isset($_GET['vc_study_sessions_category']) ? sanitize_text_field(wp_unslash($_GET['vc_study_sessions_category'])) : '';
+$initial_detail_category_id = 0;
+
+if ($requested_view === 'detail' && $requested_category !== '' && !empty($categories)) {
+  foreach ($categories as $initial_category) {
+    $initial_category_id = isset($initial_category['id']) ? (int) $initial_category['id'] : 0;
+
+    if ($initial_category_id > 0 && hash_equals((string) $initial_category_id, $requested_category)) {
+      $initial_detail_category_id = $initial_category_id;
+      break;
+    }
+  }
+}
+
+$initial_view = $requested_view === 'session' ? 'session' : ($initial_detail_category_id > 0 ? 'detail' : 'home');
 ?>
-<div class="vc-study-sessions-app" data-categories="<?php echo esc_attr(wp_json_encode($categories)); ?>">
+<div
+  class="vc-study-sessions-app is-booting"
+  data-categories="<?php echo esc_attr(wp_json_encode($categories)); ?>"
+  data-active-view="<?php echo esc_attr($initial_view); ?>"
+  data-vc-study-sessions-initial-view="<?php echo esc_attr($initial_view); ?>"
+  data-vc-study-sessions-initial-category="<?php echo esc_attr((string) $initial_detail_category_id); ?>"
+>
   <?php /* Area comun para mensajes de error, carga o feedback contextual. */ ?>
   <p class="vc-study-sessions-feedback" data-vc-study-sessions-feedback hidden></p>
 
   <?php /* Vista inicial con las categorias disponibles para estudiar. */ ?>
-  <section class="vc-study-sessions-view vc-study-sessions-home" data-vc-study-sessions-view="home">
+  <section class="vc-study-sessions-view vc-study-sessions-home" data-vc-study-sessions-view="home"<?php echo $initial_view === 'home' ? '' : ' hidden'; ?>>
     <?php /* Dashboard stats. These are independent from category cards and subtopic row metrics. */ ?>
     <section class="vc-study-sessions-stats">
       <article class="vc-study-sessions-stat-card">
@@ -124,7 +147,7 @@ if (!defined('ABSPATH')) {
   </section>
 
   <?php /* Vista de detalle donde se elige como estudiar una categoria. */ ?>
-  <section class="vc-study-sessions-view" data-vc-study-sessions-view="detail" hidden>
+  <section class="vc-study-sessions-view" data-vc-study-sessions-view="detail"<?php echo $initial_view === 'detail' ? '' : ' hidden'; ?>>
     <?php /* Cabecera contextual con regreso y datos de la categoria activa. */ ?>
     <header class="vc-study-sessions-detail-header">
       <button type="button" class="vc-study-sessions-back" data-vc-study-sessions-back>
@@ -198,7 +221,7 @@ if (!defined('ABSPATH')) {
   </section>
 
   <?php /* Vista de sesion activa donde se responde cada flashcard. */ ?>
-  <section class="vc-study-sessions-session" data-vc-study-sessions-session hidden>
+  <section class="vc-study-sessions-session" data-vc-study-sessions-session<?php echo $initial_view === 'session' ? '' : ' hidden'; ?>>
     <?php /* Cabecera de sesion con regreso y progreso actual. */ ?>
     <div class="vc-study-sessions-session-header">
       <button type="button" class="vc-study-sessions-back" data-vc-study-sessions-back>

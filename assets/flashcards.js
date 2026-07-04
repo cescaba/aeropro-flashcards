@@ -96,6 +96,8 @@
     let selectedAcsCodes = new Set();
     let weakAreasSortActive = false;
     const storageKey = 'vcStudySessionsState:' + window.location.pathname;
+    const initialView = root.dataset.vcStudySessionsInitialView || 'home';
+    const initialCategoryId = Number(root.dataset.vcStudySessionsInitialCategory || 0);
 
     // Persistencia: limpia el estado cuando el usuario sale de Study sessions.
     function clearPersistedState() {
@@ -118,6 +120,48 @@
           } catch (error) {}
         });
       });
+    }
+
+    // URL: mantiene la vista detail de Study sessions al recargar sin pintar primero el home.
+    function updateStudyUrl(viewName, categoryId) {
+      if (!window.history || !window.history.pushState) {
+        return;
+      }
+
+      try {
+        const url = new URL(window.location.href);
+        if (viewName === 'session') {
+          url.searchParams.set('vc_study_sessions_view', 'session');
+          url.searchParams.delete('vc_study_sessions_category');
+        } else if (viewName === 'detail' && categoryId) {
+          url.searchParams.set('vc_study_sessions_view', 'detail');
+          url.searchParams.set('vc_study_sessions_category', String(categoryId));
+        } else {
+          url.searchParams.delete('vc_study_sessions_view');
+          url.searchParams.delete('vc_study_sessions_category');
+        }
+
+        window.history.pushState({ vcStudySessionsView: viewName, categoryId: categoryId || 0 }, '', url.toString());
+      } catch (error) {}
+    }
+
+    // URL: restaura detail desde URL cuando no hay una practica viva guardada.
+    function restoreUrlState() {
+      let categoryId = initialCategoryId;
+
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('vc_study_sessions_view') === 'detail') {
+          categoryId = Number(url.searchParams.get('vc_study_sessions_category') || categoryId || 0);
+        }
+      } catch (error) {}
+
+      if ((initialView === 'detail' || categoryId > 0) && categoryId > 0 && getCategoryById(categoryId)) {
+        openCategory(categoryId, { updateUrl: false });
+        return true;
+      }
+
+      return false;
     }
 
     // Datos: normaliza el JSON de categorias para evitar errores con payloads vacios.
@@ -317,20 +361,35 @@
     }
 
     // Navegacion: alterna home, detail, session y summary.
-    function showView(viewName) {
+    function showView(viewName, options) {
+      const opts = options || {};
       root.dataset.activeView = viewName;
       homeView.hidden = viewName !== 'home';
       detailView.hidden = viewName !== 'detail';
       sessionPanel.hidden = viewName !== 'session';
       summaryPanel.hidden = viewName !== 'summary';
+      if (opts.updateUrl === false) {
+        persistState();
+        return;
+      }
+
+      if (viewName === 'session') {
+        updateStudyUrl('session', 0);
+      } else if (viewName === 'detail' && currentCategory) {
+        updateStudyUrl('detail', currentCategory.id);
+      }
       persistState();
     }
 
     // Navegacion: vuelve al home y limpia la categoria activa.
-    function openHome() {
+    function openHome(options) {
+      const opts = options || {};
       currentCategory = null;
-      showView('home');
+      showView('home', { updateUrl: opts.updateUrl });
       setFeedback('', '');
+      if (opts.updateUrl !== false) {
+        updateStudyUrl('home', 0);
+      }
       persistState();
     }
 
@@ -342,7 +401,8 @@
     }
 
     // Detail: abre una categoria y renderiza sus subtopics.
-    function openCategory(categoryId) {
+    function openCategory(categoryId, options) {
+      const opts = options || {};
       currentCategory = getCategoryById(categoryId);
 
       if (!currentCategory) {
@@ -351,7 +411,7 @@
 
       renderCategoryHeader(currentCategory);
       renderSubtopics(currentCategory.children || []);
-      showView('detail');
+      showView('detail', { updateUrl: opts.updateUrl });
       setFeedback('', '');
       persistState();
     }
@@ -1410,10 +1470,26 @@
     summaryBackButton.addEventListener('click', function () {
       if (currentCategory) {
         showView('detail');
+        updateStudyUrl('detail', currentCategory.id);
         return;
       }
 
       openHome();
+    });
+
+    window.addEventListener('popstate', function () {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('vc_study_sessions_view') === 'session' && restoreState()) {
+          return;
+        }
+      } catch (error) {}
+
+      if (restoreUrlState()) {
+        return;
+      }
+
+      openHome({ updateUrl: false });
     });
 
     // Eventos: atajos de teclado para responder con la letra de la opcion.
@@ -1434,8 +1510,12 @@
 
     // Arranque: restaura una sesion previa o inicia en home.
     if (!restoreState()) {
-      openHome();
+      if (!restoreUrlState()) {
+        openHome({ updateUrl: false });
+      }
     }
+
+    root.classList.remove('is-booting');
   }
 
   // Inicializa todas las instancias del shortcode presentes en la pagina.

@@ -2,9 +2,15 @@
 if (!defined('ABSPATH')) {
   exit;
 }
+
+$requested_exam_view = isset($_GET['vc_exam_view']) ? sanitize_key(wp_unslash($_GET['vc_exam_view'])) : '';
+$initial_exam_view = $requested_exam_view === 'session' ? 'session' : 'home';
 ?>
 <?php /* Exam app shell: JS switches between home, session and summary views. */ ?>
-<div class="vc-exam-app is-booting">
+<div
+  class="vc-exam-app is-booting <?php echo $initial_exam_view === 'session' ? 'is-session' : 'is-home'; ?>"
+  data-vc-exam-initial-view="<?php echo esc_attr($initial_exam_view); ?>"
+>
   <?php /* Shared feedback node for AJAX errors and contextual exam messages. */ ?>
   <p class="vc-exam-feedback" data-vc-exam-feedback hidden></p>
 

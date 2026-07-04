@@ -24,6 +24,10 @@
   --vc-study-sessions-surface-radius: 12px;
 }
 
+.vc-study-sessions-app.is-booting {
+  visibility: hidden;
+}
+
 .vc-study-sessions-app,
 .vc-study-sessions-app *,
 .vc-study-sessions-app *::before,
