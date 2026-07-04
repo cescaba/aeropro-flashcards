@@ -44,7 +44,12 @@ class VC_Flashcards_Plugin {
   const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
 
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
-  const DB_VERSION = '1.2.2';
+  const DB_VERSION = '1.2.3';
+
+  // Identifica que modulo creo cada sesion para mantener historiales independientes.
+  const SESSION_SOURCE_STUDY = 'study_sessions';
+  const SESSION_SOURCE_FLASHCARDS = 'flashcards_library';
+  const SESSION_SOURCE_MOCK = 'mock_test';
 
   // Limites ligeros para proteger el widget de feedback sin hacerlo lento.
   const FEEDBACK_RATE_LIMIT_WINDOW = 300;
@@ -125,9 +130,10 @@ class VC_Flashcards_Plugin {
     add_action('wp_ajax_vc_flashcards_submit_feedback', [$this, 'ajax_submit_feedback']);
     add_action('wp_ajax_nopriv_vc_flashcards_submit_feedback', [$this, 'ajax_submit_feedback']);
 
-    // Shortcodes del frontend: app normal de flashcards y alias historico.
+    // Shortcodes del frontend: study sessions, flashcards library y alias historico.
     add_shortcode('vc_flashcards_app', [$this, 'render_flashcards_shortcode']);
     add_shortcode('vc_flashcards', [$this, 'render_flashcards_shortcode']);
+    add_shortcode('vc_flashcards_library', [$this, 'render_flashcards_library_shortcode']);
 
     // Endpoints AJAX para sesiones normales de estudio.
     add_action('wp_ajax_vc_flashcards_start_session', [$this, 'ajax_start_session']);
@@ -736,6 +742,7 @@ class VC_Flashcards_Plugin {
     $sessions_sql = "CREATE TABLE {$sessions_table} (
       id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
       user_id bigint(20) unsigned NOT NULL,
+      session_source varchar(32) NOT NULL DEFAULT 'study_sessions',
       mode varchar(20) NOT NULL DEFAULT 'random',
       topic_term_id bigint(20) unsigned DEFAULT NULL,
       total_cards smallint(5) unsigned NOT NULL DEFAULT 0,
@@ -748,7 +755,8 @@ class VC_Flashcards_Plugin {
       KEY user_id (user_id),
       KEY topic_term_id (topic_term_id),
       KEY completed_at (completed_at),
-      KEY user_mode_completed_id (user_id, mode, completed_at, id)
+      KEY user_mode_completed_id (user_id, mode, completed_at, id),
+      KEY user_source_completed_id (user_id, session_source, completed_at, id)
     ) {$charset_collate};";
 
     // Tabla detalle de respuestas.
@@ -821,6 +829,18 @@ class VC_Flashcards_Plugin {
     dbDelta($attempts_sql);
     dbDelta($session_cards_sql);
     dbDelta($feedback_sql);
+
+    // Backfill idempotente: las instalaciones antiguas no tenian session_source.
+    // Al agregar la columna, MySQL rellena con study_sessions; los examenes historicos deben quedar en mock_test.
+    $wpdb->query($wpdb->prepare(
+      "UPDATE {$sessions_table}
+      SET session_source = %s
+      WHERE mode = %s
+        AND session_source = %s",
+      self::SESSION_SOURCE_MOCK,
+      'exam',
+      self::SESSION_SOURCE_STUDY
+    ));
   }
 
   // Ejecuta dbDelta solo cuando cambia la version del esquema.
@@ -1304,13 +1324,179 @@ class VC_Flashcards_Plugin {
 
     $user_id = get_current_user_id();
     $stats = $this->get_user_stats($user_id);
-    $categories = $this->get_category_cards($user_id);
+    $categories = $this->get_category_cards($user_id, self::SESSION_SOURCE_STUDY);
     $total_flashcards = wp_count_posts(self::POST_TYPE);
     $published_flashcards = $total_flashcards instanceof stdClass ? (int) $total_flashcards->publish : 0;
 
     ob_start();
     include VC_FLASHCARDS_DIR . 'templates/shortcode-app.php';
     return (string) ob_get_clean();
+  }
+
+  // Renderiza la vista independiente de Flashcards.
+  // Mantiene su propio template para que el nuevo diseno pueda crecer sin tocar Study sessions.
+  public function render_flashcards_library_shortcode($atts = []): string {
+    if (!is_user_logged_in()) {
+      return '<div class="vc-flashcards-library-guest">' . esc_html__('Please log in to use flashcards.', 'vc-flashcards') . '</div>';
+    }
+
+    wp_enqueue_style(
+      'vc-general-style',
+      VC_FLASHCARDS_URL . 'assets/general.css',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
+    );
+
+    wp_enqueue_style(
+      'vc-flashcards-library-style',
+      VC_FLASHCARDS_URL . 'assets/flashcards-library.css',
+      ['vc-general-style'],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards-library.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards-library.css') : '1.0.0'
+    );
+
+    wp_enqueue_script(
+      'vc-flashcards-library-script',
+      VC_FLASHCARDS_URL . 'assets/flashcards-library.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards-library.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards-library.js') : '1.0.0',
+      true
+    );
+
+    $user_id = get_current_user_id();
+    $categories = $this->get_flashcards_library_categories($user_id);
+    $session_history = $this->get_flashcards_library_session_history($user_id, 5);
+
+    ob_start();
+    include VC_FLASHCARDS_DIR . 'templates/shortcode-flashcards.php';
+    return (string) ob_get_clean();
+  }
+
+  // Devuelve solo los topics padre oficiales para la vista independiente de Flashcards.
+  private function get_flashcards_library_categories(int $user_id): array {
+    $categories = $this->get_category_cards($user_id, self::SESSION_SOURCE_FLASHCARDS);
+    $by_name = [];
+
+    foreach ($categories as $category) {
+      $name = isset($category['name']) ? (string) $category['name'] : '';
+      if ($name === '') {
+        continue;
+      }
+
+      $by_name[strtolower($name)] = $category;
+    }
+
+    $ordered_categories = [];
+    foreach (self::DEFAULT_TOPIC_ORDER as $topic_name) {
+      $topic_key = strtolower($topic_name);
+      if (isset($by_name[$topic_key])) {
+        $ordered_categories[] = $by_name[$topic_key];
+        continue;
+      }
+
+      $ordered_categories[] = [
+        'id' => 0,
+        'name' => $topic_name,
+        'totalCards' => 0,
+        'masteredCards' => 0,
+        'progress' => 0,
+        'subtopicCount' => 0,
+        'description' => sprintf(
+          /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
+          0,
+          0,
+          0
+        ),
+        'children' => [],
+        'acsCodes' => [],
+      ];
+    }
+
+    return $ordered_categories;
+  }
+
+  // Devuelve las ultimas sesiones normales completadas para el historial de Flashcards.
+  private function get_flashcards_library_session_history(int $user_id, int $limit = 5): array {
+    global $wpdb;
+
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
+
+    $rows = $wpdb->get_results($wpdb->prepare(
+      "SELECT mode, topic_term_id, total_cards, score_percent, started_at, completed_at
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND session_source = %s
+        AND mode <> %s
+        AND completed_at IS NOT NULL
+      ORDER BY completed_at DESC, id DESC
+      LIMIT %d",
+      $user_id,
+      self::SESSION_SOURCE_FLASHCARDS,
+      'exam',
+      $limit
+    ), ARRAY_A);
+
+    $history = [];
+    foreach ($rows as $row) {
+      $started_at = isset($row['started_at']) ? strtotime((string) $row['started_at']) : false;
+      $completed_at = isset($row['completed_at']) ? strtotime((string) $row['completed_at']) : false;
+      if (!$completed_at) {
+        continue;
+      }
+
+      $topic = $this->get_session_history_topic_label(absint($row['topic_term_id'] ?? 0), (string) ($row['mode'] ?? ''));
+      $score_percent = isset($row['score_percent']) ? (float) $row['score_percent'] : 0.0;
+      $history[] = [
+        'date' => date_i18n('d M Y', $completed_at),
+        'topic' => $topic,
+        'duration' => $this->format_session_duration_label($started_at ?: 0, $completed_at),
+        'cards_reviewed' => isset($row['total_cards']) ? absint($row['total_cards']) : 0,
+        'is_strong' => $score_percent >= 70,
+        'has_session' => true,
+      ];
+    }
+
+    return $history;
+  }
+
+  private function get_session_history_topic_label(int $term_id, string $mode): string {
+    if ($mode === 'global-random' || $term_id < 1) {
+      return __('Mixed', 'vc-flashcards');
+    }
+
+    $term = get_term($term_id, self::TAXONOMY);
+    if (!$term instanceof WP_Term) {
+      return __('Mixed', 'vc-flashcards');
+    }
+
+    if ((int) $term->parent > 0) {
+      $parent = get_term((int) $term->parent, self::TAXONOMY);
+      if ($parent instanceof WP_Term) {
+        return html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8');
+      }
+    }
+
+    return html_entity_decode($term->name, ENT_QUOTES, 'UTF-8');
+  }
+
+  private function format_session_duration_label(int $started_at, int $completed_at): string {
+    if ($started_at < 1 || $completed_at < $started_at) {
+      return __('0 min', 'vc-flashcards');
+    }
+
+    $elapsed_minutes = max(1, (int) round(($completed_at - $started_at) / 60));
+    $hours = intdiv($elapsed_minutes, 60);
+    $minutes = $elapsed_minutes % 60;
+
+    if ($hours > 0 && $minutes > 0) {
+      return sprintf('%dh %02d min', $hours, $minutes);
+    }
+
+    if ($hours > 0) {
+      return sprintf('%dh', $hours);
+    }
+
+    return sprintf('%d min', $minutes);
   }
 
   // Inicia una sesion de practica normal y devuelve al frontend las tarjetas seleccionadas.
@@ -1322,6 +1508,9 @@ class VC_Flashcards_Plugin {
     }
 
     $mode = isset($_POST['mode']) ? sanitize_key(wp_unslash($_POST['mode'])) : 'random';
+    $session_source = isset($_POST['session_source'])
+      ? sanitize_key(wp_unslash($_POST['session_source']))
+      : self::SESSION_SOURCE_STUDY;
     $term_id = isset($_POST['term_id']) ? absint($_POST['term_id']) : 0;
     $card_limit = isset($_POST['card_limit']) ? absint($_POST['card_limit']) : 10;
     $acs_codes_json = isset($_POST['acs_codes']) ? wp_unslash($_POST['acs_codes']) : '[]';
@@ -1332,6 +1521,10 @@ class VC_Flashcards_Plugin {
 
     if (!in_array($mode, ['random', 'global-random', 'category', 'subcategory'], true)) {
       $mode = 'random';
+    }
+
+    if (!in_array($session_source, [self::SESSION_SOURCE_STUDY, self::SESSION_SOURCE_FLASHCARDS], true)) {
+      $session_source = self::SESSION_SOURCE_STUDY;
     }
 
     $card_limit = max(1, min(50, $card_limit));
@@ -1351,6 +1544,7 @@ class VC_Flashcards_Plugin {
       $wpdb->prefix . self::SESSION_TABLE,
       [
         'user_id' => get_current_user_id(),
+        'session_source' => $session_source,
         'mode' => $mode,
         'topic_term_id' => $term_id ?: null,
         'total_cards' => count($cards),
@@ -1358,7 +1552,7 @@ class VC_Flashcards_Plugin {
         'score_percent' => 0,
         'started_at' => current_time('mysql'),
       ],
-      ['%d', '%s', '%d', '%d', '%d', '%f', '%s']
+      ['%d', '%s', '%s', '%d', '%d', '%d', '%f', '%s']
     );
 
     $session_id = (int) $wpdb->insert_id;
@@ -1818,7 +2012,7 @@ class VC_Flashcards_Plugin {
   }
 
   // Arma las cards de categorias del home con progreso, conteos y metadata del usuario.
-  private function get_category_cards(int $user_id): array {
+  private function get_category_cards(int $user_id, string $session_source = self::SESSION_SOURCE_STUDY): array {
     $parents = get_terms([
       'taxonomy' => self::TAXONOMY,
       'hide_empty' => false,
@@ -1833,7 +2027,7 @@ class VC_Flashcards_Plugin {
 
     $parents = $this->sort_parent_topics($parents);
 
-    $mastered_ids = $this->get_mastered_flashcard_ids($user_id);
+    $mastered_ids = $this->get_mastered_flashcard_ids($user_id, $session_source);
     $categories = [];
 
     foreach ($parents as $parent) {
@@ -2102,10 +2296,12 @@ class VC_Flashcards_Plugin {
       FROM {$sessions_table}
       WHERE user_id = %d
         AND completed_at IS NOT NULL
+        AND session_source = %s
         AND mode <> %s
       ORDER BY completed_at DESC, id DESC
       LIMIT 1",
       $user_id,
+      self::SESSION_SOURCE_STUDY,
       'exam'
     ));
 
@@ -2136,12 +2332,14 @@ class VC_Flashcards_Plugin {
         ON study_session.id = attempt.session_id
         AND study_session.user_id = attempt.user_id
         AND study_session.completed_at IS NOT NULL
+        AND study_session.session_source = %s
         AND study_session.mode <> %s
       INNER JOIN {$posts_table} flashcard
         ON flashcard.ID = attempt.flashcard_id
         AND flashcard.post_type = %s
         AND flashcard.post_status = %s
       WHERE attempt.user_id = %d",
+      self::SESSION_SOURCE_STUDY,
       'exam',
       self::POST_TYPE,
       'publish',
@@ -2193,6 +2391,7 @@ class VC_Flashcards_Plugin {
         ON study_session.id = attempt.session_id
         AND study_session.user_id = attempt.user_id
         AND study_session.completed_at IS NOT NULL
+        AND study_session.session_source = %s
         AND study_session.mode <> %s
       INNER JOIN {$term_taxonomy_table} subtopic
         ON subtopic.term_id = attempt.topic_term_id
@@ -2203,6 +2402,7 @@ class VC_Flashcards_Plugin {
         AND flashcard.post_type = %s
         AND flashcard.post_status = %s
       WHERE attempt.user_id = %d",
+      self::SESSION_SOURCE_STUDY,
       'exam',
       self::TAXONOMY,
       self::POST_TYPE,
@@ -2222,24 +2422,31 @@ class VC_Flashcards_Plugin {
   // Devuelve las tarjetas dominadas por el usuario.
   // Regla de negocio: una tarjeta cuenta como mastered solo si su ultimo intento publicado fue correcto.
   // La tabla de intentos es append-only, por eso MAX(id) identifica el intento mas reciente por flashcard.
-  private function get_mastered_flashcard_ids(int $user_id): array {
+  private function get_mastered_flashcard_ids(int $user_id, string $session_source = self::SESSION_SOURCE_STUDY): array {
     global $wpdb;
 
     static $cache = [];
-    if (isset($cache[$user_id])) {
-      return $cache[$user_id];
+    $cache_key = $user_id . '|' . $session_source;
+    if (isset($cache[$cache_key])) {
+      return $cache[$cache_key];
     }
 
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
     $posts_table = $wpdb->posts;
     $ids = $wpdb->get_col($wpdb->prepare(
       "SELECT latest_attempt.flashcard_id
       FROM {$attempts_table} latest_attempt
       INNER JOIN (
-        SELECT flashcard_id, MAX(id) AS latest_id
-        FROM {$attempts_table}
-        WHERE user_id = %d
-        GROUP BY flashcard_id
+        SELECT attempt.flashcard_id, MAX(attempt.id) AS latest_id
+        FROM {$attempts_table} attempt
+        INNER JOIN {$sessions_table} study_session
+          ON study_session.id = attempt.session_id
+          AND study_session.user_id = attempt.user_id
+          AND study_session.session_source = %s
+          AND study_session.completed_at IS NOT NULL
+        WHERE attempt.user_id = %d
+        GROUP BY attempt.flashcard_id
       ) latest ON latest.latest_id = latest_attempt.id
       INNER JOIN {$posts_table} flashcard
         ON flashcard.ID = latest_attempt.flashcard_id
@@ -2247,14 +2454,15 @@ class VC_Flashcards_Plugin {
         AND flashcard.post_status = %s
       WHERE latest_attempt.user_id = %d
         AND latest_attempt.is_correct = 1",
+      $session_source,
       $user_id,
       self::POST_TYPE,
       'publish',
       $user_id
     ));
 
-    $cache[$user_id] = array_map('intval', $ids);
-    return $cache[$user_id];
+    $cache[$cache_key] = array_map('intval', $ids);
+    return $cache[$cache_key];
   }
 
   // Devuelve todos los IDs de flashcards asociados a un term concreto.
@@ -2415,9 +2623,11 @@ class VC_Flashcards_Plugin {
         AVG(score_percent) AS average_score
       FROM {$sessions_table}
       WHERE user_id = %d
+        AND session_source = %s
         AND mode = %s
         AND completed_at IS NOT NULL",
       $user_id,
+      self::SESSION_SOURCE_MOCK,
       'exam'
     ), ARRAY_A);
     // Recupera los ultimos intentos de examen para contar cuantos aprobaron.
@@ -2426,11 +2636,13 @@ class VC_Flashcards_Plugin {
       "SELECT score_percent
       FROM {$sessions_table}
       WHERE user_id = %d
+        AND session_source = %s
         AND mode = %s
         AND completed_at IS NOT NULL
       ORDER BY completed_at DESC, id DESC
       LIMIT %d",
       $user_id,
+      self::SESSION_SOURCE_MOCK,
       'exam',
       self::EXAM_HISTORY_LIMIT
     ));
@@ -2476,6 +2688,7 @@ class VC_Flashcards_Plugin {
       $wpdb->prefix . self::SESSION_TABLE,
       [
         'user_id'         => get_current_user_id(),
+        'session_source'  => self::SESSION_SOURCE_MOCK,
         'mode'            => 'exam',
         'topic_term_id'   => $topic_term_id,
         'total_cards'     => count($cards),
@@ -2483,7 +2696,7 @@ class VC_Flashcards_Plugin {
         'score_percent'   => 0,
         'started_at'      => current_time('mysql'),
       ],
-      ['%d', '%s', '%d', '%d', '%d', '%f', '%s']
+      ['%d', '%s', '%s', '%d', '%d', '%d', '%f', '%s']
     );
 
     $session_id = (int) $wpdb->insert_id;
@@ -2693,34 +2906,64 @@ class VC_Flashcards_Plugin {
       'order'      => 'ASC',
     ]);
 
-    if (is_wp_error($parents) || empty($parents)) {
-      return [];
+    if (is_wp_error($parents)) {
+      $parents = [];
     }
 
-    $parents    = $this->sort_parent_topics($parents);
+    $parents_by_name = [];
+    foreach ($parents as $parent) {
+      if (!$parent instanceof WP_Term) {
+        continue;
+      }
+
+      $parent_name = html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8');
+      $parents_by_name[strtolower($parent_name)] = $parent;
+    }
+
     $categories = [];
 
-    foreach ($parents as $parent) {
-      $children = get_terms([
-        'taxonomy'   => self::TAXONOMY,
-        'hide_empty' => false,
-        'parent'     => $parent->term_id,
-        'orderby'    => 'name',
-        'order'      => 'ASC',
-      ]);
+    foreach (self::DEFAULT_TOPIC_ORDER as $topic_name) {
+      $parent = $parents_by_name[strtolower($topic_name)] ?? null;
+      $parent_id = $parent instanceof WP_Term ? (int) $parent->term_id : 0;
+      $subtopic_count = 0;
+      $total_cards = 0;
 
-      $subtopic_count = is_wp_error($children) ? 0 : count($children);
-      $total_cards    = count($this->get_flashcard_ids_for_term((int) $parent->term_id));
+      if ($parent_id > 0) {
+        $children = get_terms([
+          'taxonomy'   => self::TAXONOMY,
+          'hide_empty' => false,
+          'parent'     => $parent_id,
+          'orderby'    => 'name',
+          'order'      => 'ASC',
+        ]);
+
+        $subtopic_count = is_wp_error($children) ? 0 : count($children);
+        $total_cards = count($this->get_flashcard_ids_for_term($parent_id));
+      }
 
       $categories[] = [
-        'id'           => (int) $parent->term_id,
-        'name'         => html_entity_decode($parent->name, ENT_QUOTES, 'UTF-8'),
+        'id'           => $parent_id,
+        'key'          => sanitize_title($topic_name),
+        'name'         => $topic_name,
+        'description'  => $this->get_exam_category_description($topic_name),
         'totalCards'   => $total_cards,
         'subtopicCount' => $subtopic_count,
+        'isAvailable'  => $parent_id > 0 && $total_cards > 0,
       ];
     }
 
     return $categories;
+  }
+
+  // Mantiene la copia comercial de cada categoria oficial del mock test en un solo lugar.
+  private function get_exam_category_description(string $topic_name): string {
+    $descriptions = [
+      'general' => __('Regulations, math, physics, and documentation', 'vc-flashcards'),
+      'airframe' => __('Structures, systems, and aircraft components', 'vc-flashcards'),
+      'powerplant' => __('Engines, propellers, fuel systems, and engine inspection procedures', 'vc-flashcards'),
+    ];
+
+    return $descriptions[strtolower($topic_name)] ?? '';
   }
 
   /* Devuelve los intentos completados del examen ya formateados para pintar el historial. */
@@ -2736,11 +2979,13 @@ class VC_Flashcards_Plugin {
       "SELECT started_at, completed_at, score_percent
       FROM {$sessions_table}
       WHERE user_id = %d
+        AND session_source = %s
         AND mode = %s
         AND completed_at IS NOT NULL
       ORDER BY completed_at DESC, id DESC
       LIMIT %d",
       $user_id,
+      self::SESSION_SOURCE_MOCK,
       'exam',
       $limit
     ), ARRAY_A);

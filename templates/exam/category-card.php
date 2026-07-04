@@ -2,36 +2,32 @@
 if (!defined('ABSPATH')) {
   exit;
 }
+
+$category_description = isset($category['description']) ? (string) $category['description'] : '';
+$category_is_available = !empty($category['isAvailable']);
+$category_key = isset($category['key']) ? (string) $category['key'] : sanitize_title((string) ($category['name'] ?? ''));
 ?>
 <article
   class="vc-exam-category-card"
-  aria-labelledby="vc-exam-category-<?php echo esc_attr((string) $category['id']); ?>-title"
+  aria-labelledby="vc-exam-category-<?php echo esc_attr($category_key); ?>-title"
 >
   <div class="vc-exam-category-top">
-    <h3 id="vc-exam-category-<?php echo esc_attr((string) $category['id']); ?>-title"><?php echo esc_html($category['name']); ?></h3>
+    <h3 id="vc-exam-category-<?php echo esc_attr($category_key); ?>-title"><?php echo esc_html($category['name']); ?></h3>
   </div>
 
   <div class="vc-exam-category-meta">
-    <p>
-      <?php echo esc_html(
-        sprintf(
-          /* translators: %d: subtopic count */
-          _n('%d subtopic', '%d subtopics', $category['subtopicCount'], 'vc-flashcards'),
-          $category['subtopicCount']
-        ) . ' · ' . sprintf(
-          /* translators: %d: total questions */
-          _n('%d question available', '%d questions available', $category['totalCards'], 'vc-flashcards'),
-          $category['totalCards']
-        )
-      ); ?>
-    </p>
+    <p><?php echo esc_html($category_description); ?></p>
   </div>
 
   <div class="vc-exam-category-action">
     <button
       type="button"
       class="vc-exam-start"
-      data-vc-exam-start="<?php echo esc_attr((string) $category['id']); ?>"
+      <?php if ($category_is_available): ?>
+        data-vc-exam-start="<?php echo esc_attr((string) $category['id']); ?>"
+      <?php else: ?>
+        aria-disabled="true"
+      <?php endif; ?>
     >
       <span><?php esc_html_e('Start Exam', 'vc-flashcards'); ?></span>
       <span class="vc-exam-start-icon" aria-hidden="true">

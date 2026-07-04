@@ -228,6 +228,7 @@
 }
 
 .vc-flashcards-feedback-dropzone {
+  position: relative;
   display: grid;
   place-items: center;
   gap: 6px;
@@ -241,6 +242,11 @@
   text-align: center;
   cursor: pointer;
   overflow: hidden;
+}
+
+.vc-flashcards-feedback-dropzone:focus-visible {
+  border-color: #1447e6;
+  outline: 3px solid rgba(20, 71, 230, 0.16);
 }
 
 .vc-flashcards-feedback-dropzone.is-dragover,
@@ -283,6 +289,51 @@
   height: 100%;
   border-radius: 6px;
   object-fit: cover;
+}
+
+.vc-flashcards-help-widget .vc-flashcards-feedback-remove-image,
+.vc-flashcards-help-widget .vc-flashcards-feedback-remove-image:hover,
+.vc-flashcards-help-widget .vc-flashcards-feedback-remove-image:focus {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
+  color: #212121 !important;
+  cursor: pointer;
+  font-size: 0;
+  line-height: 1;
+  text-decoration: none;
+  outline: none;
+}
+
+.vc-flashcards-help-widget .vc-flashcards-feedback-remove-image[hidden] {
+  display: none !important;
+}
+
+.vc-flashcards-feedback-remove-image:focus-visible {
+  outline: 2px solid rgba(20, 71, 230, 0.35);
+  outline-offset: 1px;
+}
+
+.vc-flashcards-feedback-remove-image svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
 }
 
 .vc-flashcards-help-widget .vc-flashcards-feedback-submit,

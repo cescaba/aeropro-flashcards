@@ -1168,6 +1168,7 @@
       const body = new window.URLSearchParams();
       body.append('action', 'vc_flashcards_start_session');
       body.append('nonce', window.vcStudySessionsData.nonce);
+      body.append('session_source', 'study_sessions');
       body.append('mode', config.mode);
       body.append('term_id', String(config.termId || 0));
       body.append('card_limit', String(config.selectedCount || 10));

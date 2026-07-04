@@ -1119,6 +1119,19 @@
   gap: 16px;
 }
 
+@media (min-width: 641px) {
+  .vc-study-sessions-session-header > .vc-study-sessions-session-progress {
+    order: 1;
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .vc-study-sessions-session-header > .vc-study-sessions-back {
+    order: 2;
+    margin-left: auto;
+  }
+}
+
 /* ==========================================================================
    Component: Configuration And Subtopics
    Cards de configuracion, listado de subtemas y feedback del detail view.

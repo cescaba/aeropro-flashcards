@@ -49,16 +49,21 @@ if (!defined('ABSPATH')) {
       <label class="vc-flashcards-feedback-upload-label" for="vc-flashcards-feedback-screenshot">
         <?php esc_html_e('Attach a screenshot (optional)', 'vc-flashcards'); ?>
       </label>
-      <label class="vc-flashcards-feedback-dropzone" for="vc-flashcards-feedback-screenshot" data-vc-flashcards-feedback-dropzone>
+      <div class="vc-flashcards-feedback-dropzone" data-vc-flashcards-feedback-dropzone role="button" tabindex="0" aria-controls="vc-flashcards-feedback-screenshot">
         <input id="vc-flashcards-feedback-screenshot" name="screenshot" type="file" accept="image/*">
         <img class="vc-flashcards-feedback-preview" data-vc-flashcards-feedback-preview src="" alt="" hidden>
+        <button type="button" class="vc-flashcards-feedback-remove-image" data-vc-flashcards-feedback-remove-image aria-label="<?php esc_attr_e('Remove screenshot', 'vc-flashcards'); ?>" hidden>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
         <svg data-vc-flashcards-feedback-upload-icon width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
           <path d="M18.9944 2.99902H4.99845C3.8942 2.99902 2.99902 3.8942 2.99902 4.99845V18.9944C2.99902 20.0987 3.8942 20.9938 4.99845 20.9938H18.9944C20.0987 20.9938 20.9938 20.0987 20.9938 18.9944V4.99845C20.9938 3.8942 20.0987 2.99902 18.9944 2.99902Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M8.99747 10.9969C10.1017 10.9969 10.9969 10.1017 10.9969 8.99747C10.9969 7.89322 10.1017 6.99805 8.99747 6.99805C7.89322 6.99805 6.99805 7.89322 6.99805 8.99747C6.99805 10.1017 7.89322 10.9969 8.99747 10.9969Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M20.994 14.9957L17.9089 11.9106C17.5339 11.5358 17.0254 11.3252 16.4953 11.3252C15.9651 11.3252 15.4566 11.5358 15.0817 11.9106L5.99829 20.994" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <span data-vc-flashcards-feedback-file-label><?php esc_html_e('Click or drag an image here', 'vc-flashcards'); ?></span>
-      </label>
+      </div>
 
       <button type="submit" class="vc-flashcards-feedback-submit">
         <span><?php esc_html_e('Send feedback', 'vc-flashcards'); ?></span>

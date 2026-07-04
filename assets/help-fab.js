@@ -15,6 +15,7 @@
     const dropzone = form ? form.querySelector('[data-vc-flashcards-feedback-dropzone]') : null;
     const screenshotInput = form ? form.querySelector('input[name="screenshot"]') : null;
     const screenshotPreview = form ? form.querySelector('[data-vc-flashcards-feedback-preview]') : null;
+    const screenshotRemove = form ? form.querySelector('[data-vc-flashcards-feedback-remove-image]') : null;
     const screenshotIcon = form ? form.querySelector('[data-vc-flashcards-feedback-upload-icon]') : null;
     const screenshotLabel = form ? form.querySelector('[data-vc-flashcards-feedback-file-label]') : null;
     const screenshotDefaultLabel = screenshotLabel ? screenshotLabel.textContent : '';
@@ -71,6 +72,21 @@
       }
 
       if (dropzone && screenshotInput) {
+        dropzone.addEventListener('click', function (event) {
+          if (screenshotRemove && screenshotRemove.contains(event.target)) {
+            return;
+          }
+
+          screenshotInput.click();
+        });
+
+        dropzone.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            screenshotInput.click();
+          }
+        });
+
         dropzone.addEventListener('dragover', function (event) {
           event.preventDefault();
           dropzone.classList.add('is-dragover');
@@ -92,6 +108,22 @@
 
           screenshotInput.files = files;
           updateScreenshotPreview(files[0]);
+        });
+      }
+
+      if (screenshotRemove && screenshotInput) {
+        screenshotRemove.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          clearScreenshot();
+        });
+
+        screenshotRemove.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+            clearScreenshot();
+          }
         });
       }
 
@@ -167,6 +199,14 @@
       }
     }
 
+    function clearScreenshot() {
+      if (screenshotInput) {
+        screenshotInput.value = '';
+      }
+
+      updateScreenshotPreview(null);
+    }
+
     function updateScreenshotPreview(file) {
       if (screenshotPreviewUrl) {
         URL.revokeObjectURL(screenshotPreviewUrl);
@@ -180,6 +220,10 @@
       if (!file) {
         screenshotPreview.src = '';
         screenshotPreview.hidden = true;
+        if (screenshotRemove) {
+          screenshotRemove.hidden = true;
+          screenshotRemove.setAttribute('aria-hidden', 'true');
+        }
         screenshotIcon.hidden = false;
         screenshotLabel.hidden = false;
         screenshotLabel.textContent = screenshotDefaultLabel;
@@ -191,6 +235,10 @@
       screenshotPreview.src = screenshotPreviewUrl;
       screenshotPreview.alt = file.name;
       screenshotPreview.hidden = false;
+      if (screenshotRemove) {
+        screenshotRemove.hidden = false;
+        screenshotRemove.removeAttribute('aria-hidden');
+      }
       screenshotIcon.hidden = true;
       screenshotLabel.hidden = true;
       screenshotLabel.textContent = file.name;

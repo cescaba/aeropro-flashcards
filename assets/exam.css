@@ -247,11 +247,17 @@
 }
 
 .vc-exam-category-meta {
-  margin: 0px;
-  color: var(--vc-exam-muted);
-  font-size: 14px;
   padding-bottom: 16px;
-  line-height: 100%;
+}
+
+.vc-exam-category-meta p {
+  margin: 0;
+  color: var(--vc-exam-muted);
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
   letter-spacing: -0.15px;
 }
 
