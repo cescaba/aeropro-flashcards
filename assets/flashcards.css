@@ -125,6 +125,7 @@
 
 .vc-study-sessions-category-card {
   display: grid;
+  min-height: 228px;
   gap: 16px;
   border: 1px solid #E2E8F0;
   border-radius: 12px;
@@ -325,7 +326,9 @@
 }
 
 .vc-study-sessions-detail-header [data-vc-study-sessions-category-title] {
+  font-family: Poppins, sans-serif;
   font-weight: 400;
+  font-style: normal;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.31px;
@@ -564,7 +567,9 @@
 /* Texto secundario que muestra el total de Study sessions bajo el titulo de la categoria. */
 .vc-study-sessions-category-total {
   margin: 0;
+  font-family: Poppins, sans-serif;
   font-weight: 400;
+  font-style: normal;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.15px;
@@ -745,6 +750,7 @@
   align-items: center;
   gap: 8px;
   justify-content: center;
+  min-width: 81px;
   min-height: 34px;
   padding: 7px 11px;
   line-height: 1;
@@ -761,7 +767,18 @@
 
 /* Icono de vc-study-sessions-back con una flecha hacia la izquierda. */
 .vc-study-sessions-back-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-study-sessions-back svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 /* Color base de los CTA principales. */
@@ -946,7 +963,6 @@
 }
 
 /* Layout horizontal compartido para encabezados y grupos de acciones. */
-.vc-study-sessions-category-top,
 .vc-study-sessions-category-progress,
 .vc-study-sessions-subtopics-header,
 .vc-study-sessions-modal-range-meta,
@@ -964,20 +980,17 @@
   margin-bottom: 16px;
 }
 
-/* Estilo del dato destacado en la cabecera de categoria. */
-.vc-study-sessions-category-top strong {
-  flex: 0 0 auto;
-  font-size: 28px;
-  line-height: 1;
-  color: #2b50da;
-}
-
-/* Reset del titulo principal de cada categoria. */
-.vc-study-sessions-category-top h3 {
+/* Titulo principal de cada categoria: gana al h3 global de Elementor sin usar !important. */
+.vc-study-sessions-category-card > .vc-study-sessions-category-title {
   margin: 0;
+  color: #212121;
+  font-family: "Poppins", Sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
 }
 
-.vc-study-sessions-category-card .vc-study-sessions-category-top,
+.vc-study-sessions-category-card .vc-study-sessions-category-title,
 .vc-study-sessions-category-card .vc-study-sessions-category-progress-block,
 .vc-study-sessions-category-card .vc-study-sessions-category-meta {
   margin-top: 0;
@@ -3349,7 +3362,6 @@ body.vc-study-sessions-modal-open {
   /* 480 Shared actions and summary */
 
   /* Study sessions mobile: apila encabezados y acciones solo en el breakpoint realmente movil. */
-  .vc-study-sessions-category-top,
   .vc-study-sessions-subtopics-header,
   .vc-study-sessions-modal-actions,
   .vc-study-sessions-summary-actions,
@@ -3710,7 +3722,7 @@ body.vc-study-sessions-modal-open {
   }
 
   /* Study sessions category mobile: ordena los elementos para 480px. */
-  .vc-study-sessions-category-card .vc-study-sessions-category-top {
+  .vc-study-sessions-category-card .vc-study-sessions-category-title {
     order: 1;
   }
 
@@ -3823,7 +3835,7 @@ body.vc-study-sessions-modal-open {
   }
 
   /* Study sessions category mobile: aplica la escala tipografica compacta al titulo. */
-  .vc-study-sessions-category-top h3 {
+  .vc-study-sessions-category-card > .vc-study-sessions-category-title {
     font-weight: 400;
     font-style: normal;
     font-size: 16px;

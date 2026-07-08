@@ -96,6 +96,7 @@
     let selectedAcsCodes = new Set();
     let weakAreasSortActive = false;
     const storageKey = 'vcStudySessionsState:' + window.location.pathname;
+    const studyStateVersion = 1;
     const initialView = root.dataset.vcStudySessionsInitialView || 'home';
     const initialCategoryId = Number(root.dataset.vcStudySessionsInitialCategory || 0);
 
@@ -178,24 +179,117 @@
       }
     }
 
+    // Persistencia: conserva solo el shape que Study necesita rehidratar.
+    function normalizeStudyCard(card) {
+      if (!card || typeof card !== 'object') {
+        return null;
+      }
+
+      const answers = card.answers && typeof card.answers === 'object' ? card.answers : {};
+      const normalized = {
+        id: Number(card.id || 0),
+        question: String(card.question || ''),
+        questionImageUrl: String(card.questionImageUrl || ''),
+        answers: {
+          a: String(answers.a || ''),
+          b: String(answers.b || ''),
+          c: String(answers.c || '')
+        },
+        acsCode: String(card.acsCode || ''),
+        correctAnswer: String(card.correctAnswer || ''),
+        explanation: String(card.explanation || ''),
+        topicTermId: Number(card.topicTermId || 0),
+        topicLabel: String(card.topicLabel || ''),
+        subtopicLabel: String(card.subtopicLabel || '')
+      };
+
+      if (!normalized.id || !normalized.question || !normalized.answers.a || !normalized.answers.b || !normalized.answers.c) {
+        return null;
+      }
+
+      return normalized;
+    }
+
+    function normalizeStudyCards(cardList) {
+      if (!Array.isArray(cardList)) {
+        return [];
+      }
+
+      return cardList
+        .map(normalizeStudyCard)
+        .filter(function (card) { return !!card; });
+    }
+
+    function normalizeStudyAttempt(attempt) {
+      if (!attempt || typeof attempt !== 'object') {
+        return null;
+      }
+
+      return {
+        flashcardId: Number(attempt.flashcardId || 0),
+        topicTermId: Number(attempt.topicTermId || 0),
+        selectedAnswer: String(attempt.selectedAnswer || ''),
+        responseTimeMs: Number(attempt.responseTimeMs || 0)
+      };
+    }
+
+    function normalizeStudyAttempts(attemptList) {
+      if (!Array.isArray(attemptList)) {
+        return [];
+      }
+
+      return attemptList
+        .map(normalizeStudyAttempt)
+        .filter(function (attempt) { return !!attempt && attempt.flashcardId > 0; });
+    }
+
+    function buildPersistedState() {
+      return {
+        version: studyStateVersion,
+        activeView: root.dataset.activeView || 'home',
+        summaryOpen: summaryPanel ? !summaryPanel.hidden : false,
+        summaryMetrics: summaryMetrics,
+        currentCategoryId: currentCategory ? Number(currentCategory.id) : 0,
+        pendingConfig: pendingConfig,
+        lastConfig: lastConfig,
+        sessionId: Number(sessionId || 0),
+        cards: normalizeStudyCards(cards),
+        cardIndex: Number(cardIndex || 0),
+        attempts: normalizeStudyAttempts(attempts),
+        answeredCurrentCard: Boolean(answeredCurrentCard),
+        explanationVisible: explanationEl ? !explanationEl.hidden : false
+      };
+    }
+
+    function isValidPersistedState(state) {
+      if (!state || typeof state !== 'object') {
+        return false;
+      }
+
+      const version = typeof state.version === 'undefined' ? 1 : Number(state.version);
+      if (version !== 1) {
+        return false;
+      }
+
+      if (!state.activeView || typeof state.activeView !== 'string') {
+        return false;
+      }
+
+      if (state.activeView === 'session' || state.summaryOpen) {
+        if (!state.sessionId || !Array.isArray(state.cards) || !state.cards.length) {
+          return false;
+        }
+
+        return normalizeStudyCards(state.cards).length === state.cards.length;
+      }
+
+      return true;
+    }
+
     // Persistencia: guarda lo minimo para restaurar una practica al recargar.
     function persistState() {
       try {
-        window.sessionStorage.setItem(storageKey, JSON.stringify({
-          activeView: root.dataset.activeView || 'home',
-          summaryOpen: summaryPanel ? !summaryPanel.hidden : false,
-          summaryMetrics: summaryMetrics,
-          currentCategoryId: currentCategory ? Number(currentCategory.id) : 0,
-          pendingConfig: pendingConfig,
-          lastConfig: lastConfig,
-          sessionId: sessionId,
-          cards: cards,
-          cardIndex: cardIndex,
-          attempts: attempts,
-          answeredCurrentCard: answeredCurrentCard,
-          currentExplanationHtml: currentExplanationHtml,
-          explanationVisible: explanationEl ? !explanationEl.hidden : false
-        }));
+        window.sessionStorage.setItem(storageKey, JSON.stringify(buildPersistedState()));
       } catch (error) {}
     }
 
@@ -258,7 +352,8 @@
 
         const state = JSON.parse(rawState);
 
-        if (!state || !state.activeView) {
+        if (!isValidPersistedState(state)) {
+          clearPersistedState();
           return false;
         }
 
@@ -267,10 +362,10 @@
         lastConfig = state.lastConfig || null;
         summaryMetrics = state.summaryMetrics || null;
         sessionId = Number(state.sessionId || 0);
-        cards = Array.isArray(state.cards) ? state.cards : [];
+        cards = normalizeStudyCards(state.cards);
         cardIndex = Math.max(0, Math.min(Number(state.cardIndex || 0), Math.max(cards.length - 1, 0)));
-        attempts = Array.isArray(state.attempts) ? state.attempts : [];
-        currentExplanationHtml = state.currentExplanationHtml || '';
+        attempts = normalizeStudyAttempts(state.attempts);
+        currentExplanationHtml = '';
 
         if (currentCategory) {
           renderCategoryHeader(currentCategory);
@@ -1022,14 +1117,14 @@
       answersWrap.querySelectorAll('.vc-study-sessions-answer').forEach(function (answerButton) {
         answerButton.disabled = true;
 
-        if (answerButton.dataset.answerKey === attempt.correctAnswer) {
+        if (answerButton.dataset.answerKey === card.correctAnswer) {
           answerButton.dataset.state = 'correct';
         } else if (attempt.selectedAnswer && answerButton.dataset.answerKey === attempt.selectedAnswer) {
           answerButton.dataset.state = 'incorrect';
         }
       });
 
-      renderExplanation(card, attempt.selectedAnswer === attempt.correctAnswer);
+      renderExplanation(card, attempt.selectedAnswer === card.correctAnswer);
       explanationEl.hidden = !explanationVisible;
       setExplanationToggleOpen(!explanationEl.hidden);
       setExplanationToggleLabel(
@@ -1107,7 +1202,6 @@
         flashcardId: card.id,
         topicTermId: card.topicTermId,
         selectedAnswer: selectedAnswer,
-        correctAnswer: card.correctAnswer,
         responseTimeMs: responseTimeMs
       });
 
@@ -1146,7 +1240,6 @@
         flashcardId: card.id,
         topicTermId: card.topicTermId,
         selectedAnswer: '',
-        correctAnswer: card.correctAnswer,
         responseTimeMs: responseTimeMs
       });
 

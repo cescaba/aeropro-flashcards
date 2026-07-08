@@ -133,7 +133,7 @@
    Intro Badges
    ========================================================================== */
 
-.vc-exam-intro-badges {
+.vc-exam-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -143,7 +143,7 @@
 }
 
 /* Stat card styles */
-.vc-study-sessions-stat-card {
+.vc-exam-stat-card {
   opacity: 1;
   padding: 12px 20px;
   border: 1px solid #E2E8F0;
@@ -151,14 +151,14 @@
   background: #F1F5F9;
 }
 
-.vc-study-sessions-stat-card-content {
+.vc-exam-stat-card-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .vc-exam-badge-icon,
-.vc-study-sessions-stat-card-icon,
+.vc-exam-stat-card-icon,
 .vc-exam-history-item-icon,
 .vc-exam-timer-icon {
   display: inline-flex;
@@ -166,7 +166,7 @@
   justify-content: center;
 }
 
-.vc-study-sessions-stat-card-icon {
+.vc-exam-stat-card-icon {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -178,26 +178,26 @@
   box-sizing: border-box;
 }
 
-.vc-study-sessions-stat-card-icon img {
+.vc-exam-stat-card-icon img {
   display: block;
   width: 28px;
   height: 28px;
 }
 
-.vc-study-sessions-stat-card-copy {
+.vc-exam-stat-card-copy {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
 }
 
-.vc-study-sessions-stat-card-copy small {
+.vc-exam-stat-card-copy small {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
   color: #666666;
 }
 
-.vc-study-sessions-stat-card-copy strong,
+.vc-exam-stat-card-copy strong,
 [data-vc-exam-best-score],
 [data-vc-exam-average-score],
 [data-vc-exam-passed-attempts] {
@@ -240,7 +240,7 @@
 .vc-exam-category-top h3 {
   margin: 0px;
   color: #212121;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 16px;
   line-height: 100%;
   letter-spacing: -0.3px;
@@ -1274,7 +1274,7 @@
 
   /* 1180 Home grids */
 
-  .vc-exam-intro-badges {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
@@ -1292,7 +1292,7 @@
 
   /* 960 Home grids */
 
-  .vc-exam-intro-badges{
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1309,12 +1309,12 @@
 
   /* 720 Home and summary layout */
 
-  .vc-study-sessions-stats {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .vc-study-sessions-stat-card {
+  .vc-exam-stat-card {
     min-width: 0;
     padding: 10px 12px;
   }
@@ -1386,19 +1386,19 @@
     margin-bottom: 20px;
   }
 
-  .vc-study-sessions-stats {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
-  .vc-study-sessions-stat-card {
+  .vc-exam-stat-card {
     display: flex;
     align-items: center;
     min-height: 115px;
     padding: 12px 6px;
   }
 
-  .vc-study-sessions-stat-card-content {
+  .vc-exam-stat-card-content {
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -1407,34 +1407,33 @@
     width: 100%;
   }
 
-  .vc-study-sessions-stat-card-icon {
+  .vc-exam-stat-card-icon {
     padding: 10px;
     border-radius: 8px;
     width: 40px;
     height: 40px;
   }
 
-  .vc-study-sessions-stat-card-icon img {
+  .vc-exam-stat-card-icon img {
     width: 20px;
     height: 20px;
   }
 
-  .vc-study-sessions-stat-card-copy {
+  .vc-exam-stat-card-copy {
     align-items: center;
     min-width: 0;
   }
 
-  .vc-study-sessions-stat-card-copy [data-vc-study-sessions-stat],
-  .vc-study-sessions-stat-card-copy [data-vc-exam-best-score],
-  .vc-study-sessions-stat-card-copy [data-vc-exam-average-score],
-  .vc-study-sessions-stat-card-copy [data-vc-exam-passed-attempts] {
+  .vc-exam-stat-card-copy [data-vc-exam-best-score],
+  .vc-exam-stat-card-copy [data-vc-exam-average-score],
+  .vc-exam-stat-card-copy [data-vc-exam-passed-attempts] {
     order: 1;
     font-size: 18px;
     line-height: 20px;
     letter-spacing: 0;
   }
 
-  .vc-study-sessions-stats .vc-study-sessions-stat-card-copy small {
+  .vc-exam-stats .vc-exam-stat-card-copy small {
     order: 2;
     margin-top: 3px;
     font-size: 10px;

@@ -40,8 +40,14 @@ class VC_Flashcards_Plugin {
   // Tiempo corto de cache para pools de IDs del mock test. La sesion sigue siendo unica por usuario.
   const EXAM_POOL_CACHE_TTL = 600;
 
+  // Cachea pools base de tarjetas para que muchos usuarios no reconstruyan el mismo set.
+  const SESSION_POOL_CACHE_TTL = 600;
+
   // Version logica para invalidar todos los pools de examen sin buscar transients por prefijo.
   const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
+
+  // Version logica para invalidar todos los pools de sesiones normales y flashcards.
+  const SESSION_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_session_pool_cache_version';
 
   // Versiona cambios de tablas/indices para aplicar migraciones ligeras una sola vez.
   const DB_VERSION = '1.2.3';
@@ -645,7 +651,7 @@ class VC_Flashcards_Plugin {
       add_action('save_post_' . self::POST_TYPE, [$this, 'save_flashcard_meta']);
     }
 
-    $this->clear_exam_pool_cache();
+    $this->clear_flashcard_pool_caches();
   }
 
   public function clear_exam_pool_cache_for_object_terms($object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids): void {
@@ -653,7 +659,7 @@ class VC_Flashcards_Plugin {
       return;
     }
 
-    $this->clear_exam_pool_cache();
+    $this->clear_flashcard_pool_caches();
   }
 
   // Ajuste menor del checklist de terms para que WordPress no suba los seleccionados al tope.
@@ -1008,7 +1014,7 @@ class VC_Flashcards_Plugin {
     fclose($handle);
 
     if ($created > 0 || $updated > 0) {
-      $this->clear_exam_pool_cache();
+      $this->clear_flashcard_pool_caches();
     }
 
     return [
@@ -1324,7 +1330,7 @@ class VC_Flashcards_Plugin {
 
     $user_id = get_current_user_id();
     $stats = $this->get_user_stats($user_id);
-    $categories = $this->get_category_cards($user_id, self::SESSION_SOURCE_STUDY);
+    $categories = $this->get_study_sessions_categories($user_id);
     $total_flashcards = wp_count_posts(self::POST_TYPE);
     $published_flashcards = $total_flashcards instanceof stdClass ? (int) $total_flashcards->publish : 0;
 
@@ -1355,12 +1361,36 @@ class VC_Flashcards_Plugin {
     );
 
     wp_enqueue_script(
+      'vc-view-state',
+      VC_FLASHCARDS_URL . 'assets/view-state.js',
+      [],
+      file_exists(VC_FLASHCARDS_DIR . 'assets/view-state.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/view-state.js') : '1.0.0',
+      true
+    );
+
+    wp_enqueue_script(
       'vc-flashcards-library-script',
       VC_FLASHCARDS_URL . 'assets/flashcards-library.js',
-      [],
+      ['vc-view-state'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards-library.js') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards-library.js') : '1.0.0',
       true
     );
+
+    wp_localize_script('vc-flashcards-library-script', 'vcFlashcardsLibraryData', [
+      'ajaxUrl' => admin_url('admin-ajax.php'),
+      'nonce' => wp_create_nonce(self::NONCE_ACTION),
+      'labels' => [
+        'loading' => __('Loading questions...', 'vc-flashcards'),
+        'error' => __('Could not start session', 'vc-flashcards'),
+        'noCards' => __('No questions were found for this selection.', 'vc-flashcards'),
+        'nextQuestion' => __('Next question', 'vc-flashcards'),
+        'finish' => __('Finish', 'vc-flashcards'),
+        'questionProgress' => __('Question %1$d of %2$d', 'vc-flashcards'),
+        'correct' => __('Correct', 'vc-flashcards'),
+        'incorrect' => __('Incorrect', 'vc-flashcards'),
+        'summaryMeta' => __('%1$d correct · %2$d incorrect', 'vc-flashcards'),
+      ],
+    ]);
 
     $user_id = get_current_user_id();
     $categories = $this->get_flashcards_library_categories($user_id);
@@ -1373,6 +1403,384 @@ class VC_Flashcards_Plugin {
 
   // Devuelve solo los topics padre oficiales para la vista independiente de Flashcards.
   private function get_flashcards_library_categories(int $user_id): array {
+    $terms = get_terms([
+      'taxonomy' => self::TAXONOMY,
+      'hide_empty' => false,
+      'orderby' => 'name',
+      'order' => 'ASC',
+    ]);
+
+    if (is_wp_error($terms)) {
+      $terms = [];
+    }
+
+    $parents_by_name = [];
+    $children_by_parent = [];
+
+    foreach ($terms as $term) {
+      if (!$term instanceof WP_Term) {
+        continue;
+      }
+
+      if ((int) $term->parent === 0) {
+        $parents_by_name[strtolower(html_entity_decode($term->name, ENT_QUOTES, 'UTF-8'))] = $term;
+        continue;
+      }
+
+      $children_by_parent[(int) $term->parent][] = $term;
+    }
+
+    $ordered_categories = [];
+    $category_index_by_parent_id = [];
+    $child_index_by_term_id = [];
+
+    foreach (self::DEFAULT_TOPIC_ORDER as $topic_name) {
+      $parent = $parents_by_name[strtolower($topic_name)] ?? null;
+      $parent_id = $parent instanceof WP_Term ? (int) $parent->term_id : 0;
+      $children = $parent_id > 0 && isset($children_by_parent[$parent_id]) ? $children_by_parent[$parent_id] : [];
+      $child_items = [];
+
+      foreach ($children as $child) {
+        if (!$child instanceof WP_Term) {
+          continue;
+        }
+
+        $child_status = $this->get_subtopic_mastery_status(0);
+        $child_items[] = [
+          'id' => (int) $child->term_id,
+          'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
+          'totalCards' => 0,
+          'masteredCards' => 0,
+          'progress' => 0,
+          'status' => $child_status['label'],
+          'statusClass' => $child_status['class'],
+          'description' => $this->format_subtopic_mastery_description(0, 0),
+        ];
+        $child_index_by_term_id[(int) $child->term_id] = [
+          'parent_id' => $parent_id,
+          'child_index' => count($child_items) - 1,
+        ];
+      }
+
+      $ordered_categories[] = [
+        'id' => $parent_id,
+        'name' => $topic_name,
+        'totalCards' => 0,
+        'masteredCards' => 0,
+        'progress' => 0,
+        'subtopicCount' => count($child_items),
+        'description' => sprintf(
+          /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
+          count($child_items),
+          0,
+          0
+        ),
+        'children' => $child_items,
+        'acsCodes' => [],
+      ];
+
+      if ($parent_id > 0) {
+        $category_index_by_parent_id[$parent_id] = count($ordered_categories) - 1;
+      }
+    }
+
+    $published_ids = get_posts([
+      'post_type' => self::POST_TYPE,
+      'post_status' => 'publish',
+      'posts_per_page' => -1,
+      'fields' => 'ids',
+      'orderby' => 'ID',
+      'order' => 'ASC',
+      'suppress_filters' => true,
+      'no_found_rows' => true,
+    ]);
+
+    if (!empty($published_ids)) {
+      $published_ids = array_values(array_map('intval', $published_ids));
+      update_object_term_cache($published_ids, self::POST_TYPE);
+      $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_FLASHCARDS), true);
+
+      foreach ($published_ids as $post_id) {
+        $terms_for_post = get_the_terms($post_id, self::TAXONOMY);
+        if (empty($terms_for_post) || is_wp_error($terms_for_post)) {
+          continue;
+        }
+
+        usort($terms_for_post, static function (WP_Term $left, WP_Term $right): int {
+          $parent_comparison = $right->parent <=> $left->parent;
+          if ($parent_comparison !== 0) {
+            return $parent_comparison;
+          }
+
+          return strcasecmp($left->name, $right->name);
+        });
+
+        $selected_parent_id = 0;
+        $selected_child_id = 0;
+
+        foreach ($terms_for_post as $term) {
+          $term_id = (int) $term->term_id;
+
+          if (isset($child_index_by_term_id[$term_id])) {
+            $selected_child_id = $term_id;
+            $selected_parent_id = $child_index_by_term_id[$term_id]['parent_id'];
+            break;
+          }
+
+          if (isset($category_index_by_parent_id[$term_id])) {
+            $selected_parent_id = $term_id;
+          }
+        }
+
+        if ($selected_parent_id < 1 || !isset($category_index_by_parent_id[$selected_parent_id])) {
+          continue;
+        }
+
+        $category_index = $category_index_by_parent_id[$selected_parent_id];
+        $ordered_categories[$category_index]['totalCards']++;
+
+        if (isset($mastered_lookup[$post_id])) {
+          $ordered_categories[$category_index]['masteredCards']++;
+        }
+
+        if ($selected_child_id > 0 && isset($child_index_by_term_id[$selected_child_id])) {
+          $child_index = $child_index_by_term_id[$selected_child_id]['child_index'];
+          $ordered_categories[$category_index]['children'][$child_index]['totalCards']++;
+
+          if (isset($mastered_lookup[$post_id])) {
+            $ordered_categories[$category_index]['children'][$child_index]['masteredCards']++;
+          }
+        }
+      }
+    }
+
+    foreach ($ordered_categories as &$category) {
+      $category_total = (int) ($category['totalCards'] ?? 0);
+      $category_mastered = (int) ($category['masteredCards'] ?? 0);
+      $category['progress'] = $category_total > 0 ? (int) round(($category_mastered / $category_total) * 100) : 0;
+      $category['description'] = sprintf(
+        /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+        __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
+        count($category['children'] ?? []),
+        $category_mastered,
+        $category_total
+      );
+
+      if (empty($category['children']) || !is_array($category['children'])) {
+        continue;
+      }
+
+      foreach ($category['children'] as &$child) {
+        $child_total = (int) ($child['totalCards'] ?? 0);
+        $child_mastered = (int) ($child['masteredCards'] ?? 0);
+        $child_progress = $child_total > 0 ? (int) round(($child_mastered / $child_total) * 100) : 0;
+        $child_status = $this->get_subtopic_mastery_status($child_progress);
+
+        $child['progress'] = $child_progress;
+        $child['status'] = $child_status['label'];
+        $child['statusClass'] = $child_status['class'];
+        $child['description'] = $this->format_subtopic_mastery_description($child_mastered, $child_total);
+      }
+      unset($child);
+    }
+    unset($category);
+
+    return $ordered_categories;
+  }
+
+  // Study Sessions usa un agregador propio para no recalcular counts/progreso/ACS por cada categoria.
+  private function get_study_sessions_categories(int $user_id): array {
+    $terms = get_terms([
+      'taxonomy' => self::TAXONOMY,
+      'hide_empty' => false,
+      'orderby' => 'name',
+      'order' => 'ASC',
+    ]);
+
+    if (is_wp_error($terms) || empty($terms)) {
+      return [];
+    }
+
+    $parents_by_id = [];
+    $parents_by_name = [];
+    $children_by_parent = [];
+
+    foreach ($terms as $term) {
+      if (!$term instanceof WP_Term) {
+        continue;
+      }
+
+      if ((int) $term->parent === 0) {
+        $parents_by_id[(int) $term->term_id] = $term;
+        $parents_by_name[strtolower(html_entity_decode($term->name, ENT_QUOTES, 'UTF-8'))] = $term;
+        continue;
+      }
+
+      $children_by_parent[(int) $term->parent][] = $term;
+    }
+
+    $all_ids = get_posts([
+      'post_type' => self::POST_TYPE,
+      'post_status' => 'publish',
+      'posts_per_page' => -1,
+      'fields' => 'ids',
+      'orderby' => 'ID',
+      'order' => 'ASC',
+      'no_found_rows' => true,
+    ]);
+
+    $all_ids = array_values(array_map('intval', is_array($all_ids) ? $all_ids : []));
+    if (empty($all_ids)) {
+      return [];
+    }
+
+    update_meta_cache('post', $all_ids);
+    update_object_term_cache($all_ids, self::POST_TYPE);
+
+    $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_STUDY), true);
+    $latest_results = $this->get_latest_attempt_results_for_flashcards($user_id, $all_ids);
+
+    $parent_card_ids = [];
+    $child_card_ids = [];
+    $parent_acs_metrics = [];
+
+    foreach ($all_ids as $card_id) {
+      $card_terms = get_the_terms($card_id, self::TAXONOMY);
+      if (empty($card_terms) || is_wp_error($card_terms)) {
+        continue;
+      }
+
+      $selected_term = null;
+      foreach ($card_terms as $term) {
+        if (!$term instanceof WP_Term) {
+          continue;
+        }
+
+        if ($selected_term === null || (int) $term->parent > (int) $selected_term->parent) {
+          $selected_term = $term;
+        }
+      }
+
+      if (!$selected_term instanceof WP_Term) {
+        continue;
+      }
+
+      $child_term = (int) $selected_term->parent > 0 ? $selected_term : null;
+      $parent_term = $child_term instanceof WP_Term
+        ? ($parents_by_id[(int) $child_term->parent] ?? null)
+        : $selected_term;
+
+      if (!$parent_term instanceof WP_Term || (int) $parent_term->term_id < 1) {
+        continue;
+      }
+
+      $parent_id = (int) $parent_term->term_id;
+      $parent_card_ids[$parent_id][] = $card_id;
+
+      if ($child_term instanceof WP_Term) {
+        $child_card_ids[(int) $child_term->term_id][] = $card_id;
+      }
+
+      $acs_code = trim((string) get_post_meta($card_id, '_vc_flashcard_acs_code', true));
+      if ($acs_code === '') {
+        continue;
+      }
+
+      if (!isset($parent_acs_metrics[$parent_id][$acs_code])) {
+        $parent_acs_metrics[$parent_id][$acs_code] = [
+          'total' => 0,
+          'attempted' => 0,
+          'incorrect' => 0,
+          'topics' => [],
+        ];
+      }
+
+      $parent_acs_metrics[$parent_id][$acs_code]['total']++;
+      $parent_acs_metrics[$parent_id][$acs_code]['topics'][html_entity_decode($parent_term->name, ENT_QUOTES, 'UTF-8')] = true;
+      if ($child_term instanceof WP_Term) {
+        $parent_acs_metrics[$parent_id][$acs_code]['topics'][html_entity_decode($child_term->name, ENT_QUOTES, 'UTF-8')] = true;
+      }
+
+      if (array_key_exists($card_id, $latest_results)) {
+        $parent_acs_metrics[$parent_id][$acs_code]['attempted']++;
+        if ((int) $latest_results[$card_id] !== 1) {
+          $parent_acs_metrics[$parent_id][$acs_code]['incorrect']++;
+        }
+      }
+    }
+
+    $categories = [];
+
+    foreach (self::DEFAULT_TOPIC_ORDER as $topic_name) {
+      $parent = $parents_by_name[strtolower($topic_name)] ?? null;
+      $parent_id = $parent instanceof WP_Term ? (int) $parent->term_id : 0;
+      $card_ids = $parent_id > 0 && isset($parent_card_ids[$parent_id]) ? array_values(array_unique($parent_card_ids[$parent_id])) : [];
+      $total_cards = count($card_ids);
+      $mastered_count = 0;
+
+      foreach ($card_ids as $card_id) {
+        if (isset($mastered_lookup[$card_id])) {
+          $mastered_count++;
+        }
+      }
+
+      $progress = $total_cards > 0 ? (int) round(($mastered_count / $total_cards) * 100) : 0;
+      $child_items = [];
+      $children = $parent_id > 0 && isset($children_by_parent[$parent_id]) ? $children_by_parent[$parent_id] : [];
+
+      foreach ($children as $child) {
+        if (!$child instanceof WP_Term) {
+          continue;
+        }
+
+        $child_ids = isset($child_card_ids[(int) $child->term_id]) ? array_values(array_unique($child_card_ids[(int) $child->term_id])) : [];
+        $child_total_cards = count($child_ids);
+        $child_mastered_count = 0;
+
+        foreach ($child_ids as $child_id) {
+          if (isset($mastered_lookup[$child_id])) {
+            $child_mastered_count++;
+          }
+        }
+
+        $child_progress = $child_total_cards > 0 ? (int) round(($child_mastered_count / $child_total_cards) * 100) : 0;
+        $child_status = $this->get_subtopic_mastery_status($child_progress);
+
+        $child_items[] = [
+          'id' => (int) $child->term_id,
+          'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
+          'totalCards' => $child_total_cards,
+          'masteredCards' => $child_mastered_count,
+          'progress' => $child_progress,
+          'status' => $child_status['label'],
+          'statusClass' => $child_status['class'],
+          'description' => $this->format_subtopic_mastery_description($child_mastered_count, $child_total_cards),
+        ];
+      }
+
+      $categories[] = [
+        'id' => $parent_id,
+        'name' => $topic_name,
+        'totalCards' => $total_cards,
+        'masteredCards' => $mastered_count,
+        'progress' => $progress,
+        'subtopicCount' => count($child_items),
+        'description' => sprintf(
+          __('%1$d subtopics Â· %2$d/%3$d cards mastered', 'vc-flashcards'),
+          count($child_items),
+          $mastered_count,
+          $total_cards
+        ),
+        'children' => $child_items,
+        'acsCodes' => $this->format_acs_metrics_payload($parent_acs_metrics[$parent_id] ?? []),
+      ];
+    }
+
+    return $categories;
+  }
+
+  private function get_flashcards_library_categories_legacy(int $user_id): array {
     $categories = $this->get_category_cards($user_id, self::SESSION_SOURCE_FLASHCARDS);
     $by_name = [];
 
@@ -1499,6 +1907,60 @@ class VC_Flashcards_Plugin {
     return sprintf('%d min', $minutes);
   }
 
+  // Flashcards practice only needs prompt, answer text and topic labels.
+  private function build_flashcards_library_practice_cards(array $cards): array {
+    return array_values(array_filter(array_map(static function (array $card): array {
+      $answers = isset($card['answers']) && is_array($card['answers']) ? $card['answers'] : [];
+
+      return [
+        'id' => isset($card['id']) ? (int) $card['id'] : 0,
+        'question' => isset($card['question']) ? (string) $card['question'] : '',
+        'answers' => [
+          'a' => isset($answers['a']) ? (string) $answers['a'] : '',
+          'b' => isset($answers['b']) ? (string) $answers['b'] : '',
+          'c' => isset($answers['c']) ? (string) $answers['c'] : '',
+        ],
+        'correctAnswer' => isset($card['correctAnswer']) ? (string) $card['correctAnswer'] : '',
+        'topicTermId' => isset($card['topicTermId']) ? (int) $card['topicTermId'] : 0,
+        'topicLabel' => isset($card['topicLabel']) ? (string) $card['topicLabel'] : '',
+        'subtopicLabel' => isset($card['subtopicLabel']) ? (string) $card['subtopicLabel'] : '',
+      ];
+    }, $cards), static function (array $card): bool {
+      return $card['id'] > 0
+        && $card['question'] !== ''
+        && in_array($card['correctAnswer'], ['a', 'b', 'c'], true)
+        && $card['answers']['a'] !== ''
+        && $card['answers']['b'] !== ''
+        && $card['answers']['c'] !== '';
+    }));
+  }
+
+  // Mock Test solo necesita el enunciado, opciones, topic visible e imagen de referencia.
+  private function build_exam_runtime_cards(array $cards): array {
+    return array_values(array_filter(array_map(static function (array $card): array {
+      $answers = isset($card['answers']) && is_array($card['answers']) ? $card['answers'] : [];
+
+      return [
+        'id' => isset($card['id']) ? (int) $card['id'] : 0,
+        'question' => isset($card['question']) ? (string) $card['question'] : '',
+        'questionImageUrl' => isset($card['questionImageUrl']) ? (string) $card['questionImageUrl'] : '',
+        'answers' => [
+          'a' => isset($answers['a']) ? (string) $answers['a'] : '',
+          'b' => isset($answers['b']) ? (string) $answers['b'] : '',
+          'c' => isset($answers['c']) ? (string) $answers['c'] : '',
+        ],
+        'topicTermId' => isset($card['topicTermId']) ? (int) $card['topicTermId'] : 0,
+        'topicLabel' => isset($card['topicLabel']) ? (string) $card['topicLabel'] : '',
+      ];
+    }, $cards), static function (array $card): bool {
+      return $card['id'] > 0
+        && $card['question'] !== ''
+        && $card['answers']['a'] !== ''
+        && $card['answers']['b'] !== ''
+        && $card['answers']['c'] !== '';
+    }));
+  }
+
   // Inicia una sesion de practica normal y devuelve al frontend las tarjetas seleccionadas.
   public function ajax_start_session(): void {
     check_ajax_referer(self::NONCE_ACTION, 'nonce');
@@ -1567,9 +2029,13 @@ class VC_Flashcards_Plugin {
       wp_send_json_error(['message' => __('Could not prepare the session. Please try again.', 'vc-flashcards')], 500);
     }
 
+    $response_cards = $session_source === self::SESSION_SOURCE_FLASHCARDS
+      ? $this->build_flashcards_library_practice_cards($cards)
+      : $cards;
+
     wp_send_json_success([
       'sessionId' => $session_id,
-      'cards' => $cards,
+      'cards' => $response_cards,
     ]);
   }
 
@@ -1585,7 +2051,8 @@ class VC_Flashcards_Plugin {
     $table = $wpdb->prefix . self::SESSION_CARD_TABLE;
     $wpdb->delete($table, ['session_id' => $session_id, 'user_id' => $user_id], ['%d', '%d']);
 
-    $stored_count = 0;
+    $rows = [];
+    $values = [];
     foreach (array_values($cards) as $index => $card) {
       $flashcard_id = isset($card['id']) ? absint($card['id']) : 0;
       $correct_answer = isset($card['correctAnswer']) ? sanitize_key((string) $card['correctAnswer']) : '';
@@ -1594,25 +2061,24 @@ class VC_Flashcards_Plugin {
         continue;
       }
 
-      $inserted = $wpdb->insert(
-        $table,
-        [
-          'session_id' => $session_id,
-          'user_id' => $user_id,
-          'flashcard_id' => $flashcard_id,
-          'topic_term_id' => isset($card['topicTermId']) ? absint($card['topicTermId']) : null,
-          'correct_answer' => $correct_answer,
-          'card_position' => $index,
-        ],
-        ['%d', '%d', '%d', '%d', '%s', '%d']
-      );
-
-      if ($inserted !== false) {
-        $stored_count++;
+      $topic_term_id = isset($card['topicTermId']) ? absint($card['topicTermId']) : 0;
+      if ($topic_term_id > 0) {
+        $rows[] = '(%d, %d, %d, %d, %s, %d)';
+        array_push($values, $session_id, $user_id, $flashcard_id, $topic_term_id, $correct_answer, $index);
+      } else {
+        $rows[] = '(%d, %d, %d, NULL, %s, %d)';
+        array_push($values, $session_id, $user_id, $flashcard_id, $correct_answer, $index);
       }
     }
 
-    return $stored_count;
+    if (empty($rows)) {
+      return 0;
+    }
+
+    $sql = "INSERT INTO {$table} (session_id, user_id, flashcard_id, topic_term_id, correct_answer, card_position) VALUES " . implode(', ', $rows);
+    $inserted = $wpdb->query($wpdb->prepare($sql, $values));
+
+    return $inserted === false ? 0 : (int) $inserted;
   }
 
   // Devuelve el snapshot server-side de tarjetas de una sesion, indexado por flashcard_id.
@@ -1647,14 +2113,6 @@ class VC_Flashcards_Plugin {
     }
 
     return $snapshot;
-  }
-
-  // Removes server-only answer keys before sending exam cards to the browser.
-  private function strip_correct_answers_from_cards(array $cards): array {
-    return array_map(static function (array $card): array {
-      unset($card['correctAnswer']);
-      return $card;
-    }, $cards);
   }
 
   // Completa una sesion, recalcula score en servidor y persiste cada intento.
@@ -1795,15 +2253,23 @@ class VC_Flashcards_Plugin {
     }
 
     /* Devuelve al frontend las metricas finales para pintar el resumen de la sesion. */
-    wp_send_json_success([
-      'stats' => $this->get_user_stats($user_id),
-      'examHomeStats' => $this->get_exam_home_stats($user_id),
+    $session_source = isset($session->session_source) ? (string) $session->session_source : self::SESSION_SOURCE_STUDY;
+    $response = [
       'precisionPercent' => $precision_percent,
       'scorePercent' => $score_percent,
       'correctAnswers' => $correct_answers,
       'incorrectAnswers' => $incorrect_answers,
       'totalCards' => $total_cards,
-    ]);
+    ];
+
+    if ($session_source === self::SESSION_SOURCE_STUDY) {
+      $response['stats'] = $this->get_user_stats($user_id);
+    } elseif ($session_source === self::SESSION_SOURCE_MOCK) {
+      $response['examHomeStats'] = $this->get_exam_home_stats($user_id);
+      $response['examHistoryHtml'] = $this->render_exam_history_content($user_id);
+    }
+
+    wp_send_json_success($response);
   }
 
   // Reune el pool base de tarjetas disponibles segun el modo de practica y el term elegido.
@@ -1862,7 +2328,7 @@ class VC_Flashcards_Plugin {
       }
     }
 
-    set_transient($pool_cache_key, $cards_pool, 5 * MINUTE_IN_SECONDS);
+    set_transient($pool_cache_key, $cards_pool, self::SESSION_POOL_CACHE_TTL);
 
     if (!empty($acs_codes)) {
       $cards_pool = array_values(array_filter($cards_pool, static function (array $card) use ($acs_codes): bool {
@@ -1920,6 +2386,37 @@ class VC_Flashcards_Plugin {
     ];
   }
 
+  // Mock Test usa un payload mas corto para reducir trabajo de backend y bytes transferidos.
+  private function build_exam_card_payload(int $post_id): array {
+    $meta = get_post_meta($post_id);
+    $question = $this->get_first_meta_value($meta, '_vc_flashcard_question');
+    $answer_a = $this->get_first_meta_value($meta, '_vc_flashcard_answer_a');
+    $answer_b = $this->get_first_meta_value($meta, '_vc_flashcard_answer_b');
+    $answer_c = $this->get_first_meta_value($meta, '_vc_flashcard_answer_c');
+    $correct_answer = $this->get_first_meta_value($meta, '_vc_flashcard_correct_answer');
+    $question_image_url = $this->get_first_meta_value($meta, '_vc_flashcard_question_image_url');
+
+    if ($question === '' || $answer_a === '' || $answer_b === '' || $answer_c === '' || !in_array($correct_answer, ['a', 'b', 'c'], true)) {
+      return [];
+    }
+
+    $term_payload = $this->get_flashcard_term_payload($post_id);
+
+    return [
+      'id' => $post_id,
+      'question' => wp_strip_all_tags($question),
+      'questionImageUrl' => esc_url_raw($question_image_url),
+      'answers' => [
+        'a' => $answer_a,
+        'b' => $answer_b,
+        'c' => $answer_c,
+      ],
+      'correctAnswer' => $correct_answer,
+      'topicTermId' => $term_payload['term_id'],
+      'topicLabel' => $term_payload['topic_label'],
+    ];
+  }
+
   /* Devuelve el primer valor escalar de una clave de meta ya precargada. */
   // Extrae un valor de meta de forma segura aunque WordPress lo devuelva como array.
   private function get_first_meta_value(array $meta, string $key): string {
@@ -1933,7 +2430,7 @@ class VC_Flashcards_Plugin {
   /* Genera la clave del pool base por modo y termino para reutilizarlo entre distintos limits. */
   // Genera una clave de cache para reusar pools de tarjetas por modo y term.
   private function get_session_cards_pool_cache_key(string $mode, int $term_id): string {
-    return 'vc_flashcards_session_cards_pool_' . md5($mode . '|' . $term_id);
+    return 'vc_flashcards_session_cards_pool_' . $this->get_session_pool_cache_version() . '_' . md5($mode . '|' . $term_id);
   }
 
   // Resuelve topic y subtopic de una flashcard y los empaqueta para la UI.
@@ -2177,6 +2674,62 @@ class VC_Flashcards_Plugin {
         'topics' => array_keys($metrics['topics']),
       ];
     }, array_keys($counts), array_values($counts));
+  }
+
+  // Trae el ultimo resultado conocido por flashcard en una sola consulta para un conjunto de IDs.
+  private function get_latest_attempt_results_for_flashcards(int $user_id, array $card_ids): array {
+    global $wpdb;
+
+    $card_ids = array_values(array_unique(array_map('intval', $card_ids)));
+    if ($user_id < 1 || empty($card_ids)) {
+      return [];
+    }
+
+    $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $placeholders = implode(', ', array_fill(0, count($card_ids), '%d'));
+    $query_args = array_merge([$user_id], $card_ids, [$user_id]);
+    $rows = $wpdb->get_results(
+      $wpdb->prepare(
+        "SELECT latest_attempt.flashcard_id, latest_attempt.is_correct
+        FROM {$attempts_table} latest_attempt
+        INNER JOIN (
+          SELECT flashcard_id, MAX(id) AS latest_id
+          FROM {$attempts_table}
+          WHERE user_id = %d
+            AND flashcard_id IN ({$placeholders})
+          GROUP BY flashcard_id
+        ) latest ON latest.latest_id = latest_attempt.id
+        WHERE latest_attempt.user_id = %d",
+        $query_args
+      ),
+      ARRAY_A
+    );
+
+    $latest_results = [];
+    foreach ($rows as $row) {
+      $latest_results[(int) $row['flashcard_id']] = (int) $row['is_correct'];
+    }
+
+    return $latest_results;
+  }
+
+  // Convierte metricas ACS acumuladas en el payload estable que usa la UI.
+  private function format_acs_metrics_payload(array $acs_metrics): array {
+    if (empty($acs_metrics)) {
+      return [];
+    }
+
+    uksort($acs_metrics, 'strnatcasecmp');
+
+    return array_map(static function (string $acs_code, array $metrics): array {
+      return [
+        'code' => $acs_code,
+        'totalCards' => isset($metrics['total']) ? (int) $metrics['total'] : 0,
+        'attemptedCards' => isset($metrics['attempted']) ? (int) $metrics['attempted'] : 0,
+        'incorrectCards' => isset($metrics['incorrect']) ? (int) $metrics['incorrect'] : 0,
+        'topics' => isset($metrics['topics']) && is_array($metrics['topics']) ? array_keys($metrics['topics']) : [],
+      ];
+    }, array_keys($acs_metrics), array_values($acs_metrics));
   }
 
   // Formats the secondary text below a subtopic title.
@@ -2538,16 +3091,9 @@ class VC_Flashcards_Plugin {
     );
 
     wp_enqueue_style(
-      'vc-study-sessions-style',
-      VC_FLASHCARDS_URL . 'assets/flashcards.css',
-      ['vc-reference-modal-style'],
-      file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards.css') : '1.0.0'
-    );
-
-    wp_enqueue_style(
       'vc-exam-style',
       VC_FLASHCARDS_URL . 'assets/exam.css',
-      ['vc-study-sessions-style'],
+      ['vc-reference-modal-style'],
       file_exists(VC_FLASHCARDS_DIR . 'assets/exam.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/exam.css') : '1.0.0'
     );
 
@@ -2713,7 +3259,7 @@ class VC_Flashcards_Plugin {
 
     wp_send_json_success([
       'sessionId'      => $session_id,
-      'cards'          => $this->strip_correct_answers_from_cards($cards),
+      'cards'          => $this->build_exam_runtime_cards($cards),
       'totalQuestions' => count($cards),
     ]);
   }
@@ -2870,7 +3416,7 @@ class VC_Flashcards_Plugin {
 
     $cards = [];
     foreach ($selected_ids as $post_id) {
-      $card = $this->build_flashcard_payload($post_id);
+      $card = $this->build_exam_card_payload($post_id);
       if (!empty($card)) {
         $cards[] = $card;
       }
@@ -2889,9 +3435,24 @@ class VC_Flashcards_Plugin {
     return max(1, $version);
   }
 
+  private function get_session_pool_cache_version(): int {
+    $version = (int) get_option(self::SESSION_POOL_CACHE_VERSION_OPTION, 1);
+    return max(1, $version);
+  }
+
   private function clear_exam_pool_cache(): void {
     $version = (int) get_option(self::EXAM_POOL_CACHE_VERSION_OPTION, 1);
     update_option(self::EXAM_POOL_CACHE_VERSION_OPTION, max(1, $version) + 1, false);
+  }
+
+  private function clear_session_pool_cache(): void {
+    $version = (int) get_option(self::SESSION_POOL_CACHE_VERSION_OPTION, 1);
+    update_option(self::SESSION_POOL_CACHE_VERSION_OPTION, max(1, $version) + 1, false);
+  }
+
+  private function clear_flashcard_pool_caches(): void {
+    $this->clear_exam_pool_cache();
+    $this->clear_session_pool_cache();
   }
 
   /* Returns parent topics enriched with subtopic count and total card count for the exam selector. */

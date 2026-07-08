@@ -23,7 +23,7 @@ if ($requested_view === 'detail' && $requested_category !== '' && !empty($catego
 $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
 ?>
 <div
-  class="vc-flashcards-library"
+  class="vc-flashcards-library is-booting"
   data-vc-flashcards-library
   data-vc-flashcards-library-initial-view="<?php echo esc_attr($initial_view); ?>"
   data-vc-flashcards-library-initial-category="<?php echo esc_attr($initial_detail_key); ?>"
@@ -48,12 +48,14 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
           ?>
           <article class="vc-flashcards-library-card">
             <h3><?php echo esc_html($category_name); ?></h3>
-            <div class="vc-flashcards-library-progress-meta">
-              <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
-              <strong><?php echo esc_html((string) $category_progress); ?>%</strong>
-            </div>
-            <div class="vc-flashcards-library-progress" aria-hidden="true">
-              <span style="width: <?php echo esc_attr((string) $category_progress); ?>%;"></span>
+            <div class="vc-flashcards-library-progress-group">
+              <div class="vc-flashcards-library-progress-meta">
+                <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
+                <strong><?php echo esc_html((string) $category_progress); ?>%</strong>
+              </div>
+              <div class="vc-flashcards-library-progress" aria-hidden="true">
+                <span style="width: <?php echo esc_attr((string) $category_progress); ?>%;"></span>
+              </div>
             </div>
             <p class="vc-flashcards-library-card-meta">
               <span>
@@ -170,9 +172,10 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
       <article class="vc-flashcards-library-detail-panel" data-vc-flashcards-library-detail-panel="<?php echo esc_attr($category_key); ?>"<?php echo $initial_detail_key === $category_key ? '' : ' hidden'; ?>>
         <header class="vc-flashcards-library-detail-header">
           <button type="button" class="vc-flashcards-library-back" data-vc-flashcards-library-back>
-            <span aria-hidden="true">
+            <span class="vc-flashcards-library-back-icon" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" focusable="false" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13 8H3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
             <span><?php esc_html_e('Back', 'vc-flashcards'); ?></span>
@@ -192,15 +195,16 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
         </header>
 
         <div class="vc-flashcards-library-mode-grid">
-          <button type="button" class="vc-flashcards-library-mode-card" data-vc-flashcards-library-launch="random" data-vc-flashcards-library-topic-id="<?php echo esc_attr((string) $category_id); ?>">
+          <button
+            type="button"
+            class="vc-flashcards-library-mode-card"
+            data-vc-flashcards-library-launch="random"
+            data-vc-flashcards-library-topic-id="<?php echo esc_attr((string) $category_id); ?>"
+            data-vc-flashcards-library-topic="<?php echo esc_attr($category_name); ?>"
+            data-vc-flashcards-library-total="<?php echo esc_attr((string) $category_total_cards); ?>"
+          >
             <span class="vc-flashcards-library-mode-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" focusable="false" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 3H21V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M4 20L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M21 16V21H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M4 4L9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
             </span>
             <span class="vc-flashcards-library-mode-copy">
               <strong><?php esc_html_e('Random practice', 'vc-flashcards'); ?></strong>
@@ -231,7 +235,14 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
                 $subtopic_total = isset($subtopic['totalCards']) ? (int) $subtopic['totalCards'] : 0;
                 $subtopic_completed = isset($subtopic['masteredCards']) ? (int) $subtopic['masteredCards'] : 0;
                 ?>
-                <button type="button" class="vc-flashcards-library-subtopic-item" data-vc-flashcards-library-subtopic="<?php echo esc_attr((string) ($subtopic['id'] ?? '')); ?>">
+                <button
+                  type="button"
+                  class="vc-flashcards-library-subtopic-item"
+                  data-vc-flashcards-library-launch="subcategory"
+                  data-vc-flashcards-library-subtopic="<?php echo esc_attr((string) ($subtopic['id'] ?? '')); ?>"
+                  data-vc-flashcards-library-topic="<?php echo esc_attr($subtopic_name); ?>"
+                  data-vc-flashcards-library-total="<?php echo esc_attr((string) $subtopic_total); ?>"
+                >
                   <span class="vc-flashcards-library-subtopic-copy">
                     <span class="vc-flashcards-library-subtopic-title">
                       <strong><?php echo esc_html($subtopic_name); ?></strong>
@@ -272,4 +283,8 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
       </article>
     <?php endforeach; ?>
   </section>
+
+  <?php include VC_FLASHCARDS_DIR . 'templates/partials/flashcards-practice-workspace.php'; ?>
+
+  <?php include VC_FLASHCARDS_DIR . 'templates/partials/flashcards-session-modal.php'; ?>
 </div>

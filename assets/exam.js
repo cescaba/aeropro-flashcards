@@ -27,6 +27,7 @@
     var nonce     = data.nonce           || '';
 
     var storageKey = 'vcExamState:' + window.location.pathname;
+    var examStateVersion = 1;
     /* ── DOM references ─────────────────────────────────────────────────── */
 
     var homeView    = root.querySelector('[data-vc-exam-view="home"]');
@@ -196,31 +197,107 @@
       };
     }
 
-    // Vuelve a pedir al servidor el historial de examenes ya completados y reemplaza el HTML del bloque.
-    // Se usa despues de terminar el examen para refrescar la lista sin recargar toda la pagina.
-    function refreshExamHistory() {
-      if (!historyContent || !ajaxUrl || !nonce) { return Promise.resolve(); }
+    function normalizeExamCard(card) {
+      if (!card || typeof card !== 'object') {
+        return null;
+      }
 
-      var body = new URLSearchParams();
-      body.append('action', 'vc_flashcards_get_exam_history');
-      body.append('nonce', nonce);
+      var answers = card.answers && typeof card.answers === 'object' ? card.answers : {};
+      var normalized = {
+        id: Number(card.id || 0),
+        question: String(card.question || ''),
+        questionImageUrl: String(card.questionImageUrl || ''),
+        answers: {
+          a: String(answers.a || ''),
+          b: String(answers.b || ''),
+          c: String(answers.c || ''),
+        },
+        topicTermId: Number(card.topicTermId || 0),
+        topicLabel: String(card.topicLabel || ''),
+      };
 
-      return fetch(ajaxUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-        body: body.toString(),
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (payload) {
-          if (!payload.success || !payload.data || typeof payload.data.html !== 'string') {
-            throw new Error('history');
-          }
+      if (!normalized.id || !normalized.question || !normalized.answers.a || !normalized.answers.b || !normalized.answers.c) {
+        return null;
+      }
 
-          historyContent.innerHTML = payload.data.html;
-        })
-        .catch(function () {
-          return null;
-        });
+      return normalized;
+    }
+
+    function normalizeExamCards(cardList) {
+      if (!Array.isArray(cardList)) {
+        return [];
+      }
+
+      return cardList
+        .map(normalizeExamCard)
+        .filter(function (card) { return !!card; });
+    }
+
+    function normalizeExamAttempt(attempt) {
+      if (!attempt || typeof attempt !== 'object') {
+        return null;
+      }
+
+      return {
+        flashcardId: Number(attempt.flashcardId || 0),
+        topicTermId: Number(attempt.topicTermId || 0),
+        selectedAnswer: String(attempt.selectedAnswer || ''),
+        responseTimeMs: Number(attempt.responseTimeMs || 0),
+      };
+    }
+
+    function normalizeExamAttempts(attemptList) {
+      if (!Array.isArray(attemptList)) {
+        return [];
+      }
+
+      return attemptList.map(function (attempt) {
+        return normalizeExamAttempt(attempt);
+      });
+    }
+
+    function buildPersistedState(stateOverrides) {
+      var overrides = stateOverrides || {};
+
+      return {
+        version: examStateVersion,
+        view: typeof overrides.view === 'string' ? overrides.view : activeViewName,
+        summaryOpen: typeof overrides.summaryOpen === 'boolean'
+          ? overrides.summaryOpen
+          : !!(summaryView && !summaryView.hidden),
+        summaryResults: typeof overrides.summaryResults === 'undefined' ? activeSummaryResults : overrides.summaryResults,
+        sessionId: Number(typeof overrides.sessionId === 'undefined' ? sessionId : overrides.sessionId),
+        cards: normalizeExamCards(typeof overrides.cards === 'undefined' ? cards : overrides.cards),
+        cardIndex: Number(typeof overrides.cardIndex === 'undefined' ? cardIndex : overrides.cardIndex),
+        attempts: normalizeExamAttempts(typeof overrides.attempts === 'undefined' ? attempts : overrides.attempts),
+        examStartTime: Number(typeof overrides.examStartTime === 'undefined' ? examStartTime : overrides.examStartTime),
+        lastTopicTermId: Number(typeof overrides.lastTopicTermId === 'undefined' ? lastTopicTermId : overrides.lastTopicTermId),
+      };
+    }
+
+    function isValidStoredState(state) {
+      if (!state || typeof state !== 'object') {
+        return false;
+      }
+
+      var version = typeof state.version === 'undefined' ? 1 : Number(state.version);
+      if (version !== 1) {
+        return false;
+      }
+
+      if (!state.sessionId || !Array.isArray(state.cards) || !state.cards.length || !state.examStartTime) {
+        return false;
+      }
+
+      return normalizeExamCards(state.cards).length === state.cards.length;
+    }
+
+    function updateExamHistory(historyHtml) {
+      if (!historyContent || typeof historyHtml !== 'string' || historyHtml === '') {
+        return;
+      }
+
+      historyContent.innerHTML = historyHtml;
     }
 
     // Refresca los badges del home del Mock Test con valores recalculados por el servidor.
@@ -264,17 +341,7 @@
 
     function persistState() {
       try {
-        sessionStorage.setItem(storageKey, JSON.stringify({
-          view:                activeViewName,
-          summaryOpen:         summaryView ? !summaryView.hidden : false,
-          summaryResults:      activeSummaryResults,
-          sessionId:           sessionId,
-          cards:               cards,
-          cardIndex:           cardIndex,
-          attempts:            attempts,
-          examStartTime:       examStartTime,
-          lastTopicTermId:     lastTopicTermId,
-        }));
+        sessionStorage.setItem(storageKey, JSON.stringify(buildPersistedState()));
       } catch (e) {}
     }
 
@@ -283,17 +350,10 @@
     function persistSummaryState(results) {
       activeSummaryResults = results;
       try {
-        sessionStorage.setItem(storageKey, JSON.stringify({
-          view:                activeViewName,
-          summaryOpen:         true,
-          sessionId:           sessionId,
-          cards:               cards,
-          cardIndex:           cardIndex,
-          attempts:            attempts,
-          examStartTime:       examStartTime,
-          lastTopicTermId:     lastTopicTermId,
-          summaryResults:      results,
-        }));
+        sessionStorage.setItem(storageKey, JSON.stringify(buildPersistedState({
+          summaryOpen: true,
+          summaryResults: results,
+        })));
       } catch (e) {}
     }
 
@@ -345,17 +405,21 @@
         if (!raw) { return false; }
 
         var state = JSON.parse(raw);
-        if (!state) {
+        if (!isValidStoredState(state)) {
+          clearState();
           return false;
         }
+
+        var restoredCards = normalizeExamCards(state.cards);
+        var restoredAttempts = normalizeExamAttempts(state.attempts);
 
         // Si habia un resultado abierto, restauramos la sesion como fondo
         // y volvemos a abrir el modal encima, igual que Study sessions.
         if ((state.view === 'summary' || state.summaryOpen) && state.summaryResults) {
           sessionId           = state.sessionId || 0;
-          cards               = state.cards || [];
+          cards               = restoredCards;
           cardIndex           = Math.max(0, Math.min(state.cardIndex || 0, Math.max(cards.length - 1, 0)));
-          attempts            = state.attempts || [];
+          attempts            = restoredAttempts;
           examStartTime       = state.examStartTime || 0;
           lastTopicTermId     = state.lastTopicTermId || 0;
           activeSummaryResults = state.summaryResults;
@@ -384,9 +448,9 @@
         }
 
         sessionId           = state.sessionId;
-        cards               = state.cards;
+        cards               = restoredCards;
         cardIndex           = Math.max(0, Math.min(state.cardIndex || 0, cards.length - 1));
-        attempts            = state.attempts || [];
+        attempts            = restoredAttempts;
         examStartTime       = state.examStartTime;
         lastTopicTermId     = state.lastTopicTermId || 0;
 
@@ -727,10 +791,10 @@
         .then(function (payload) {
           if (!payload.success) { throw new Error('server'); }
           updateExamHomeBadges(payload.data && payload.data.examHomeStats);
+          updateExamHistory(payload.data && payload.data.examHistoryHtml);
           var summaryResults = buildServerSummaryResults(payload.data || {}, elapsed, expired);
           persistSummaryState(summaryResults);
           renderSummary(summaryResults);
-          return refreshExamHistory();
         })
         .catch(function () {
           setFeedback(labels.saveFailed || 'We could not save your exam. Please try again.', 'error');
