@@ -84,20 +84,20 @@ $initial_view = $requested_view === 'session' ? 'session' : ($initial_detail_cat
           $category_mastered_cards = isset($category['masteredCards']) ? (int) $category['masteredCards'] : 0;
           $category_subtopic_count = count($category['children'] ?? []);
           ?>
-          <article class="vc-study-sessions-category-card">
+          <article class="vc-study-sessions-category-card" data-vc-study-sessions-category-card="<?php echo esc_attr((string) $category['id']); ?>">
             <?php /* Titulo directo de la categoria; la meta vive debajo del progreso. */ ?>
             <h3 class="vc-study-sessions-category-title"><?php echo esc_html($category['name']); ?></h3>
             <div class="vc-study-sessions-category-progress-block">
               <div class="vc-study-sessions-category-progress">
                 <span><?php esc_html_e('Progress', 'vc-study-sessions'); ?></span>
-                <strong><?php echo esc_html((string) $category['progress']); ?>%</strong>
+                <strong data-vc-study-sessions-category-progress><?php echo esc_html((string) $category['progress']); ?>%</strong>
               </div>
               <div class="vc-study-sessions-topic-bar" aria-hidden="true">
-                <span style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
+                <span data-vc-study-sessions-category-progress-bar style="width: <?php echo esc_attr((string) $category['progress']); ?>%;"></span>
               </div>
             </div>
             <?php /* Category metric only: uses this category's masteredCards/totalCards, not dashboard stats. */ ?>
-            <span class="vc-study-sessions-category-meta">
+            <span class="vc-study-sessions-category-meta" data-vc-study-sessions-category-meta-summary>
               <?php
               echo esc_html(sprintf(
                 /* translators: 1: subtopic count, 2: separator dot, 3: mastered cards, 4: total cards */

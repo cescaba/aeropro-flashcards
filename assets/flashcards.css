@@ -1884,7 +1884,7 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.3);
+  background: #0000004D;
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
   /* Fix: suaviza la aparicion del popup de resultados sin cambiar el flujo JS. */
@@ -2223,7 +2223,7 @@
 .vc-study-sessions-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: #0000004D;
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
 }
@@ -2388,7 +2388,7 @@
 /* Grid de cantidades rapidas dentro del modal. */
 .vc-study-sessions-modal-options {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--vc-study-sessions-option-count, 5), minmax(0, 1fr));
   gap: 8px;
   margin-top: 10px;
 }
@@ -2894,15 +2894,14 @@
 }
 
 .vc-study-sessions-acs-code-item.is-selected {
-  background: #E2E8F0;
+  background: #F1F5F9;
 }
 
 .vc-study-sessions-acs-code-item.is-selected:hover,
 .vc-study-sessions-acs-code-item.is-selected:focus,
 .vc-study-sessions-acs-code-item.is-selected:focus-within,
 .vc-study-sessions-acs-code-item.is-selected:active {
-  border: 1px solid #E2E8F0;
-  background: #E2E8F0;
+  background: #F1F5F9;
   color: inherit;
   box-shadow: none;
   filter: none;
@@ -2915,10 +2914,9 @@
   width: 14px;
   height: 14px;
   border-radius: 2px;
-  border: 1px solid #999999; 
+  border: 1px solid #E2E8F0;
   flex: 0 0 14px;
   margin: 0;
-  accent-color: #F1F5F9;
 }
 
 .vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"] {
@@ -2927,7 +2925,7 @@
   min-width: 14px;
   min-height: 14px;
   padding: 0;
-  border: 1px solid #999999;
+  border: 1px solid #E2E8F0;
   border-radius: 2px;
   background-color: #ffffff;
   flex: 0 0 14px;
@@ -2940,21 +2938,28 @@
   transition: none;
 }
 
-.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:hover,
-.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:focus,
-.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:focus-visible,
-.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item input[type="checkbox"]:active {
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item.is-selected input[type="checkbox"] {
   width: 14px;
   height: 14px;
   padding: 0;
   border: 1px solid #999999 !important;
-  background-color: #ffffff !important;
+  background-color: #F1F5F9 !important;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
   box-shadow: none !important;
   filter: none !important;
   outline: none;
   opacity: 1 !important;
   transform: none !important;
   transition: none !important;
+}
+
+.vc-study-sessions-acs-code-list .vc-study-sessions-acs-code-item.is-selected input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1.5 5L4.5 8L10.5 2' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 10px 8px;
 }
 
 .vc-study-sessions-acs-code-item-copy {
@@ -3453,6 +3458,14 @@ body.vc-study-sessions-modal-open {
     padding: 19px;
   }
 
+  body.vc-study-sessions-summary-open .vc-dashboard-sidebar {
+    z-index: 9999;
+  }
+
+  body.vc-dashboard-page.vc-study-sessions-summary-open.is-dashboard-menu-open::before {
+    opacity: 0;
+  }
+
   /* Study sessions summary box mobile: conserva la caja amplia del resultado en 480px. */
   .vc-study-sessions-summary-box {
     padding: 30px;
@@ -3470,7 +3483,7 @@ body.vc-study-sessions-modal-open {
 
   /* Study sessions modal options mobile: reparte las cantidades en una fila proporcional solo en 480px. */
   .vc-study-sessions-modal-options {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--vc-study-sessions-option-count, 5), minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -3539,6 +3552,14 @@ body.vc-study-sessions-modal-open {
     align-items: center;
     justify-items: center;
     padding: 15px;
+  }
+
+  body.vc-study-sessions-modal-open .vc-dashboard-sidebar {
+    z-index: 10000;
+  }
+
+  body.vc-dashboard-page.vc-study-sessions-modal-open.is-dashboard-menu-open::before {
+    opacity: 0;
   }
 
   .vc-study-sessions-acs-code-modal {

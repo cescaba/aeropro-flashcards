@@ -46,15 +46,15 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
           $category_id = isset($category['id']) ? (int) $category['id'] : 0;
           $category_key = $category_id > 0 ? (string) $category_id : sanitize_title($category_name);
           ?>
-          <article class="vc-flashcards-library-card">
+          <article class="vc-flashcards-library-card" data-vc-flashcards-library-category="<?php echo esc_attr($category_key); ?>">
             <h3><?php echo esc_html($category_name); ?></h3>
             <div class="vc-flashcards-library-progress-group">
               <div class="vc-flashcards-library-progress-meta">
                 <span><?php esc_html_e('Progress', 'vc-flashcards'); ?></span>
-                <strong><?php echo esc_html((string) $category_progress); ?>%</strong>
+                <strong data-vc-flashcards-library-category-progress><?php echo esc_html((string) $category_progress); ?>%</strong>
               </div>
               <div class="vc-flashcards-library-progress" aria-hidden="true">
-                <span style="width: <?php echo esc_attr((string) $category_progress); ?>%;"></span>
+                <span data-vc-flashcards-library-category-progress-bar style="width: <?php echo esc_attr((string) $category_progress); ?>%;"></span>
               </div>
             </div>
             <p class="vc-flashcards-library-card-meta">
@@ -204,11 +204,14 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
             data-vc-flashcards-library-total="<?php echo esc_attr((string) $category_total_cards); ?>"
           >
             <span class="vc-flashcards-library-mode-icon" aria-hidden="true">
-              <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
+              <picture>
+                <source media="(max-width: 480px)" srcset="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/IconMobil.svg'); ?>">
+                <img src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>" alt="" width="24" height="24">
+              </picture>
             </span>
             <span class="vc-flashcards-library-mode-copy">
               <strong><?php esc_html_e('Random practice', 'vc-flashcards'); ?></strong>
-              <span><?php echo esc_html(sprintf(__('Mix questions from all %s subtopics', 'vc-flashcards'), $category_name)); ?></span>
+              <span><?php echo esc_html(sprintf(__('15 flashcards per round, shuffled from all of %s', 'vc-flashcards'), $category_name)); ?></span>
             </span>
             <span class="vc-flashcards-library-mode-chevron" aria-hidden="true">
               <svg class="icono-flecha" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
@@ -219,8 +222,8 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
 
         </div>
 
-        <section class="vc-flashcards-library-subtopics" aria-label="<?php esc_attr_e('Study by Subtopic', 'vc-flashcards'); ?>">
-          <h3><?php esc_html_e('Study by Subtopic', 'vc-flashcards'); ?></h3>
+        <section class="vc-flashcards-library-subtopics" aria-label="<?php esc_attr_e('Flashcards by Subtopic', 'vc-flashcards'); ?>">
+          <h3><?php esc_html_e('Flashcards by Subtopic', 'vc-flashcards'); ?></h3>
           <?php if (empty($category_children)): ?>
             <article class="vc-flashcards-library-subtopic-empty">
               <p><?php esc_html_e('No subtopics are available yet.', 'vc-flashcards'); ?></p>
@@ -246,7 +249,7 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
                   <span class="vc-flashcards-library-subtopic-copy">
                     <span class="vc-flashcards-library-subtopic-title">
                       <strong><?php echo esc_html($subtopic_name); ?></strong>
-                      <span class="vc-flashcards-library-subtopic-status vc-flashcards-library-subtopic-status--<?php echo esc_attr($subtopic_status_class); ?>"><?php echo esc_html($subtopic_status); ?></span>
+                      <span class="vc-flashcards-library-subtopic-status vc-flashcards-library-subtopic-status--<?php echo esc_attr($subtopic_status_class); ?>" data-vc-flashcards-library-subtopic-status><?php echo esc_html($subtopic_status); ?></span>
                     </span>
                     <span class="vc-flashcards-library-subtopic-meta">
                       <span>
@@ -259,7 +262,7 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
                         ?>
                       </span>
                       <span aria-hidden="true">&middot;</span>
-                      <span>
+                      <span data-vc-flashcards-library-subtopic-completed>
                         <?php
                         echo esc_html(sprintf(
                           /* translators: %d: completed count */
@@ -285,6 +288,4 @@ $initial_view = $initial_detail_key !== '' ? 'detail' : 'home';
   </section>
 
   <?php include VC_FLASHCARDS_DIR . 'templates/partials/flashcards-practice-workspace.php'; ?>
-
-  <?php include VC_FLASHCARDS_DIR . 'templates/partials/flashcards-session-modal.php'; ?>
 </div>

@@ -300,6 +300,7 @@
       }
 
       summaryPanel.hidden = !isOpen;
+      document.body.classList.toggle('vc-study-sessions-summary-open', Boolean(isOpen));
       persistState();
     }
 
@@ -463,6 +464,7 @@
       detailView.hidden = viewName !== 'detail';
       sessionPanel.hidden = viewName !== 'session';
       summaryPanel.hidden = viewName !== 'summary';
+      document.body.classList.toggle('vc-study-sessions-summary-open', viewName === 'summary');
       if (opts.updateUrl === false) {
         persistState();
         return;
@@ -570,7 +572,7 @@
           openConfigModal({
             mode: 'subcategory',
             termId: Number(subtopic.id),
-            title: 'Card study: ' + subtopic.name,
+            title: 'Study session: ' + subtopic.name,
             description: 'Focus on one specific subtopic.',
             maxCards: Number(subtopic.totalCards || 0),
             kicker: currentCategory ? currentCategory.name + ' / ' + subtopic.name : subtopic.name
@@ -583,14 +585,14 @@
 
     // Modal: limita la cantidad seleccionada al rango permitido.
     function normalizeCount(value, maxCards) {
-      const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
+      const safeMax = Math.max(1, Number(maxCards || 1));
       const safeValue = Math.max(1, Math.min(safeMax, Number(value || safeMax)));
       return safeValue;
     }
 
     // Modal: calcula las opciones rapidas de cantidad segun el maximo disponible.
     function getOptionValues(maxCards, mode) {
-      const safeMax = Math.max(1, Math.min(50, Number(maxCards || 1)));
+      const safeMax = Math.max(1, Number(maxCards || 1));
       const filtered = cardOptions
         .map(function (value) { return Number(value); })
         .filter(function (value) {
@@ -697,6 +699,7 @@
       });
 
       if (mode !== 'subcategory') {
+        controls.optionsWrap.style.setProperty('--vc-study-sessions-option-count', String(Math.max(1, values.length)));
         return;
       }
 
@@ -713,6 +716,7 @@
         updateModalSelection(allCount);
       });
       controls.optionsWrap.appendChild(allButton);
+      controls.optionsWrap.style.setProperty('--vc-study-sessions-option-count', String(Math.max(1, values.length + 2)));
     }
 
     function updateAcsCodeSummary(category) {
@@ -887,8 +891,8 @@
       controls.title.textContent = config.title;
       controls.copy.textContent = config.description;
       controls.rangeInput.min = '1';
-      controls.rangeInput.max = String(Math.max(1, Math.min(50, maxCards)));
-      controls.rangeLabel.textContent = '1 - ' + String(Math.max(1, Math.min(50, maxCards)));
+      controls.rangeInput.max = String(Math.max(1, maxCards));
+      controls.rangeLabel.textContent = '1 - ' + String(Math.max(1, maxCards));
 
       renderModalOptions(maxCards, pendingConfig.mode);
       updateModalSelection(pendingConfig.selectedCount);
@@ -1266,6 +1270,68 @@
       }
     }
 
+    function applyStudySessionsProgressUpdates(updates) {
+      if (!updates) {
+        return;
+      }
+
+      (updates.categories || []).forEach(function (categoryUpdate) {
+        const category = getCategoryById(categoryUpdate.id);
+        if (!category) {
+          return;
+        }
+
+        category.totalCards = Number(categoryUpdate.totalCards || 0);
+        category.masteredCards = Number(categoryUpdate.masteredCards || 0);
+        category.progress = Math.max(0, Math.min(100, Number(categoryUpdate.progress) || 0));
+
+        root.querySelectorAll('[data-vc-study-sessions-category-card]').forEach(function (card) {
+          if (Number(card.dataset.vcStudySessionsCategoryCard) !== Number(category.id)) {
+            return;
+          }
+
+          const progressValue = card.querySelector('[data-vc-study-sessions-category-progress]');
+          const progressBar = card.querySelector('[data-vc-study-sessions-category-progress-bar]');
+          const meta = card.querySelector('[data-vc-study-sessions-category-meta-summary]');
+          if (progressValue) {
+            progressValue.textContent = String(category.progress) + '%';
+          }
+          if (progressBar) {
+            progressBar.style.width = String(category.progress) + '%';
+          }
+          if (meta && categoryUpdate.description) {
+            meta.textContent = String(categoryUpdate.description);
+          }
+        });
+      });
+
+      (updates.subtopics || []).forEach(function (subtopicUpdate) {
+        const category = getCategoryById(subtopicUpdate.parentId);
+        if (!category || !Array.isArray(category.children)) {
+          return;
+        }
+
+        const subtopic = category.children.find(function (item) {
+          return Number(item.id) === Number(subtopicUpdate.id);
+        });
+        if (!subtopic) {
+          return;
+        }
+
+        subtopic.totalCards = Number(subtopicUpdate.totalCards || 0);
+        subtopic.masteredCards = Number(subtopicUpdate.masteredCards || 0);
+        subtopic.progress = Math.max(0, Math.min(100, Number(subtopicUpdate.progress) || 0));
+        subtopic.status = String(subtopicUpdate.status || '');
+        subtopic.statusClass = String(subtopicUpdate.statusClass || 'needs-review');
+        subtopic.description = String(subtopicUpdate.description || '');
+      });
+
+      if (currentCategory) {
+        renderCategoryHeader(currentCategory);
+        renderSubtopics(currentCategory.children || []);
+      }
+    }
+
     // AJAX: envia intentos al backend y abre el summary final.
     function finishSession() {
       const body = new window.URLSearchParams();
@@ -1295,6 +1361,7 @@
             scorePercent: Number(data.scorePercent || 0)
           };
           updateStats(data.stats);
+          applyStudySessionsProgressUpdates(data.studySessionsProgress);
           setSummaryOpen(true);
           renderSummaryMetrics(summaryMetrics);
           persistState();
@@ -1521,7 +1588,7 @@
         }, 0);
         const acsConfig = Object.assign({}, pendingConfig, {
           acsCodes: selectedCodes,
-          selectedCount: Math.max(1, Math.min(50, selectedQuestionCount))
+          selectedCount: Math.max(1, selectedQuestionCount)
         });
 
         startSession(acsConfig);

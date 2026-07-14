@@ -36,6 +36,10 @@ if (!defined('ABSPATH')) {
             <h3><?php esc_html_e('Incorrect', 'vc-flashcards'); ?></h3>
           </div>
         </div>
+        <div class="vc-exam-summary-result-card vc-exam-summary-result-card--accuracy">
+          <h3><?php esc_html_e('Accuracy', 'vc-flashcards'); ?></h3>
+          <strong class="vc-exam-summary-count vc-exam-summary-count--accuracy" data-vc-exam-accuracy>0%</strong>
+        </div>
       </div>
 
       <p class="vc-exam-summary-message"><?php esc_html_e('Keep studying. Practice makes perfect.', 'vc-flashcards'); ?></p>

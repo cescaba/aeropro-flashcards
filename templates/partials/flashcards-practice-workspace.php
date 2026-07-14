@@ -8,16 +8,18 @@ if (!defined('ABSPATH')) {
 ?>
 
 <section class="vc-flashcards-library-view vc-flashcards-practice" data-vc-flashcards-library-view="session" data-vc-flashcards-practice hidden>
-  <header class="vc-flashcards-practice-header">
-    <div class="vc-flashcards-practice-heading">
-      <h2 data-vc-flashcards-practice-title><?php esc_html_e('Flashcards', 'vc-flashcards'); ?></h2>
-      <p data-vc-flashcards-practice-subtitle><?php esc_html_e('Subtopic name', 'vc-flashcards'); ?></p>
-    </div>
-    <button type="button" class="vc-flashcards-practice-finish" data-vc-flashcards-practice-finish><?php esc_html_e('Finish', 'vc-flashcards'); ?></button>
-  </header>
+  <div class="vc-flashcards-practice-top">
+    <header class="vc-flashcards-practice-header">
+      <div class="vc-flashcards-practice-heading">
+        <h2 data-vc-flashcards-practice-title><?php esc_html_e('Flashcards', 'vc-flashcards'); ?></h2>
+        <p data-vc-flashcards-practice-subtitle></p>
+      </div>
+      <button type="button" class="vc-flashcards-practice-finish" data-vc-flashcards-practice-finish><?php esc_html_e('Finish', 'vc-flashcards'); ?></button>
+    </header>
 
-  <div class="vc-flashcards-practice-bar" aria-hidden="true">
-    <span data-vc-flashcards-practice-bar-fill style="width: 0%;"></span>
+    <div class="vc-flashcards-practice-bar" aria-hidden="true">
+      <span data-vc-flashcards-practice-bar-fill style="width: 0%;"></span>
+    </div>
   </div>
 
   <article class="vc-flashcards-practice-card" data-vc-flashcards-practice-card tabindex="0" role="button" aria-pressed="false" aria-live="polite">

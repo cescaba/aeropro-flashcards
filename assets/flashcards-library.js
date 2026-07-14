@@ -9,19 +9,6 @@
     var views = root.querySelectorAll('[data-vc-flashcards-library-view]');
     var detailPanels = root.querySelectorAll('[data-vc-flashcards-library-detail-panel]');
     var dashboardContent = root.closest('.vc-dashboard-content');
-    var modal = root.querySelector('[data-vc-flashcards-session-modal]');
-    var modalTitle = root.querySelector('[data-vc-flashcards-session-modal-title]');
-    var modalCopy = root.querySelector('[data-vc-flashcards-session-modal-copy]');
-    var countDisplay = root.querySelector('[data-vc-flashcards-session-count-display]');
-    var rangeLabel = root.querySelector('[data-vc-flashcards-session-range-label]');
-    var rangeInput = root.querySelector('[data-vc-flashcards-session-range]');
-    var optionsWrap = root.querySelector('[data-vc-flashcards-session-options]');
-    var confirmButton = root.querySelector('[data-vc-flashcards-session-confirm]');
-    var modalStatus = root.querySelector('[data-vc-flashcards-session-status]');
-    var confirmDefaultLabel = confirmButton ? confirmButton.textContent : 'Start';
-    var pendingConfig = null;
-    var activeLaunchButton = null;
-    var optionValues = [10, 20, 30, 40, 50];
     var libraryData = window.vcFlashcardsLibraryData || {};
     var labels = libraryData.labels || {};
     var practiceStateVersion = 1;
@@ -34,8 +21,8 @@
     var attempts = [];
     var answerStartedAt = 0;
     var answeredCurrentCard = false;
-    var pendingPracticeMotion = '';
     var currentPracticeConfig = null;
+    var discardedForMockTest = false;
     var practiceState = window.VCViewState && typeof window.VCViewState.create === 'function'
       ? window.VCViewState.create('flashcards-practice', { scope: window.location.pathname })
       : null;
@@ -53,10 +40,6 @@
     var practiceNextLabel = root.querySelector('[data-vc-flashcards-practice-next-label]');
     var practiceRepeat = root.querySelector('[data-vc-flashcards-practice-repeat]');
     var practiceShuffle = root.querySelector('[data-vc-flashcards-practice-shuffle]');
-
-    function getModalLabel(name, fallback) {
-      return modal && modal.dataset[name] ? modal.dataset[name] : fallback;
-    }
 
     function updateUrl(viewName, panelKey) {
       if (!window.history || !window.URL) {
@@ -124,184 +107,21 @@
         .replace('%2$d', String(second));
     }
 
-    function normalizeCount(value, maxCards) {
-      var safeMax = Math.max(1, Math.min(50, Number(maxCards) || 1));
-      var count = Number(value) || 1;
-
-      return Math.max(1, Math.min(safeMax, Math.round(count)));
-    }
-
-    function getOptionValues(maxCards, mode) {
-      var safeMax = Math.max(1, Math.min(50, Number(maxCards) || 1));
-      var filtered = optionValues.filter(function (value) {
-        return value <= safeMax && (mode !== 'subcategory' || value < 40);
-      });
-      var values = filtered.length > 0 ? filtered : [safeMax];
-
-      return values.filter(function (value, index) {
-        return values.indexOf(value) === index;
-      });
-    }
-
-    function updateRangeFill() {
-      if (!rangeInput) {
-        return;
-      }
-
-      var min = Number(rangeInput.min || 0);
-      var max = Number(rangeInput.max || 100);
-      var value = Number(rangeInput.value || min);
-      var percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
-
-      rangeInput.style.setProperty('--vc-flashcards-session-range-progress', percent + '%');
-    }
-
-    function updateModalSelection(value) {
-      if (!pendingConfig || !rangeInput || !countDisplay || !optionsWrap) {
-        return;
-      }
-
-      pendingConfig.selectedCount = normalizeCount(value, pendingConfig.maxCards);
-      rangeInput.value = String(pendingConfig.selectedCount);
-      countDisplay.textContent = String(pendingConfig.selectedCount);
-
-      optionsWrap.querySelectorAll('button').forEach(function (button) {
-        button.classList.toggle('is-active', Number(button.dataset.count) === pendingConfig.selectedCount);
-      });
-
-      updateRangeFill();
-    }
-
-    function renderModalOptions(maxCards, mode) {
-      if (!optionsWrap) {
-        return;
-      }
-
-      var values = getOptionValues(maxCards, mode);
-      optionsWrap.innerHTML = '';
-
-      values.forEach(function (value) {
-        var button = document.createElement('button');
-        var label = document.createElement('span');
-        button.type = 'button';
-        button.className = 'vc-flashcards-session-count-option';
-        button.dataset.count = String(value);
-        label.className = 'vc-flashcards-session-count-option-label';
-        label.textContent = String(value);
-        button.appendChild(label);
-        button.addEventListener('click', function () {
-          updateModalSelection(value);
-        });
-        optionsWrap.appendChild(button);
-      });
-
-      if (mode !== 'subcategory') {
-        optionsWrap.style.setProperty('--vc-flashcards-session-option-count', String(Math.max(1, values.length)));
-        return;
-      }
-
-      var allCount = normalizeCount(maxCards, maxCards);
-      var allButton = document.createElement('button');
-      var allLabel = document.createElement('span');
-      allButton.type = 'button';
-      allButton.className = 'vc-flashcards-session-count-option vc-flashcards-session-count-option--all';
-      allButton.dataset.count = String(allCount);
-      allLabel.className = 'vc-flashcards-session-count-option-label';
-      allLabel.textContent = getModalLabel('vcFlashcardsSessionAllLabel', 'All questions');
-      allButton.appendChild(allLabel);
-      allButton.addEventListener('click', function () {
-        updateModalSelection(allCount);
-      });
-      optionsWrap.appendChild(allButton);
-      optionsWrap.style.setProperty('--vc-flashcards-session-option-count', String(Math.max(1, values.length + 2)));
-    }
-
-    function openConfigModal(button) {
-      if (!modal || !rangeInput) {
-        return;
-      }
-
+    function getPracticeConfig(button) {
       var mode = button.getAttribute('data-vc-flashcards-library-launch') || 'random';
       var termId = mode === 'subcategory'
         ? button.getAttribute('data-vc-flashcards-library-subtopic')
         : button.getAttribute('data-vc-flashcards-library-topic-id');
       var topic = button.getAttribute('data-vc-flashcards-library-topic') || '';
-      var maxCards = Math.max(1, Math.min(50, Number(button.getAttribute('data-vc-flashcards-library-total')) || 1));
-      var selectedCount = normalizeCount(Math.min(20, maxCards), maxCards);
+      var maxCards = Math.max(1, Number(button.getAttribute('data-vc-flashcards-library-total')) || 1);
 
-      pendingConfig = {
+      return {
         mode: mode,
         termId: Number(termId || 0),
         topic: topic,
         maxCards: maxCards,
-        selectedCount: selectedCount
+        selectedCount: Math.min(15, maxCards)
       };
-
-      if (modalTitle) {
-        modalTitle.textContent = mode === 'subcategory' ? topic : getModalLabel('vcFlashcardsSessionRandomTitle', 'Random practice');
-      }
-
-      if (modalCopy) {
-        var randomCopy = getModalLabel('vcFlashcardsSessionRandomCopy', 'Choose how many questions to review from %s.');
-        modalCopy.textContent = mode === 'subcategory'
-          ? getModalLabel('vcFlashcardsSessionSubtopicCopy', 'Choose how many questions to review from this subtopic.')
-          : randomCopy.replace('%s', topic);
-      }
-
-      rangeInput.min = '1';
-      rangeInput.max = String(maxCards);
-      if (rangeLabel) {
-        rangeLabel.textContent = '1 - ' + String(maxCards);
-      }
-
-      renderModalOptions(maxCards, mode);
-      updateModalSelection(selectedCount);
-      setModalStatus('', '');
-      if (activeLaunchButton) {
-        activeLaunchButton.classList.remove('is-session-modal-active');
-      }
-      activeLaunchButton = button;
-      activeLaunchButton.classList.add('is-session-modal-active');
-      modal.hidden = false;
-      root.classList.add('is-flashcards-session-modal-open');
-      document.body.classList.add('vc-flashcards-session-modal-open');
-
-      if (document.activeElement === button) {
-        button.blur();
-      }
-    }
-
-    function closeConfigModal() {
-      if (modal) {
-        modal.hidden = true;
-      }
-
-      root.classList.remove('is-flashcards-session-modal-open');
-      document.body.classList.remove('vc-flashcards-session-modal-open');
-      if (activeLaunchButton) {
-        activeLaunchButton.classList.remove('is-session-modal-active');
-        activeLaunchButton = null;
-      }
-      pendingConfig = null;
-    }
-
-    function setStartLoading(isLoading) {
-      if (!confirmButton) {
-        return;
-      }
-
-      confirmButton.disabled = !!isLoading;
-      confirmButton.textContent = isLoading ? (labels.loading || 'Loading questions...') : confirmDefaultLabel;
-    }
-
-    function setModalStatus(message, state) {
-      if (!modalStatus) {
-        return;
-      }
-
-      modalStatus.textContent = message || '';
-      modalStatus.hidden = !message;
-      modalStatus.dataset.state = state || '';
     }
 
     function resetPracticeUi() {
@@ -315,7 +135,14 @@
       }
       updatePracticeStepControls();
       if (practiceCard) {
-        practiceCard.classList.remove('is-flipped', 'is-flipping', 'is-loading', 'has-answer');
+        practiceCard.classList.remove(
+          'is-flipped',
+          'is-flipping',
+          'is-loading',
+          'has-answer',
+          'is-returning',
+          'is-returning-flipped'
+        );
         practiceCard.setAttribute('aria-pressed', 'false');
       }
       updatePracticeRepeatControl();
@@ -327,11 +154,15 @@
     }
 
     function getPracticeSubtitle(config, card) {
-      if (config && config.mode === 'subcategory') {
-        return (card && card.subtopicLabel) || config.topic || 'Subtopic practice';
+      if (card && card.subtopicLabel) {
+        return card.subtopicLabel;
       }
 
-      return 'Subtopic name';
+      if (config && config.mode === 'subcategory') {
+        return config.topic || 'Subtopic practice';
+      }
+
+      return '';
     }
 
     function updatePracticeHeading(config, card) {
@@ -388,20 +219,30 @@
       }
     }
 
-    function applyPracticeCardMotion(isAnswered) {
-      if (!practiceCard || pendingPracticeMotion !== 'back') {
-        pendingPracticeMotion = '';
-        return;
+    function renderPracticeCardWithoutMotion(showQuestionSide) {
+      if (practiceCard) {
+        practiceCard.classList.add('is-switching-card-without-motion');
       }
 
-      practiceCard.classList.add(isAnswered ? 'is-returning-flipped' : 'is-returning');
-      pendingPracticeMotion = '';
+      renderPracticeCard(showQuestionSide);
+
+      if (practiceCardInner) {
+        void practiceCardInner.offsetWidth;
+      }
+      if (practiceCard) {
+        practiceCard.classList.remove('is-switching-card-without-motion');
+      }
     }
 
     function clearStoredPracticeState() {
       if (practiceState) {
         practiceState.clear();
       }
+
+      // Limpia el formato local usado brevemente por versiones anteriores.
+      try {
+        window.localStorage.removeItem('vcViewState:flashcards-practice:' + window.location.pathname);
+      } catch (error) {}
     }
 
     function hasValidPracticeCard(card) {
@@ -553,7 +394,6 @@
     function renderPracticeLoading(config) {
       resetPracticeUi();
       answerStartedAt = 0;
-      closeConfigModal();
       showView('session');
       updatePracticeHeading(config, null);
       setPracticeFinishDisabled(true);
@@ -600,7 +440,7 @@
       }
     }
 
-    function renderPracticeCard() {
+    function renderPracticeCard(showQuestionSide) {
       var card = cards[cardIndex];
       var currentAttempt = null;
 
@@ -644,9 +484,10 @@
 
       if (currentAttempt) {
         answeredCurrentCard = true;
-        showReviewedCurrentCard(card);
+        if (!showQuestionSide) {
+          showReviewedCurrentCard(card);
+        }
       }
-      applyPracticeCardMotion(!!currentAttempt);
       savePracticeState();
     }
 
@@ -693,12 +534,11 @@
 
     function startPracticeSession(config) {
       if (!config || !libraryData.ajaxUrl || !libraryData.nonce) {
-        setModalStatus('Could not start the session. Please refresh the page and try again.', 'error');
+        currentPracticeConfig = config ? Object.assign({}, config) : null;
+        renderPracticeStartError('Could not start the session. Please refresh the page and try again.');
         return;
       }
 
-      setStartLoading(true);
-      setModalStatus('', '');
       currentPracticeConfig = Object.assign({}, config);
       renderPracticeLoading(currentPracticeConfig);
 
@@ -732,13 +572,10 @@
         })
         .catch(function (error) {
           renderPracticeStartError(error.message || (labels.noCards || 'No questions were found for this selection.'));
-        })
-        .finally(function () {
-          setStartLoading(false);
         });
     }
 
-    function exitPracticeSession() {
+    function resetPracticeSessionData() {
       clearStoredPracticeState();
       sessionId = 0;
       cards = [];
@@ -746,9 +583,47 @@
       attempts = [];
       answerStartedAt = 0;
       answeredCurrentCard = false;
-      pendingPracticeMotion = '';
       currentPracticeConfig = null;
-      showLibraryState(currentPanelKey && hasDetailPanel(currentPanelKey) ? 'detail' : 'home', currentPanelKey, true);
+    }
+
+    function discardPracticeSession(shouldUpdateUrl) {
+      resetPracticeSessionData();
+      showLibraryState(
+        currentPanelKey && hasDetailPanel(currentPanelKey) ? 'detail' : 'home',
+        currentPanelKey,
+        Boolean(shouldUpdateUrl)
+      );
+    }
+
+    function exitPracticeSession() {
+      discardPracticeSession(true);
+    }
+
+    function bindDashboardExitReset() {
+      document.querySelectorAll('.vc-dashboard-nav-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+          var currentUrl;
+          var targetUrl;
+
+          try {
+            currentUrl = new URL(window.location.href);
+            targetUrl = new URL(link.href, window.location.href);
+          } catch (error) {
+            return;
+          }
+
+          var currentView = currentUrl.searchParams.get('view') || 'study-sessions';
+          var targetView = targetUrl.searchParams.get('view') || 'study-sessions';
+          var isOpeningMockTest = currentView === 'flashcards' && targetView === 'mock-test';
+
+          if (isOpeningMockTest) {
+            // Solo descarta la practica. El enlace conserva su navegacion normal
+            // hacia Mock Test y no cambia antes la vista interna de Flashcards.
+            discardedForMockTest = true;
+            resetPracticeSessionData();
+          }
+        });
+      });
     }
 
     function getLocalPracticeMetrics() {
@@ -763,6 +638,49 @@
         incorrectAnswers: incorrect,
         scorePercent: score
       };
+    }
+
+    function applyFlashcardsProgressUpdates(updates) {
+      if (!updates) {
+        return;
+      }
+
+      (updates.categories || []).forEach(function (category) {
+        root.querySelectorAll('[data-vc-flashcards-library-category]').forEach(function (card) {
+          if (Number(card.getAttribute('data-vc-flashcards-library-category')) !== Number(category.id)) {
+            return;
+          }
+
+          var progress = Math.max(0, Math.min(100, Number(category.progress) || 0));
+          var progressValue = card.querySelector('[data-vc-flashcards-library-category-progress]');
+          var progressBar = card.querySelector('[data-vc-flashcards-library-category-progress-bar]');
+          if (progressValue) {
+            progressValue.textContent = String(progress) + '%';
+          }
+          if (progressBar) {
+            progressBar.style.width = String(progress) + '%';
+          }
+        });
+      });
+
+      (updates.subtopics || []).forEach(function (subtopic) {
+        root.querySelectorAll('[data-vc-flashcards-library-launch="subcategory"]').forEach(function (button) {
+          if (Number(button.getAttribute('data-vc-flashcards-library-subtopic')) !== Number(subtopic.id)) {
+            return;
+          }
+
+          var status = button.querySelector('[data-vc-flashcards-library-subtopic-status]');
+          var completed = button.querySelector('[data-vc-flashcards-library-subtopic-completed]');
+          var statusClass = String(subtopic.statusClass || 'needs-review');
+          if (status) {
+            status.className = 'vc-flashcards-library-subtopic-status vc-flashcards-library-subtopic-status--' + statusClass;
+            status.textContent = String(subtopic.status || '');
+          }
+          if (completed) {
+            completed.textContent = String(subtopic.completedLabel || (String(Number(subtopic.masteredCards) || 0) + ' completed'));
+          }
+        });
+      });
     }
 
     function finishPracticeSession() {
@@ -790,6 +708,7 @@
             throw new Error(payload.data && payload.data.message ? payload.data.message : '');
           }
 
+          applyFlashcardsProgressUpdates(payload.data.flashcardsProgress);
           exitPracticeSession();
         })
         .catch(function () {
@@ -835,33 +754,15 @@
 
     root.querySelectorAll('[data-vc-flashcards-library-launch]').forEach(function (button) {
       button.addEventListener('click', function () {
-        openConfigModal(button);
-      });
-    });
-
-    root.querySelectorAll('[data-vc-flashcards-session-close]').forEach(function (button) {
-      button.addEventListener('click', closeConfigModal);
-    });
-
-    if (rangeInput) {
-      rangeInput.addEventListener('input', function () {
-        updateModalSelection(Number(rangeInput.value));
-      });
-    }
-
-    if (confirmButton) {
-      confirmButton.addEventListener('click', function () {
-        if (!pendingConfig) {
-          return;
-        }
+        var config = getPracticeConfig(button);
 
         root.dispatchEvent(new CustomEvent('vc-flashcards-library-session-configured', {
           bubbles: true,
-          detail: Object.assign({}, pendingConfig)
+          detail: Object.assign({}, config)
         }));
-        startPracticeSession(pendingConfig);
+        startPracticeSession(config);
       });
-    }
+    });
 
     if (practiceBack) {
       practiceBack.addEventListener('click', function () {
@@ -869,10 +770,8 @@
           return;
         }
 
-        pendingPracticeMotion = 'back';
         cardIndex -= 1;
-        renderPracticeCard();
-        savePracticeState();
+        renderPracticeCardWithoutMotion(true);
         blurButton(practiceBack);
       });
     }
@@ -907,9 +806,14 @@
 
     if (practiceNext) {
       practiceNext.addEventListener('click', function () {
+        if (cardIndex >= cards.length - 1) {
+          finishPracticeSession();
+          blurButton(practiceNext);
+          return;
+        }
+
         cardIndex += 1;
-        renderPracticeCard();
-        savePracticeState();
+        renderPracticeCardWithoutMotion();
         blurButton(practiceNext);
       });
     }
@@ -943,6 +847,21 @@
 
       showLibraryState(viewName, panelKey, false);
     });
+
+    window.addEventListener('pageshow', function (event) {
+      if (!event.persisted || !discardedForMockTest) {
+        return;
+      }
+
+      discardedForMockTest = false;
+      showLibraryState(
+        currentPanelKey && hasDetailPanel(currentPanelKey) ? 'detail' : 'home',
+        currentPanelKey,
+        false
+      );
+    });
+
+    bindDashboardExitReset();
 
     try {
       if (!restoreStoredPracticeState()) {

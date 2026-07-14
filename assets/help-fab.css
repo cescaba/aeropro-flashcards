@@ -11,6 +11,27 @@
   right: 30px;
   bottom: 30px;
   z-index: 9999;
+  isolation: isolate;
+}
+
+.vc-flashcards-help-widget::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #0000004D;
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease-out, visibility 0s linear 180ms;
+}
+
+.vc-flashcards-help-widget.is-open::before {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .vc-flashcards-help-widget .vc-flashcards-help-fab,
@@ -26,8 +47,8 @@
   border: 0;
   border-radius: 35px;
   color: #ffffff;
-  background: #1447e6;
-  background-color: #1447e6;
+  background: #325CBA;
+  background-color: #325CBA;
   text-decoration: none;
   transition: none;
   cursor: pointer;
@@ -54,6 +75,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
+  z-index: 1;
   display: grid;
   width: 300px;
   height: 480px;
@@ -159,12 +181,14 @@
 
 .vc-flashcards-feedback-options {
   display: grid;
-  grid-template-columns: repeat(3, 82px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  width: 100%;
 }
 
 .vc-flashcards-feedback-options label {
-  width: 82px;
+  width: 100%;
+  min-width: 0;
 }
 
 .vc-flashcards-feedback-options input {
@@ -178,7 +202,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 82px;
+  width: 100%;
   height: 32px;
   padding: 8px;
   border: 1px solid #CAD5E2;
@@ -229,9 +253,11 @@
 
 .vc-flashcards-feedback-dropzone {
   position: relative;
-  display: grid;
-  place-items: center;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
   height: 75px;
   padding: 6px 8px;
@@ -279,8 +305,8 @@
 }
 
 .vc-flashcards-feedback-dropzone svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .vc-flashcards-feedback-preview {
@@ -343,14 +369,14 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 267px;
+  width: 100%;
   height: 40px;
   padding: 8px;
   border: 0;
   border-radius: 6px;
   color: #ffffff;
-  background: #1447e6;
-  background-color: #1447e6;
+  background: #325CBA;
+  background-color: #325CBA;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
@@ -410,5 +436,28 @@
     bottom: max(16px, env(safe-area-inset-bottom));
     width: 60px;
     height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  body:has(.vc-flashcards-help-widget.is-open) .vc-dashboard-sidebar {
+    z-index: 10000;
+  }
+
+  body.vc-dashboard-page.is-dashboard-menu-open:has(.vc-flashcards-help-widget.is-open)::before {
+    opacity: 0;
+  }
+
+  .vc-flashcards-feedback-panel {
+    position: fixed;
+    top: auto;
+    left: 26px;
+    right: 26px;
+    bottom: 72px;
+    width: auto;
+    max-width: none;
+    height: min(480px, calc(100dvh - 104px));
+    max-height: 480px;
+    transform: none;
   }
 }

@@ -67,6 +67,7 @@
     var resultKicker  = root.querySelector('[data-vc-exam-result-kicker]');
     var correctCount  = root.querySelector('[data-vc-exam-correct-count]');
     var incorrectCount = root.querySelector('[data-vc-exam-incorrect-count]');
+    var accuracyValue = root.querySelector('[data-vc-exam-accuracy]');
     var historyContent = root.querySelector('.vc-exam-history-content');
     var bestScoreEl = root.querySelector('[data-vc-exam-best-score]');
     var averageScoreEl = root.querySelector('[data-vc-exam-average-score]');
@@ -188,10 +189,17 @@
     // Normaliza el resultado que ya fue validado y guardado por el servidor.
     function buildServerSummaryResults(serverData, elapsed, expired) {
       var data = serverData || {};
+      var score = Number(data.scorePercent || 0);
+      var accuracy = Number(data.precisionPercent || 0);
+
+      score = Number.isFinite(score) ? Math.max(0, Math.min(100, Math.round(score))) : 0;
+      accuracy = Number.isFinite(accuracy) ? Math.max(0, Math.min(100, Math.round(accuracy))) : 0;
+
       return {
         correct: Number(data.correctAnswers || 0),
         incorrect: Number(data.incorrectAnswers || 0),
-        score: Math.round(Number(data.scorePercent || 0)),
+        score: score,
+        accuracy: accuracy,
         elapsed: elapsed,
         expired: expired,
       };
@@ -811,6 +819,20 @@
     /* ── Summary rendering ──────────────────────────────────────────────── */
 
     function renderSummary(results) {
+      results = results || {};
+
+      var accuracy = Number(results.accuracy);
+      if (!Number.isFinite(accuracy)) {
+        var correct = Math.max(0, Number(results.correct) || 0);
+        var incorrect = Math.max(0, Number(results.incorrect) || 0);
+        var answered = correct + incorrect;
+        accuracy = answered > 0
+          ? Math.round((correct / answered) * 100)
+          : Number(results.score || 0);
+      }
+      accuracy = Math.max(0, Math.min(100, Math.round(accuracy)));
+
+      results.accuracy = accuracy;
       activeSummaryResults = results;
 
       var passed = results.score >= config.passingScore;
@@ -838,6 +860,7 @@
       // Counts
       if (correctCount)   { correctCount.textContent   = String(results.correct); }
       if (incorrectCount) { incorrectCount.textContent = String(results.incorrect); }
+      if (accuracyValue)  { accuracyValue.textContent  = String(accuracy) + '%'; }
 
       // Abre el resultado como modal para mantener visible la ultima pregunta de fondo.
       setSummaryOpen(true);

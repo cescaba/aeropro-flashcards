@@ -43,6 +43,11 @@ class VC_Flashcards_Plugin {
   // Cachea pools base de tarjetas para que muchos usuarios no reconstruyan el mismo set.
   const SESSION_POOL_CACHE_TTL = 600;
 
+  // Flashcards usa rondas fijas y reserva temporalmente sesiones abiertas para evitar
+  // entregar el mismo set cuando el alumno inicia desde dos pestanas a la vez.
+  const FLASHCARDS_LIBRARY_BATCH_SIZE = 15;
+  const FLASHCARDS_LIBRARY_RESERVATION_TTL = 43200;
+
   // Version logica para invalidar todos los pools de examen sin buscar transients por prefijo.
   const EXAM_POOL_CACHE_VERSION_OPTION = 'vc_flashcards_exam_pool_cache_version';
 
@@ -1989,23 +1994,54 @@ class VC_Flashcards_Plugin {
       $session_source = self::SESSION_SOURCE_STUDY;
     }
 
-    $card_limit = max(1, min(50, $card_limit));
+    $card_limit = $session_source === self::SESSION_SOURCE_FLASHCARDS
+      ? self::FLASHCARDS_LIBRARY_BATCH_SIZE
+      : max(1, $card_limit);
 
     if (in_array($mode, ['category', 'subcategory'], true) && $term_id < 1) {
       wp_send_json_error(['message' => __('Please select a topic or subtopic.', 'vc-flashcards')], 400);
     }
 
-    $cards = $this->get_flashcards_for_session($mode, $term_id, $card_limit, $acs_codes);
-    if (empty($cards)) {
-      wp_send_json_error(['message' => __('No questions were found for this selection.', 'vc-flashcards')], 404);
+    global $wpdb;
+
+    $user_id = get_current_user_id();
+    $is_flashcards_library = $session_source === self::SESSION_SOURCE_FLASHCARDS;
+    $transaction_started = false;
+    $rotation_state = [];
+
+    if ($is_flashcards_library) {
+      // Serializa solo los inicios del mismo alumno. Usuarios distintos no se bloquean
+      // entre si y una segunda pestana ve inmediatamente las tarjetas ya reservadas.
+      $transaction_started = $wpdb->query('START TRANSACTION') !== false;
+      $locked_user_id = $transaction_started
+        ? (int) $wpdb->get_var($wpdb->prepare(
+          "SELECT ID FROM {$wpdb->users} WHERE ID = %d FOR UPDATE",
+          $user_id
+        ))
+        : 0;
+
+      if (!$transaction_started || $locked_user_id !== $user_id) {
+        if ($transaction_started) {
+          $wpdb->query('ROLLBACK');
+        }
+        wp_send_json_error(['message' => __('Could not start the session. Please try again.', 'vc-flashcards')], 500);
+      }
+
+      $rotation_state = $this->get_flashcards_library_rotation_state($user_id);
     }
 
-    global $wpdb;
+    $cards = $this->get_flashcards_for_session($mode, $term_id, $card_limit, $acs_codes, $rotation_state);
+    if (empty($cards)) {
+      if ($transaction_started) {
+        $wpdb->query('ROLLBACK');
+      }
+      wp_send_json_error(['message' => __('No questions were found for this selection.', 'vc-flashcards')], 404);
+    }
 
     $wpdb->insert(
       $wpdb->prefix . self::SESSION_TABLE,
       [
-        'user_id' => get_current_user_id(),
+        'user_id' => $user_id,
         'session_source' => $session_source,
         'mode' => $mode,
         'topic_term_id' => $term_id ?: null,
@@ -2019,14 +2055,26 @@ class VC_Flashcards_Plugin {
 
     $session_id = (int) $wpdb->insert_id;
     if ($session_id < 1) {
+      if ($transaction_started) {
+        $wpdb->query('ROLLBACK');
+      }
       wp_send_json_error(['message' => __('Could not start the session. Please try again.', 'vc-flashcards')], 500);
     }
 
-    $stored_cards = $this->store_session_card_snapshot($session_id, get_current_user_id(), $cards);
+    $stored_cards = $this->store_session_card_snapshot($session_id, $user_id, $cards);
     if ($stored_cards !== count($cards)) {
-      $wpdb->delete($wpdb->prefix . self::SESSION_TABLE, ['id' => $session_id], ['%d']);
-      $wpdb->delete($wpdb->prefix . self::SESSION_CARD_TABLE, ['session_id' => $session_id], ['%d']);
+      if ($transaction_started) {
+        $wpdb->query('ROLLBACK');
+      } else {
+        $wpdb->delete($wpdb->prefix . self::SESSION_TABLE, ['id' => $session_id], ['%d']);
+        $wpdb->delete($wpdb->prefix . self::SESSION_CARD_TABLE, ['session_id' => $session_id], ['%d']);
+      }
       wp_send_json_error(['message' => __('Could not prepare the session. Please try again.', 'vc-flashcards')], 500);
+    }
+
+    if ($transaction_started && $wpdb->query('COMMIT') === false) {
+      $wpdb->query('ROLLBACK');
+      wp_send_json_error(['message' => __('Could not start the session. Please try again.', 'vc-flashcards')], 500);
     }
 
     $response_cards = $session_source === self::SESSION_SOURCE_FLASHCARDS
@@ -2264,6 +2312,17 @@ class VC_Flashcards_Plugin {
 
     if ($session_source === self::SESSION_SOURCE_STUDY) {
       $response['stats'] = $this->get_user_stats($user_id);
+      $response['studySessionsProgress'] = $this->get_session_progress_updates(
+        $user_id,
+        self::SESSION_SOURCE_STUDY,
+        $attempts
+      );
+    } elseif ($session_source === self::SESSION_SOURCE_FLASHCARDS) {
+      $response['flashcardsProgress'] = $this->get_session_progress_updates(
+        $user_id,
+        self::SESSION_SOURCE_FLASHCARDS,
+        $attempts
+      );
     } elseif ($session_source === self::SESSION_SOURCE_MOCK) {
       $response['examHomeStats'] = $this->get_exam_home_stats($user_id);
       $response['examHistoryHtml'] = $this->render_exam_history_content($user_id);
@@ -2273,10 +2332,16 @@ class VC_Flashcards_Plugin {
   }
 
   // Reune el pool base de tarjetas disponibles segun el modo de practica y el term elegido.
-  private function get_flashcards_for_session(string $mode, int $term_id, int $limit, array $acs_codes = []): array {
+  private function get_flashcards_for_session(
+    string $mode,
+    int $term_id,
+    int $limit,
+    array $acs_codes = [],
+    array $rotation_state = []
+  ): array {
     $pool_cache_key = $this->get_session_cards_pool_cache_key($mode, $term_id);
     $cached_pool = get_transient($pool_cache_key);
-    $is_random_mode = in_array($mode, ['random', 'global-random'], true);
+    $is_random_mode = !empty($rotation_state) || in_array($mode, ['random', 'global-random'], true);
 
     if (is_array($cached_pool)) {
       if (!empty($acs_codes)) {
@@ -2285,7 +2350,7 @@ class VC_Flashcards_Plugin {
         }));
       }
 
-      return $this->select_cards_from_pool($cached_pool, $limit, $is_random_mode);
+      return $this->select_cards_from_pool($cached_pool, $limit, $is_random_mode, $rotation_state);
     }
 
     $tax_query = [];
@@ -2336,17 +2401,158 @@ class VC_Flashcards_Plugin {
       }));
     }
 
-    return $this->select_cards_from_pool($cards_pool, $limit, $is_random_mode);
+    return $this->select_cards_from_pool($cards_pool, $limit, $is_random_mode, $rotation_state);
   }
 
   /* Selecciona el subset final sin volver a consultar ni reconstruir el pool base de cards. */
   // A partir del pool disponible, elige exactamente las tarjetas que usara la sesion.
-  private function select_cards_from_pool(array $cards_pool, int $limit, bool $is_random_mode): array {
+  private function select_cards_from_pool(
+    array $cards_pool,
+    int $limit,
+    bool $is_random_mode,
+    array $rotation_state = []
+  ): array {
+    if (!empty($rotation_state)) {
+      $original_pool = array_values($cards_pool);
+      $reserved_lookup = array_fill_keys($rotation_state['reserved'] ?? [], true);
+      $reviewed_lookup = array_fill_keys($rotation_state['reviewed'] ?? [], true);
+      $recent_lookup = array_fill_keys($rotation_state['recent'] ?? [], true);
+
+      // Mientras queden tarjetas nuevas en este topic/subtopic, nunca mezcla repetidas.
+      // Por eso la ultima ronda de un ciclo puede contener menos de 15 tarjetas.
+      $cards_pool = array_values(array_filter($original_pool, static function (array $card) use ($reserved_lookup, $reviewed_lookup): bool {
+        $card_id = (int) ($card['id'] ?? 0);
+        return $card_id > 0 && !isset($reserved_lookup[$card_id]) && !isset($reviewed_lookup[$card_id]);
+      }));
+
+      if (!empty($cards_pool) && count($cards_pool) < $limit) {
+        // Completa el ultimo lote al iniciar un nuevo ciclo solo cuando puede hacerlo sin
+        // repetir la sesion anterior ni duplicar una tarjeta dentro del lote actual.
+        shuffle($cards_pool);
+        $selected_lookup = [];
+        foreach ($cards_pool as $selected_card) {
+          $selected_id = (int) ($selected_card['id'] ?? 0);
+          if ($selected_id > 0) {
+            $selected_lookup[$selected_id] = true;
+          }
+        }
+
+        $fill_pool = array_values(array_filter($original_pool, static function (array $card) use ($reserved_lookup, $recent_lookup, $selected_lookup): bool {
+          $card_id = (int) ($card['id'] ?? 0);
+          return $card_id > 0
+            && !isset($reserved_lookup[$card_id])
+            && !isset($recent_lookup[$card_id])
+            && !isset($selected_lookup[$card_id]);
+        }));
+        shuffle($fill_pool);
+        $cards_pool = array_merge($cards_pool, array_slice($fill_pool, 0, $limit - count($cards_pool)));
+      }
+
+      if (empty($cards_pool)) {
+        // Ciclo completo: comienza otro sin repetir la sesion terminada mas reciente.
+        $cards_pool = array_values(array_filter($original_pool, static function (array $card) use ($reserved_lookup, $recent_lookup): bool {
+          $card_id = (int) ($card['id'] ?? 0);
+          return $card_id > 0 && !isset($reserved_lookup[$card_id]) && !isset($recent_lookup[$card_id]);
+        }));
+      }
+
+      if (empty($cards_pool)) {
+        // Si el subtema tiene 15 tarjetas o menos, repetir tras completar el ciclo es
+        // matematicamente inevitable; las sesiones abiertas siguen siempre excluidas.
+        $cards_pool = array_values(array_filter($original_pool, static function (array $card) use ($reserved_lookup): bool {
+          $card_id = (int) ($card['id'] ?? 0);
+          return $card_id > 0 && !isset($reserved_lookup[$card_id]);
+        }));
+      }
+    }
+
     if ($is_random_mode) {
       shuffle($cards_pool);
     }
 
     return array_slice($cards_pool, 0, $limit);
+  }
+
+  // Construye el estado minimo de rotacion para Flashcards. Las consultas parten por
+  // user_id y session_source, usando los indices existentes y sin cargar datos de otros usuarios.
+  private function get_flashcards_library_rotation_state(int $user_id): array {
+    if ($user_id < 1) {
+      return [];
+    }
+
+    global $wpdb;
+
+    $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
+    $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
+    $session_cards_table = $wpdb->prefix . self::SESSION_CARD_TABLE;
+    $reservation_cutoff = wp_date(
+      'Y-m-d H:i:s',
+      time() - self::FLASHCARDS_LIBRARY_RESERVATION_TTL,
+      wp_timezone()
+    );
+
+    // Solo una tarjeta realmente vista cuenta como practicada. Esto mantiene alineados
+    // la rotacion, el porcentaje y las etiquetas aunque el alumno termine antes de tiempo.
+    $reviewed_ids = $wpdb->get_col($wpdb->prepare(
+      "SELECT DISTINCT attempt.flashcard_id
+      FROM {$sessions_table} study_session
+      INNER JOIN {$attempts_table} attempt
+        ON attempt.session_id = study_session.id
+        AND attempt.user_id = study_session.user_id
+      WHERE study_session.user_id = %d
+        AND study_session.session_source = %s
+        AND study_session.completed_at IS NOT NULL
+        AND attempt.selected_answer <> ''",
+      $user_id,
+      self::SESSION_SOURCE_FLASHCARDS
+    ));
+
+    // Los snapshots recientes aun sin completar actuan como reservas. El lock por usuario
+    // hace que dos solicitudes simultaneas no puedan seleccionar el mismo lote.
+    $reserved_ids = $wpdb->get_col($wpdb->prepare(
+      "SELECT DISTINCT session_card.flashcard_id
+      FROM {$sessions_table} study_session
+      INNER JOIN {$session_cards_table} session_card
+        ON session_card.session_id = study_session.id
+        AND session_card.user_id = study_session.user_id
+      WHERE study_session.user_id = %d
+        AND study_session.session_source = %s
+        AND study_session.completed_at IS NULL
+        AND study_session.started_at >= %s",
+      $user_id,
+      self::SESSION_SOURCE_FLASHCARDS,
+      $reservation_cutoff
+    ));
+
+    $recent_session_id = (int) $wpdb->get_var($wpdb->prepare(
+      "SELECT id
+      FROM {$sessions_table}
+      WHERE user_id = %d
+        AND session_source = %s
+        AND completed_at IS NOT NULL
+      ORDER BY completed_at DESC, id DESC
+      LIMIT 1",
+      $user_id,
+      self::SESSION_SOURCE_FLASHCARDS
+    ));
+
+    $recent_ids = $recent_session_id > 0
+      ? $wpdb->get_col($wpdb->prepare(
+        "SELECT flashcard_id
+        FROM {$attempts_table}
+        WHERE session_id = %d
+          AND user_id = %d
+          AND selected_answer <> ''",
+        $recent_session_id,
+        $user_id
+      ))
+      : [];
+
+    return [
+      'reviewed' => array_values(array_unique(array_map('intval', $reviewed_ids))),
+      'reserved' => array_values(array_unique(array_map('intval', $reserved_ids))),
+      'recent' => array_values(array_unique(array_map('intval', $recent_ids))),
+    ];
   }
 
   // Convierte un post de WordPress a un payload simple que entiende el frontend JS.
@@ -2805,7 +3011,7 @@ class VC_Flashcards_Plugin {
             'description' => __('Focus on a specific FAA exam area.', 'vc-flashcards'),
           ],
           [
-            'title' => __('Study by Subtopic', 'vc-flashcards'),
+            'title' => __('Flashcards by Subtopic', 'vc-flashcards'),
             'description' => __('Work through one subtopic at a time.', 'vc-flashcards'),
           ],
         ],
@@ -2976,13 +3182,19 @@ class VC_Flashcards_Plugin {
   // Regla de negocio: una tarjeta cuenta como mastered solo si su ultimo intento publicado fue correcto.
   // La tabla de intentos es append-only, por eso MAX(id) identifica el intento mas reciente por flashcard.
   private function get_mastered_flashcard_ids(int $user_id, string $session_source = self::SESSION_SOURCE_STUDY): array {
-    global $wpdb;
-
     static $cache = [];
     $cache_key = $user_id . '|' . $session_source;
     if (isset($cache[$cache_key])) {
       return $cache[$cache_key];
     }
+
+    $cache[$cache_key] = $this->query_mastered_flashcard_ids($user_id, $session_source);
+    return $cache[$cache_key];
+  }
+
+  // Variante sin cache para respuestas generadas inmediatamente despues de guardar intentos.
+  private function query_mastered_flashcard_ids(int $user_id, string $session_source): array {
+    global $wpdb;
 
     $attempts_table = $wpdb->prefix . self::ATTEMPT_TABLE;
     $sessions_table = $wpdb->prefix . self::SESSION_TABLE;
@@ -3014,8 +3226,110 @@ class VC_Flashcards_Plugin {
       $user_id
     ));
 
-    $cache[$cache_key] = array_map('intval', $ids);
-    return $cache[$cache_key];
+    return array_map('intval', $ids);
+  }
+
+  // Devuelve solo el progreso de las categorias y subtemas tocados por la sesion.
+  // El payload se reutiliza internamente, pero cada frontend lo recibe bajo una clave propia.
+  private function get_session_progress_updates(int $user_id, string $session_source, array $attempts): array {
+    $term_ids = [];
+    foreach ($attempts as $attempt) {
+      if (!is_array($attempt)) {
+        continue;
+      }
+
+      $term_id = isset($attempt['topicTermId']) ? absint($attempt['topicTermId']) : 0;
+      if ($term_id > 0) {
+        $term_ids[$term_id] = true;
+      }
+    }
+
+    if (empty($term_ids)) {
+      return ['categories' => [], 'subtopics' => []];
+    }
+
+    $parent_ids = [];
+    $child_terms = [];
+    foreach (array_keys($term_ids) as $term_id) {
+      $term = get_term((int) $term_id, self::TAXONOMY);
+      if (!$term instanceof WP_Term) {
+        continue;
+      }
+
+      if ((int) $term->parent > 0) {
+        $parent_ids[(int) $term->parent] = true;
+        $child_terms[(int) $term->term_id] = $term;
+      } else {
+        $parent_ids[(int) $term->term_id] = true;
+      }
+    }
+
+    $mastered_lookup = array_fill_keys(
+      $this->query_mastered_flashcard_ids($user_id, $session_source),
+      true
+    );
+    $categories = [];
+    foreach (array_keys($parent_ids) as $parent_id) {
+      $card_ids = $this->get_flashcard_ids_for_term((int) $parent_id);
+      $mastered_cards = count(array_filter($card_ids, static function (int $card_id) use ($mastered_lookup): bool {
+        return isset($mastered_lookup[$card_id]);
+      }));
+      $total_cards = count($card_ids);
+      $child_ids = get_terms([
+        'taxonomy' => self::TAXONOMY,
+        'hide_empty' => false,
+        'parent' => (int) $parent_id,
+        'fields' => 'ids',
+      ]);
+      $subtopic_count = is_wp_error($child_ids) ? 0 : count($child_ids);
+
+      $categories[] = [
+        'id' => (int) $parent_id,
+        'totalCards' => $total_cards,
+        'masteredCards' => $mastered_cards,
+        'progress' => $total_cards > 0 ? (int) round(($mastered_cards / $total_cards) * 100) : 0,
+        'description' => sprintf(
+          /* translators: 1: subtopic count, 2: separator dot, 3: mastered cards, 4: total cards */
+          __('%1$d subtopics %2$s %3$d/%4$d mastered', 'vc-study-sessions'),
+          $subtopic_count,
+          html_entity_decode('&middot;', ENT_QUOTES, 'UTF-8'),
+          $mastered_cards,
+          $total_cards
+        ),
+      ];
+    }
+
+    $subtopics = [];
+    foreach ($child_terms as $child_term) {
+      $card_ids = $this->get_flashcard_ids_for_term((int) $child_term->term_id);
+      $mastered_cards = count(array_filter($card_ids, static function (int $card_id) use ($mastered_lookup): bool {
+        return isset($mastered_lookup[$card_id]);
+      }));
+      $total_cards = count($card_ids);
+      $progress = $total_cards > 0 ? (int) round(($mastered_cards / $total_cards) * 100) : 0;
+      $status = $this->get_subtopic_mastery_status($progress);
+
+      $subtopics[] = [
+        'id' => (int) $child_term->term_id,
+        'parentId' => (int) $child_term->parent,
+        'totalCards' => $total_cards,
+        'masteredCards' => $mastered_cards,
+        'progress' => $progress,
+        'status' => $status['label'],
+        'statusClass' => $status['class'],
+        'description' => $this->format_subtopic_mastery_description($mastered_cards, $total_cards),
+        'completedLabel' => sprintf(
+          /* translators: %d: completed card count */
+          __('%d completed', 'vc-flashcards'),
+          $mastered_cards
+        ),
+      ];
+    }
+
+    return [
+      'categories' => $categories,
+      'subtopics' => $subtopics,
+    ];
   }
 
   // Devuelve todos los IDs de flashcards asociados a un term concreto.
@@ -3520,7 +3834,7 @@ class VC_Flashcards_Plugin {
   private function get_exam_category_description(string $topic_name): string {
     $descriptions = [
       'general' => __('Regulations, math, physics, and documentation', 'vc-flashcards'),
-      'airframe' => __('Structures, systems, and aircraft components', 'vc-flashcards'),
+      'airframe' => __('Structures, systems, aircraft components, and airframe inspection', 'vc-flashcards'),
       'powerplant' => __('Engines, propellers, fuel systems, and engine inspection procedures', 'vc-flashcards'),
     ];
 
