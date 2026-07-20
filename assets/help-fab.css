@@ -49,6 +49,7 @@
   color: #ffffff;
   background: #325CBA;
   background-color: #325CBA;
+  box-shadow: 0 6px 4px -4px #0000001A, 0 15px 10px -3px #0000001A;
   text-decoration: none;
   transition: none;
   cursor: pointer;
