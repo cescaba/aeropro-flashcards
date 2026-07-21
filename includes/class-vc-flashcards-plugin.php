@@ -150,10 +150,9 @@ class VC_Flashcards_Plugin {
     add_action('wp_ajax_vc_flashcards_start_session', [$this, 'ajax_start_session']);
     add_action('wp_ajax_vc_flashcards_complete_session', [$this, 'ajax_complete_session']);
 
-    // Shortcode y endpoints AJAX del simulador de examen.
+    // Shortcode y endpoint AJAX del simulador de examen.
     add_shortcode('vc_exam_simulator', [$this, 'render_exam_shortcode']);
     add_action('wp_ajax_vc_flashcards_start_exam', [$this, 'ajax_start_exam']);
-    add_action('wp_ajax_vc_flashcards_get_exam_history', [$this, 'ajax_get_exam_history']);
   }
 
   // Registra las dos estructuras principales del contenido:
@@ -195,7 +194,7 @@ class VC_Flashcards_Plugin {
 
   // Carga solo los estilos minimos del boton flotante global.
   public function enqueue_global_help_assets(): void {
-    if (is_admin()) {
+    if (is_admin() || !$this->should_show_global_help_fab()) {
       return;
     }
 
@@ -227,11 +226,42 @@ class VC_Flashcards_Plugin {
 
   // Renderiza el boton flotante de ayuda en el footer del frontend.
   public function render_global_help_fab(): void {
-    if (is_admin()) {
+    if (is_admin() || !$this->should_show_global_help_fab()) {
       return;
     }
 
     include VC_FLASHCARDS_DIR . 'templates/partials/help-fab.php';
+  }
+
+  // H-04: el FAB de ayuda solo debe cargarse en paginas que efectivamente muestran
+  // alguna vista de flashcards, no en todo el sitio. "vc_member_dashboard" es el
+  // shortcode del dashboard de vc-onboarding-wizard, que invoca estas vistas via
+  // do_shortcode() dentro de su propio render (por eso se incluye aqui tambien).
+  private function should_show_global_help_fab(): bool {
+    if (!is_singular()) {
+      return false;
+    }
+
+    $post = get_post();
+    if (!$post instanceof WP_Post) {
+      return false;
+    }
+
+    $relevant_shortcodes = [
+      'vc_flashcards_app',
+      'vc_flashcards',
+      'vc_flashcards_library',
+      'vc_exam_simulator',
+      'vc_member_dashboard',
+    ];
+
+    foreach ($relevant_shortcodes as $shortcode_tag) {
+      if (has_shortcode((string) $post->post_content, $shortcode_tag)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   // Guarda el feedback enviado desde el widget global de ayuda.
@@ -1274,15 +1304,9 @@ class VC_Flashcards_Plugin {
     }
 
     wp_enqueue_style(
-      'vc-general-style',
-      VC_FLASHCARDS_URL . 'assets/general.css',
-      [],
-      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
-    );
-    wp_enqueue_style(
       'vc-reference-modal-style',
       VC_FLASHCARDS_URL . 'assets/reference-modal.css',
-      ['vc-general-style'],
+      [],
       file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
     );
     wp_enqueue_style(
@@ -1352,16 +1376,9 @@ class VC_Flashcards_Plugin {
     }
 
     wp_enqueue_style(
-      'vc-general-style',
-      VC_FLASHCARDS_URL . 'assets/general.css',
-      [],
-      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
-    );
-
-    wp_enqueue_style(
       'vc-flashcards-library-style',
       VC_FLASHCARDS_URL . 'assets/flashcards-library.css',
-      ['vc-general-style'],
+      [],
       file_exists(VC_FLASHCARDS_DIR . 'assets/flashcards-library.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/flashcards-library.css') : '1.0.0'
     );
 
@@ -1407,7 +1424,23 @@ class VC_Flashcards_Plugin {
   }
 
   // Devuelve solo los topics padre oficiales para la vista independiente de Flashcards.
+  // H-02: mismo patron que H-01 (get_study_sessions_categories): base agnostica de usuario
+  // cacheada en transient versionado, overlay ligero con el progreso del usuario actual.
   private function get_flashcards_library_categories(int $user_id): array {
+    $base = $this->get_flashcards_library_categories_base();
+    return $this->apply_user_progress_to_flashcards_library_categories($base, $user_id);
+  }
+
+  // Construye el arbol de categorias/subtemas de Flashcards Library y agrupa las tarjetas
+  // publicadas por categoria/subtema (cardIds), sin nada especifico del usuario. Se cachea
+  // con el mismo esquema de version logica que el resto de los pools del plugin.
+  private function get_flashcards_library_categories_base(): array {
+    $cache_key = 'vc_flashcards_library_categories_base_' . $this->get_session_pool_cache_version();
+    $cached = get_transient($cache_key);
+    if (is_array($cached)) {
+      return $cached;
+    }
+
     $terms = get_terms([
       'taxonomy' => self::TAXONOMY,
       'hide_empty' => false,
@@ -1450,16 +1483,10 @@ class VC_Flashcards_Plugin {
           continue;
         }
 
-        $child_status = $this->get_subtopic_mastery_status(0);
         $child_items[] = [
           'id' => (int) $child->term_id,
           'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
-          'totalCards' => 0,
-          'masteredCards' => 0,
-          'progress' => 0,
-          'status' => $child_status['label'],
-          'statusClass' => $child_status['class'],
-          'description' => $this->format_subtopic_mastery_description(0, 0),
+          'cardIds' => [],
         ];
         $child_index_by_term_id[(int) $child->term_id] = [
           'parent_id' => $parent_id,
@@ -1470,19 +1497,9 @@ class VC_Flashcards_Plugin {
       $ordered_categories[] = [
         'id' => $parent_id,
         'name' => $topic_name,
-        'totalCards' => 0,
-        'masteredCards' => 0,
-        'progress' => 0,
+        'cardIds' => [],
         'subtopicCount' => count($child_items),
-        'description' => sprintf(
-          /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
-          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
-          count($child_items),
-          0,
-          0
-        ),
         'children' => $child_items,
-        'acsCodes' => [],
       ];
 
       if ($parent_id > 0) {
@@ -1504,7 +1521,6 @@ class VC_Flashcards_Plugin {
     if (!empty($published_ids)) {
       $published_ids = array_values(array_map('intval', $published_ids));
       update_object_term_cache($published_ids, self::POST_TYPE);
-      $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_FLASHCARDS), true);
 
       foreach ($published_ids as $post_id) {
         $terms_for_post = get_the_terms($post_id, self::TAXONOMY);
@@ -1543,59 +1559,106 @@ class VC_Flashcards_Plugin {
         }
 
         $category_index = $category_index_by_parent_id[$selected_parent_id];
-        $ordered_categories[$category_index]['totalCards']++;
-
-        if (isset($mastered_lookup[$post_id])) {
-          $ordered_categories[$category_index]['masteredCards']++;
-        }
+        $ordered_categories[$category_index]['cardIds'][] = $post_id;
 
         if ($selected_child_id > 0 && isset($child_index_by_term_id[$selected_child_id])) {
           $child_index = $child_index_by_term_id[$selected_child_id]['child_index'];
-          $ordered_categories[$category_index]['children'][$child_index]['totalCards']++;
-
-          if (isset($mastered_lookup[$post_id])) {
-            $ordered_categories[$category_index]['children'][$child_index]['masteredCards']++;
-          }
+          $ordered_categories[$category_index]['children'][$child_index]['cardIds'][] = $post_id;
         }
       }
     }
 
-    foreach ($ordered_categories as &$category) {
-      $category_total = (int) ($category['totalCards'] ?? 0);
-      $category_mastered = (int) ($category['masteredCards'] ?? 0);
-      $category['progress'] = $category_total > 0 ? (int) round(($category_mastered / $category_total) * 100) : 0;
-      $category['description'] = sprintf(
-        /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
-        __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
-        count($category['children'] ?? []),
-        $category_mastered,
-        $category_total
-      );
-
-      if (empty($category['children']) || !is_array($category['children'])) {
-        continue;
-      }
-
-      foreach ($category['children'] as &$child) {
-        $child_total = (int) ($child['totalCards'] ?? 0);
-        $child_mastered = (int) ($child['masteredCards'] ?? 0);
-        $child_progress = $child_total > 0 ? (int) round(($child_mastered / $child_total) * 100) : 0;
-        $child_status = $this->get_subtopic_mastery_status($child_progress);
-
-        $child['progress'] = $child_progress;
-        $child['status'] = $child_status['label'];
-        $child['statusClass'] = $child_status['class'];
-        $child['description'] = $this->format_subtopic_mastery_description($child_mastered, $child_total);
-      }
-      unset($child);
-    }
-    unset($category);
-
+    set_transient($cache_key, $ordered_categories, self::SESSION_POOL_CACHE_TTL);
     return $ordered_categories;
   }
 
+  // Cruza la base cacheada con el progreso del usuario actual (mastered cards) para
+  // calcular masteredCards/progress/description por categoria y subtema.
+  private function apply_user_progress_to_flashcards_library_categories(array $base, int $user_id): array {
+    $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_FLASHCARDS), true);
+
+    $categories = [];
+
+    foreach ($base as $category) {
+      $card_ids = $category['cardIds'] ?? [];
+      $total_cards = count($card_ids);
+      $mastered_count = 0;
+
+      foreach ($card_ids as $card_id) {
+        if (isset($mastered_lookup[$card_id])) {
+          $mastered_count++;
+        }
+      }
+
+      $progress = $total_cards > 0 ? (int) round(($mastered_count / $total_cards) * 100) : 0;
+      $child_items = [];
+
+      foreach ($category['children'] ?? [] as $child) {
+        $child_ids = $child['cardIds'] ?? [];
+        $child_total = count($child_ids);
+        $child_mastered = 0;
+
+        foreach ($child_ids as $child_id) {
+          if (isset($mastered_lookup[$child_id])) {
+            $child_mastered++;
+          }
+        }
+
+        $child_progress = $child_total > 0 ? (int) round(($child_mastered / $child_total) * 100) : 0;
+        $child_status = $this->get_subtopic_mastery_status($child_progress);
+
+        $child_items[] = [
+          'id' => (int) ($child['id'] ?? 0),
+          'name' => (string) ($child['name'] ?? ''),
+          'totalCards' => $child_total,
+          'masteredCards' => $child_mastered,
+          'progress' => $child_progress,
+          'status' => $child_status['label'],
+          'statusClass' => $child_status['class'],
+          'description' => $this->format_subtopic_mastery_description($child_mastered, $child_total),
+        ];
+      }
+
+      $categories[] = [
+        'id' => $category['id'] ?? 0,
+        'name' => $category['name'] ?? '',
+        'totalCards' => $total_cards,
+        'masteredCards' => $mastered_count,
+        'progress' => $progress,
+        'subtopicCount' => $category['subtopicCount'] ?? count($child_items),
+        'description' => sprintf(
+          /* translators: 1: subtopic count, 2: mastered cards, 3: total cards */
+          __('%1$d subtopics · %2$d/%3$d cards mastered', 'vc-flashcards'),
+          count($child_items),
+          $mastered_count,
+          $total_cards
+        ),
+        'children' => $child_items,
+        'acsCodes' => [],
+      ];
+    }
+
+    return $categories;
+  }
+
   // Study Sessions usa un agregador propio para no recalcular counts/progreso/ACS por cada categoria.
+  // H-01: la parte agnostica de usuario vive cacheada en un transient versionado (mismo patron que
+  // get_exam_id_pool_for_topic); solo el overlay de progreso del usuario se calcula en cada request.
   private function get_study_sessions_categories(int $user_id): array {
+    $base = $this->get_study_sessions_categories_base();
+    return $this->apply_user_progress_to_study_sessions_categories($base, $user_id);
+  }
+
+  // Construye la estructura de categorias/subtemas/ACS que NO depende del usuario actual
+  // (conteos totales, arboles de terminos, card_ids agrupados) y la cachea con el mismo
+  // esquema de version logica que ya usan los pools de examen y sesion.
+  private function get_study_sessions_categories_base(): array {
+    $cache_key = 'vc_flashcards_study_sessions_categories_base_' . $this->get_session_pool_cache_version();
+    $cached = get_transient($cache_key);
+    if (is_array($cached)) {
+      return $cached;
+    }
+
     $terms = get_terms([
       'taxonomy' => self::TAXONOMY,
       'hide_empty' => false,
@@ -1642,9 +1705,6 @@ class VC_Flashcards_Plugin {
 
     update_meta_cache('post', $all_ids);
     update_object_term_cache($all_ids, self::POST_TYPE);
-
-    $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_STUDY), true);
-    $latest_results = $this->get_latest_attempt_results_for_flashcards($user_id, $all_ids);
 
     $parent_card_ids = [];
     $child_card_ids = [];
@@ -1695,23 +1755,16 @@ class VC_Flashcards_Plugin {
       if (!isset($parent_acs_metrics[$parent_id][$acs_code])) {
         $parent_acs_metrics[$parent_id][$acs_code] = [
           'total' => 0,
-          'attempted' => 0,
-          'incorrect' => 0,
+          'card_ids' => [],
           'topics' => [],
         ];
       }
 
       $parent_acs_metrics[$parent_id][$acs_code]['total']++;
+      $parent_acs_metrics[$parent_id][$acs_code]['card_ids'][] = $card_id;
       $parent_acs_metrics[$parent_id][$acs_code]['topics'][html_entity_decode($parent_term->name, ENT_QUOTES, 'UTF-8')] = true;
       if ($child_term instanceof WP_Term) {
         $parent_acs_metrics[$parent_id][$acs_code]['topics'][html_entity_decode($child_term->name, ENT_QUOTES, 'UTF-8')] = true;
-      }
-
-      if (array_key_exists($card_id, $latest_results)) {
-        $parent_acs_metrics[$parent_id][$acs_code]['attempted']++;
-        if ((int) $latest_results[$card_id] !== 1) {
-          $parent_acs_metrics[$parent_id][$acs_code]['incorrect']++;
-        }
       }
     }
 
@@ -1721,7 +1774,61 @@ class VC_Flashcards_Plugin {
       $parent = $parents_by_name[strtolower($topic_name)] ?? null;
       $parent_id = $parent instanceof WP_Term ? (int) $parent->term_id : 0;
       $card_ids = $parent_id > 0 && isset($parent_card_ids[$parent_id]) ? array_values(array_unique($parent_card_ids[$parent_id])) : [];
-      $total_cards = count($card_ids);
+      $child_items = [];
+      $children = $parent_id > 0 && isset($children_by_parent[$parent_id]) ? $children_by_parent[$parent_id] : [];
+
+      foreach ($children as $child) {
+        if (!$child instanceof WP_Term) {
+          continue;
+        }
+
+        $child_ids = isset($child_card_ids[(int) $child->term_id]) ? array_values(array_unique($child_card_ids[(int) $child->term_id])) : [];
+
+        $child_items[] = [
+          'id' => (int) $child->term_id,
+          'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
+          'totalCards' => count($child_ids),
+          'cardIds' => $child_ids,
+        ];
+      }
+
+      $categories[] = [
+        'id' => $parent_id,
+        'name' => $topic_name,
+        'totalCards' => count($card_ids),
+        'cardIds' => $card_ids,
+        'subtopicCount' => count($child_items),
+        'children' => $child_items,
+        'acsMetrics' => $parent_acs_metrics[$parent_id] ?? [],
+      ];
+    }
+
+    $base = [
+      'all_ids' => $all_ids,
+      'categories' => $categories,
+    ];
+
+    set_transient($cache_key, $base, self::SESSION_POOL_CACHE_TTL);
+    return $base;
+  }
+
+  // Cruza la base cacheada (agnostica de usuario) con el progreso del usuario actual:
+  // mastered cards y metricas ACS de intentos, igual que la version original pero sin
+  // repetir get_terms()/get_posts()/get_the_terms() en cada request.
+  private function apply_user_progress_to_study_sessions_categories(array $base, int $user_id): array {
+    if (empty($base['categories'])) {
+      return [];
+    }
+
+    $all_ids = $base['all_ids'] ?? [];
+    $mastered_lookup = array_fill_keys($this->get_mastered_flashcard_ids($user_id, self::SESSION_SOURCE_STUDY), true);
+    $latest_results = $this->get_latest_attempt_results_for_flashcards($user_id, $all_ids);
+
+    $categories = [];
+
+    foreach ($base['categories'] as $category) {
+      $card_ids = $category['cardIds'] ?? [];
+      $total_cards = (int) ($category['totalCards'] ?? count($card_ids));
       $mastered_count = 0;
 
       foreach ($card_ids as $card_id) {
@@ -1732,15 +1839,10 @@ class VC_Flashcards_Plugin {
 
       $progress = $total_cards > 0 ? (int) round(($mastered_count / $total_cards) * 100) : 0;
       $child_items = [];
-      $children = $parent_id > 0 && isset($children_by_parent[$parent_id]) ? $children_by_parent[$parent_id] : [];
 
-      foreach ($children as $child) {
-        if (!$child instanceof WP_Term) {
-          continue;
-        }
-
-        $child_ids = isset($child_card_ids[(int) $child->term_id]) ? array_values(array_unique($child_card_ids[(int) $child->term_id])) : [];
-        $child_total_cards = count($child_ids);
+      foreach ($category['children'] ?? [] as $child) {
+        $child_ids = $child['cardIds'] ?? [];
+        $child_total_cards = (int) ($child['totalCards'] ?? count($child_ids));
         $child_mastered_count = 0;
 
         foreach ($child_ids as $child_id) {
@@ -1753,8 +1855,8 @@ class VC_Flashcards_Plugin {
         $child_status = $this->get_subtopic_mastery_status($child_progress);
 
         $child_items[] = [
-          'id' => (int) $child->term_id,
-          'name' => html_entity_decode($child->name, ENT_QUOTES, 'UTF-8'),
+          'id' => (int) ($child['id'] ?? 0),
+          'name' => (string) ($child['name'] ?? ''),
           'totalCards' => $child_total_cards,
           'masteredCards' => $child_mastered_count,
           'progress' => $child_progress,
@@ -1764,13 +1866,36 @@ class VC_Flashcards_Plugin {
         ];
       }
 
+      $acs_metrics = [];
+      foreach ($category['acsMetrics'] ?? [] as $acs_code => $metrics) {
+        $metric_card_ids = $metrics['card_ids'] ?? [];
+        $attempted = 0;
+        $incorrect = 0;
+
+        foreach ($metric_card_ids as $metric_card_id) {
+          if (array_key_exists($metric_card_id, $latest_results)) {
+            $attempted++;
+            if ((int) $latest_results[$metric_card_id] !== 1) {
+              $incorrect++;
+            }
+          }
+        }
+
+        $acs_metrics[$acs_code] = [
+          'total' => $metrics['total'] ?? 0,
+          'attempted' => $attempted,
+          'incorrect' => $incorrect,
+          'topics' => $metrics['topics'] ?? [],
+        ];
+      }
+
       $categories[] = [
-        'id' => $parent_id,
-        'name' => $topic_name,
+        'id' => $category['id'] ?? 0,
+        'name' => $category['name'] ?? '',
         'totalCards' => $total_cards,
         'masteredCards' => $mastered_count,
         'progress' => $progress,
-        'subtopicCount' => count($child_items),
+        'subtopicCount' => $category['subtopicCount'] ?? count($child_items),
         'description' => sprintf(
           __('%1$d subtopics Â· %2$d/%3$d cards mastered', 'vc-flashcards'),
           count($child_items),
@@ -1778,7 +1903,7 @@ class VC_Flashcards_Plugin {
           $total_cards
         ),
         'children' => $child_items,
-        'acsCodes' => $this->format_acs_metrics_payload($parent_acs_metrics[$parent_id] ?? []),
+        'acsCodes' => $this->format_acs_metrics_payload($acs_metrics),
       ];
     }
 
@@ -3339,6 +3464,7 @@ class VC_Flashcards_Plugin {
       'post_status' => 'publish',
       'posts_per_page' => -1,
       'fields' => 'ids',
+      'no_found_rows' => true,
       'tax_query' => [
         [
           'taxonomy' => self::TAXONOMY,
@@ -3391,16 +3517,9 @@ class VC_Flashcards_Plugin {
     $exam_home_stats = $this->get_exam_home_stats($user_id);
 
     wp_enqueue_style(
-      'vc-general-style',
-      VC_FLASHCARDS_URL . 'assets/general.css',
-      [],
-      file_exists(VC_FLASHCARDS_DIR . 'assets/general.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/general.css') : '1.0.0'
-    );
-
-    wp_enqueue_style(
       'vc-reference-modal-style',
       VC_FLASHCARDS_URL . 'assets/reference-modal.css',
-      ['vc-general-style'],
+      [],
       file_exists(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') ? (string) filemtime(VC_FLASHCARDS_DIR . 'assets/reference-modal.css') : '1.0.0'
     );
 
@@ -3579,22 +3698,6 @@ class VC_Flashcards_Plugin {
   }
 
   // Devuelve el HTML del historial del examen por AJAX para refrescarlo sin recargar la pagina.
-  public function ajax_get_exam_history(): void {
-    check_ajax_referer(self::NONCE_ACTION, 'nonce');
-
-    if (!is_user_logged_in()) {
-      wp_send_json_error(['message' => __('You must be logged in.', 'vc-flashcards')], 403);
-    }
-
-    $user_id = get_current_user_id();
-
-    // Devuelve solo el HTML del historial del examen para refrescar el bloque por AJAX.
-    // Esto evita recargar toda la pagina despues de completar un mock test.
-    wp_send_json_success([
-      'html' => $this->render_exam_history_content($user_id),
-    ]);
-  }
-
   /* Builds a pool of up to 100 questions distributed proportionally across subtopics. */
   // Devuelve las preguntas que formaran parte del examen para un topic padre.
   // Intenta llenar hasta el total pedido recorriendo sus subtopics/hijos.
