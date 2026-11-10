@@ -133,7 +133,7 @@
    Intro Badges
    ========================================================================== */
 
-.vc-exam-intro-badges {
+.vc-exam-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -143,7 +143,7 @@
 }
 
 /* Stat card styles */
-.vc-flashcards-stat-card {
+.vc-exam-stat-card {
   opacity: 1;
   padding: 12px 20px;
   border: 1px solid #E2E8F0;
@@ -151,14 +151,14 @@
   background: #F1F5F9;
 }
 
-.vc-flashcards-stat-card-content {
+.vc-exam-stat-card-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .vc-exam-badge-icon,
-.vc-flashcards-stat-card-icon,
+.vc-exam-stat-card-icon,
 .vc-exam-history-item-icon,
 .vc-exam-timer-icon {
   display: inline-flex;
@@ -166,7 +166,7 @@
   justify-content: center;
 }
 
-.vc-flashcards-stat-card-icon {
+.vc-exam-stat-card-icon {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -178,26 +178,26 @@
   box-sizing: border-box;
 }
 
-.vc-flashcards-stat-card-icon img {
+.vc-exam-stat-card-icon img {
   display: block;
   width: 28px;
   height: 28px;
 }
 
-.vc-flashcards-stat-card-copy {
+.vc-exam-stat-card-copy {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
 }
 
-.vc-flashcards-stat-card-copy small {
+.vc-exam-stat-card-copy small {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
   color: #666666;
 }
 
-.vc-flashcards-stat-card-copy strong,
+.vc-exam-stat-card-copy strong,
 [data-vc-exam-best-score],
 [data-vc-exam-average-score],
 [data-vc-exam-passed-attempts] {
@@ -240,18 +240,24 @@
 .vc-exam-category-top h3 {
   margin: 0px;
   color: #212121;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 16px;
   line-height: 100%;
   letter-spacing: -0.3px;
 }
 
 .vc-exam-category-meta {
-  margin: 0px;
-  color: var(--vc-exam-muted);
-  font-size: 14px;
   padding-bottom: 16px;
-  line-height: 100%;
+}
+
+.vc-exam-category-meta p {
+  margin: 0;
+  color: var(--vc-exam-muted);
+  font-family: Poppins, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
   letter-spacing: -0.15px;
 }
 
@@ -265,7 +271,7 @@
   box-sizing: border-box;
 }
 
-/* CTA principal de categoria: iguala Study en peso, tamano y aire sin mezclar arquitectura Flashcards/Mock Test. */
+/* CTA principal de categoria: iguala Study en peso, tamano y aire sin mezclar arquitectura Study sessions/Mock Test. */
 .vc-exam-start {
   width: 100%;
   min-height: 40px;
@@ -998,7 +1004,7 @@
   place-items: center;
   min-height: 100%;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.3);
+  background: #0000004D;
   -webkit-backdrop-filter: blur(2.5px);
   backdrop-filter: blur(2.5px);
   box-sizing: border-box;
@@ -1123,6 +1129,7 @@
 
 .vc-exam-summary-metrics {
   display: grid;
+  gap: 10px;
   margin-bottom: 24px;
 }
 
@@ -1134,7 +1141,7 @@
 .vc-exam-summary-result-card {
   flex: 1 1 0;
   display: flex;
-  min-height: 76px;
+  height: 76px;
   flex-direction: column;
   gap: 0;
   padding: 10px 17px;
@@ -1152,6 +1159,15 @@
   background: #FEF2F2;
 }
 
+.vc-exam-summary-result-card--accuracy {
+  width: 100%;
+  height: 76px;
+  min-height: 76px;
+  border-color: #BEDBFF;
+  background: #EFF6FF;
+  color: #1447E6;
+}
+
 .vc-exam-summary-count {
   margin: 0;
   font-weight: 400;
@@ -1159,7 +1175,6 @@
   line-height: 36px;
   letter-spacing: 0.4px;
   text-align: center;
-  order: 1;
 }
 
 .vc-exam-summary-count--correct {
@@ -1170,14 +1185,14 @@
   color: #C10007;
 }
 
+.vc-exam-summary-count--accuracy,
+.vc-exam-summary-result-card--accuracy h3 {
+  color: #1447E6;
+}
+
 .vc-exam-summary-result-card h3 {
   margin: 0;
   letter-spacing: 0;
-  order: 2;
-}
-
-.vc-exam-summary-result-card span {
-  order: 2;
 }
 
 .vc-exam-summary-result-card--correct h3 {
@@ -1268,7 +1283,7 @@
 
   /* 1180 Home grids */
 
-  .vc-exam-intro-badges {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
@@ -1286,7 +1301,7 @@
 
   /* 960 Home grids */
 
-  .vc-exam-intro-badges{
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1303,12 +1318,12 @@
 
   /* 720 Home and summary layout */
 
-  .vc-flashcards-stats {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .vc-flashcards-stat-card {
+  .vc-exam-stat-card {
     min-width: 0;
     padding: 10px 12px;
   }
@@ -1380,19 +1395,19 @@
     margin-bottom: 20px;
   }
 
-  .vc-flashcards-stats {
+  .vc-exam-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
-  .vc-flashcards-stat-card {
+  .vc-exam-stat-card {
     display: flex;
     align-items: center;
     min-height: 115px;
     padding: 12px 6px;
   }
 
-  .vc-flashcards-stat-card-content {
+  .vc-exam-stat-card-content {
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -1401,34 +1416,33 @@
     width: 100%;
   }
 
-  .vc-flashcards-stat-card-icon {
+  .vc-exam-stat-card-icon {
     padding: 10px;
     border-radius: 8px;
     width: 40px;
     height: 40px;
   }
 
-  .vc-flashcards-stat-card-icon img {
+  .vc-exam-stat-card-icon img {
     width: 20px;
     height: 20px;
   }
 
-  .vc-flashcards-stat-card-copy {
+  .vc-exam-stat-card-copy {
     align-items: center;
     min-width: 0;
   }
 
-  .vc-flashcards-stat-card-copy [data-vc-flashcards-stat],
-  .vc-flashcards-stat-card-copy [data-vc-exam-best-score],
-  .vc-flashcards-stat-card-copy [data-vc-exam-average-score],
-  .vc-flashcards-stat-card-copy [data-vc-exam-passed-attempts] {
+  .vc-exam-stat-card-copy [data-vc-exam-best-score],
+  .vc-exam-stat-card-copy [data-vc-exam-average-score],
+  .vc-exam-stat-card-copy [data-vc-exam-passed-attempts] {
     order: 1;
     font-size: 18px;
     line-height: 20px;
     letter-spacing: 0;
   }
 
-  .vc-flashcards-stats .vc-flashcards-stat-card-copy small {
+  .vc-exam-stats .vc-exam-stat-card-copy small {
     order: 2;
     margin-top: 3px;
     font-size: 10px;
@@ -1705,6 +1719,14 @@
   /* Summary mobile */
   .vc-exam-summary {
     padding: 19px;
+  }
+
+  .vc-dashboard-shell:has(.vc-exam-app.is-summary-open) > .vc-dashboard-sidebar {
+    z-index: 9999;
+  }
+
+  body.vc-dashboard-page.is-dashboard-menu-open:has(.vc-exam-app.is-summary-open)::before {
+    opacity: 0;
   }
 
   .vc-exam-summary-message {

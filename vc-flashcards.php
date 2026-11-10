@@ -2,7 +2,7 @@
 /**
  * Plugin Name: VC Flashcards
  * Description: Flashcards practice engine with configurable topics, subtopics, sessions, attempts, and progress metrics.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: VC Studio
  */
 
@@ -23,8 +23,10 @@ if (!defined('VC_FLASHCARDS_URL')) {
 }
 
 require_once VC_FLASHCARDS_DIR . 'includes/class-vc-flashcards-plugin.php';
+require_once VC_FLASHCARDS_DIR . 'includes/class-vc-flashcards-updater.php';
 
 register_activation_hook(VC_FLASHCARDS_FILE, ['VC_Flashcards_Plugin', 'activate']);
 register_deactivation_hook(VC_FLASHCARDS_FILE, ['VC_Flashcards_Plugin', 'deactivate']);
 
 VC_Flashcards_Plugin::instance();
+new VC_Flashcards_Updater();

@@ -3,10 +3,10 @@ if (!defined('ABSPATH')) {
   exit;
 }
 ?>
-<section class="vc-exam-view vc-exam-home" data-vc-exam-view="home" aria-labelledby="vc-exam-home-title">
+<section class="vc-exam-view vc-exam-home" data-vc-exam-view="home"<?php echo (isset($initial_exam_view) && $initial_exam_view === 'session') ? ' hidden' : ''; ?> aria-labelledby="vc-exam-home-title">
   <header class="vc-exam-page-header">
     <h1 id="vc-exam-home-title"><?php esc_html_e('A&P Mock Test', 'vc-flashcards'); ?></h1>
-    <p><?php esc_html_e('Practice under real exam conditions and track your progress.', 'vc-flashcards'); ?></p>
+    <p><?php esc_html_e('Simulate real FAA exam conditions and measure your readiness', 'vc-flashcards'); ?></p>
   </header>
 
   <div class="vc-exam-intro">
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 
   <?php if (empty($exam_categories)): ?>
     <article class="vc-exam-empty">
-      <p><?php esc_html_e('No categories or flashcards are available yet.', 'vc-flashcards'); ?></p>
+      <p><?php esc_html_e('No categories or questions are available yet.', 'vc-flashcards'); ?></p>
     </article>
   <?php else: ?>
     <div class="vc-exam-category-grid">
