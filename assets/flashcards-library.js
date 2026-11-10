@@ -234,6 +234,56 @@
       }
     }
 
+    // Slider: la tarjeta actual sale hacia un lado, cambia el contenido y la siguiente entra por el otro.
+    var PRACTICE_SLIDE_MS = 350;
+    var practiceSliding = false;
+
+    function slidePracticeCard(delta) {
+      if (!practiceCard || practiceSliding) {
+        return false;
+      }
+
+      var target = cardIndex + delta;
+      if (target < 0 || target > cards.length - 1) {
+        return false;
+      }
+
+      practiceSliding = true;
+      var sliderWrap = practiceCard.parentElement;
+      if (sliderWrap) {
+        sliderWrap.classList.add('is-sliding');
+      }
+      var outClass = delta > 0 ? 'is-slide-out-left' : 'is-slide-out-right';
+      var inClass = delta > 0 ? 'is-slide-in-from-right' : 'is-slide-in-from-left';
+
+      practiceCard.classList.remove('is-slide-out-left', 'is-slide-out-right', 'is-slide-in-from-left', 'is-slide-in-from-right');
+      void practiceCard.offsetWidth;
+      practiceCard.classList.add(outClass);
+
+      setTimeout(function () {
+        cardIndex = target;
+        if (delta < 0) {
+          renderPracticeCardWithoutMotion(true);
+        } else {
+          renderPracticeCardWithoutMotion();
+        }
+
+        practiceCard.classList.remove(outClass);
+        void practiceCard.offsetWidth;
+        practiceCard.classList.add(inClass);
+
+        setTimeout(function () {
+          practiceCard.classList.remove(inClass);
+          if (sliderWrap) {
+            sliderWrap.classList.remove('is-sliding');
+          }
+          practiceSliding = false;
+        }, PRACTICE_SLIDE_MS);
+      }, PRACTICE_SLIDE_MS);
+
+      return true;
+    }
+
     function clearStoredPracticeState() {
       if (practiceState) {
         practiceState.clear();
@@ -777,8 +827,7 @@
           return;
         }
 
-        cardIndex -= 1;
-        renderPracticeCardWithoutMotion(true);
+        slidePracticeCard(-1);
         blurButton(practiceBack);
       });
     }
@@ -819,8 +868,7 @@
           return;
         }
 
-        cardIndex += 1;
-        renderPracticeCardWithoutMotion();
+        slidePracticeCard(1);
         blurButton(practiceNext);
       });
     }

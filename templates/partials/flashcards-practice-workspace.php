@@ -22,6 +22,7 @@ if (!defined('ABSPATH')) {
     </div>
   </div>
 
+  <div class="vc-flashcards-practice-slider">
   <article class="vc-flashcards-practice-card" data-vc-flashcards-practice-card tabindex="0" role="button" aria-pressed="false" aria-live="polite">
     <div class="vc-flashcards-practice-card-inner">
       <div class="vc-flashcards-practice-card-face vc-flashcards-practice-card-front">
@@ -36,6 +37,7 @@ if (!defined('ABSPATH')) {
       </div>
     </div>
   </article>
+  </div>
 
   <footer class="vc-flashcards-practice-controls">
     <div class="vc-flashcards-practice-side-group">

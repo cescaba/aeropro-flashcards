@@ -6171,3 +6171,58 @@ body.vc-study-sessions-modal-open {
     border-radius: 8px;
   }
 }
+
+/* Slider de flashcards: contenedor que recorta la tarjeta mientras sale o entra. */
+.vc-flashcards-practice-slider {
+  width: 100%;
+}
+
+/* Solo recorta mientras la tarjeta sale o entra; en reposo la sombra no se corta. */
+.vc-flashcards-practice-slider.is-sliding {
+  overflow: hidden;
+}
+
+.vc-flashcards-practice-card.is-slide-out-left {
+  animation: vcFlashcardsPracticeOutLeft 350ms ease-in both;
+}
+
+.vc-flashcards-practice-card.is-slide-out-right {
+  animation: vcFlashcardsPracticeOutRight 350ms ease-in both;
+}
+
+.vc-flashcards-practice-card.is-slide-in-from-right {
+  animation: vcFlashcardsPracticeInFromRight 350ms cubic-bezier(0.22, 0.7, 0.18, 1) both;
+}
+
+.vc-flashcards-practice-card.is-slide-in-from-left {
+  animation: vcFlashcardsPracticeInFromLeft 350ms cubic-bezier(0.22, 0.7, 0.18, 1) both;
+}
+
+@keyframes vcFlashcardsPracticeOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-110%); opacity: 0; }
+}
+
+@keyframes vcFlashcardsPracticeOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(110%); opacity: 0; }
+}
+
+@keyframes vcFlashcardsPracticeInFromRight {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes vcFlashcardsPracticeInFromLeft {
+  from { transform: translateX(-110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-flashcards-practice-card.is-slide-out-left,
+  .vc-flashcards-practice-card.is-slide-out-right,
+  .vc-flashcards-practice-card.is-slide-in-from-right,
+  .vc-flashcards-practice-card.is-slide-in-from-left {
+    animation: none;
+  }
+}
