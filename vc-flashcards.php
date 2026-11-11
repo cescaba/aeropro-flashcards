@@ -2,7 +2,7 @@
 /**
  * Plugin Name: VC Flashcards
  * Description: Flashcards practice engine with configurable topics, subtopics, sessions, attempts, and progress metrics.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: VC Studio
  */
 
