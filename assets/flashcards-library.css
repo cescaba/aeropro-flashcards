@@ -4595,15 +4595,26 @@ body.vc-study-sessions-modal-open {
   width: 100%;
   min-height: 334px;
   display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   align-items: center;
   justify-content: center;
 }
 
+.vc-flashcards-practice-question-title {
+  width: 100%;
+  margin: 0 0 10px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -0.15px;
+  text-align: center;
+  color: #B8B8B8;
+}
+
 .vc-flashcards-practice-card h3 {
   width: min(78%, 760px);
   margin: 0;
-  padding: 46px 0;
   color: #212121;
   font-size: 24px;
   font-weight: 400;
@@ -4629,13 +4640,10 @@ body.vc-study-sessions-modal-open {
 
 .vc-flashcards-practice-answers {
   width: 100%;
-  height: 100%;
-  min-height: 375px;
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   align-items: center;
   justify-content: center;
-  padding: 34px;
 }
 
 .vc-flashcards-practice-answer--revealed {
@@ -4758,12 +4766,8 @@ body.vc-study-sessions-modal-open {
 }
 
 .vc-flashcards-practice-back:hover,
-.vc-flashcards-practice-back:focus,
-.vc-flashcards-practice-back:focus-visible,
 .vc-flashcards-practice-back:active,
 .vc-flashcards-practice-next:hover,
-.vc-flashcards-practice-next:focus,
-.vc-flashcards-practice-next:focus-visible,
 .vc-flashcards-practice-next:active {
   background: #E2E8F0;
 }
@@ -5993,7 +5997,7 @@ body.vc-study-sessions-modal-open {
 .vc-flashcards-practice-next:focus,
 .vc-flashcards-practice-next:focus-visible,
 .vc-flashcards-practice-next:active {
-  width: auto;
+  width: 100px;
   padding-right: 12px;
   padding-left: 12px;
   color: #212121;

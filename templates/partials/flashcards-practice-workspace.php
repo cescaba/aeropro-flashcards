@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flashcards practice workspace: session shell rendered after the quantity modal.
  */
@@ -23,40 +24,42 @@ if (!defined('ABSPATH')) {
   </div>
 
   <div class="vc-flashcards-practice-slider">
-  <article class="vc-flashcards-practice-card" data-vc-flashcards-practice-card tabindex="0" role="button" aria-pressed="false" aria-live="polite">
-    <div class="vc-flashcards-practice-card-inner">
-      <div class="vc-flashcards-practice-card-face vc-flashcards-practice-card-front">
-        <div class="vc-flashcards-practice-question-wrap">
-          <h3 data-vc-flashcards-practice-question></h3>
+    <article class="vc-flashcards-practice-card" data-vc-flashcards-practice-card tabindex="0" role="button" aria-pressed="false" aria-live="polite">
+      <div class="vc-flashcards-practice-card-inner">
+        <div class="vc-flashcards-practice-card-face vc-flashcards-practice-card-front">
+          <div class="vc-flashcards-practice-question-wrap">
+            <p class="vc-flashcards-practice-question-title"><?php esc_html_e('Question', 'vc-flashcards'); ?></p>
+            <h3 data-vc-flashcards-practice-question></h3>
+          </div>
+          <div class="vc-flashcards-practice-flip-hint"><?php esc_html_e('Click the card to flip', 'vc-flashcards'); ?></div>
         </div>
-        <div class="vc-flashcards-practice-flip-hint"><?php esc_html_e('Click the card to flip', 'vc-flashcards'); ?></div>
+        <div class="vc-flashcards-practice-card-face vc-flashcards-practice-card-back">
+          <div class="vc-flashcards-practice-question-wrap">
+            <p class="vc-flashcards-practice-question-title"><?php esc_html_e('Answer', 'vc-flashcards'); ?></p>
+            <div class="vc-flashcards-practice-answers" data-vc-flashcards-practice-answers></div>
+          </div>
+          <div class="vc-flashcards-practice-flip-hint vc-flashcards-practice-flip-hint--back"><?php esc_html_e('Click the card to flip', 'vc-flashcards'); ?></div>
+        </div>
       </div>
-      <div class="vc-flashcards-practice-card-face vc-flashcards-practice-card-back">
-        <div class="vc-flashcards-practice-answers" data-vc-flashcards-practice-answers></div>
-        <div class="vc-flashcards-practice-flip-hint vc-flashcards-practice-flip-hint--back"><?php esc_html_e('Click the card to flip back', 'vc-flashcards'); ?></div>
-      </div>
-    </div>
-  </article>
+    </article>
   </div>
 
   <footer class="vc-flashcards-practice-controls">
     <div class="vc-flashcards-practice-side-group">
-    <button
-      type="button"
-      class="vc-flashcards-practice-side-icon vc-flashcards-practice-side-icon--left"
-      data-vc-flashcards-practice-repeat
-      aria-label="<?php esc_attr_e('Repeat flashcards', 'vc-flashcards'); ?>"
-      title="<?php esc_attr_e('Repeat flashcards', 'vc-flashcards'); ?>"
-    >
-      <img
-        class="vc-flashcards-practice-side-icon-image vc-flashcards-practice-side-icon-image--left"
-        src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try-white.svg'); ?>"
-        alt=""
-        width="19"
-        height="19"
-      >
-      <span class="vc-flashcards-practice-side-icon-label"><?php esc_html_e('Restart', 'vc-flashcards'); ?></span>
-    </button>
+      <button
+        type="button"
+        class="vc-flashcards-practice-side-icon vc-flashcards-practice-side-icon--left"
+        data-vc-flashcards-practice-repeat
+        aria-label="<?php esc_attr_e('Repeat flashcards', 'vc-flashcards'); ?>"
+        title="<?php esc_attr_e('Repeat flashcards', 'vc-flashcards'); ?>">
+        <img
+          class="vc-flashcards-practice-side-icon-image vc-flashcards-practice-side-icon-image--left"
+          src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/try-white.svg'); ?>"
+          alt=""
+          width="19"
+          height="19">
+        <span class="vc-flashcards-practice-side-icon-label"><?php esc_html_e('Restart', 'vc-flashcards'); ?></span>
+      </button>
     </div>
     <div class="vc-flashcards-practice-nav">
       <button type="button" class="vc-flashcards-practice-back" data-vc-flashcards-practice-back aria-label="<?php esc_attr_e('Previous card', 'vc-flashcards'); ?>">
@@ -82,16 +85,14 @@ if (!defined('ABSPATH')) {
       class="vc-flashcards-practice-side-icon vc-flashcards-practice-side-icon--right"
       data-vc-flashcards-practice-shuffle
       aria-label="<?php esc_attr_e('Shuffle flashcards', 'vc-flashcards'); ?>"
-      title="<?php esc_attr_e('Shuffle flashcards', 'vc-flashcards'); ?>"
-    >
+      title="<?php esc_attr_e('Shuffle flashcards', 'vc-flashcards'); ?>">
       <span class="vc-flashcards-practice-side-icon-label"><?php esc_html_e('Shuffle', 'vc-flashcards'); ?></span>
       <img
         class="vc-flashcards-practice-side-icon-image vc-flashcards-practice-side-icon-image--right"
         src="<?php echo esc_url(VC_FLASHCARDS_URL . 'assets/icons/aletorio.svg'); ?>"
         alt=""
         width="19"
-        height="19"
-      >
+        height="19">
     </button>
   </footer>
 </section>
